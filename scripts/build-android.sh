@@ -108,7 +108,9 @@ done
 cd V2rayNG
 bash gradlew --no-daemon --console=plain --stacktrace \
     :app:testPlaystoreDebugUnitTest \
+    :app:testFdroidDebugUnitTest \
     :app:compilePlaystoreDebugKotlin \
+    :app:compileFdroidDebugKotlin \
     ":app:assemblePlaystore$build_variant" \
     ":app:assembleFdroid$build_variant"
 
