@@ -189,6 +189,10 @@ fun ZhuzhalkaScreen(
                 modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp), shape = RoundedCornerShape(12.dp)) {
                 Text(stringResource(R.string.buzz_community_title))
             }
+            OutlinedButton(onClick = { onAction(MainAction.OpenAppShare) },
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp), shape = RoundedCornerShape(12.dp)) {
+                Text(stringResource(R.string.buzz_share_app))
+            }
             Text(stringResource(R.string.buzz_public_note), style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
             Text(stringResource(R.string.buzz_credit), style = MaterialTheme.typography.labelSmall,

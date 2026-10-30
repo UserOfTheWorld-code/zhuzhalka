@@ -39,4 +39,19 @@
     <string name="buzz_invalid_url">Enter a valid HTTPS subscription URL.</string>
     <string name="buzz_disabled_source">This subscription is disabled. Enable it in Manage subscriptions.</string>
     <string name="buzz_no_unique">All servers from this source already exist in other lists.</string>
+    <string name="buzz_share_app">分享 Zhuzhalka</string>
+    <string name="buzz_share_app_intro">把应用发给朋友。APK 不包含个人订阅和设置。</string>
+    <string name="buzz_share_app_qr">下载二维码</string>
+    <string name="buzz_share_app_qr_hint">在另一部手机上打开相机。二维码会打开 GitHub 发布页面；下载需要联网。</string>
+    <string name="buzz_share_app_apk">发送 APK</string>
+    <string name="buzz_share_app_apk_hint">在 Android 菜单中选择蓝牙或 Quick Share（Wi-Fi），如果这些选项可用。</string>
+    <string name="buzz_share_app_link">发送链接</string>
+    <string name="buzz_share_app_compat">分享的是当前安装的版本。如果它不兼容另一台设备，请从发布页面下载 universal APK。</string>
+    <string name="buzz_share_app_busy">正在准备 APK…</string>
+    <string name="buzz_share_app_failed">无法准备 APK。请重试或发送链接。</string>
+    <string name="buzz_share_app_split">此安装包含多个部分。请发送链接，让朋友下载完整的 APK。</string>
+    <string name="buzz_share_app_no_handler">Android 无法打开分享菜单。你可以使用二维码。</string>
+    <string name="buzz_share_app_qr_failed">无法生成二维码。</string>
+    <string name="buzz_share_app_qr_description">二维码：Zhuzhalka 下载页面</string>
+    <string name="buzz_share_app_retry">重试</string>
 </resources>

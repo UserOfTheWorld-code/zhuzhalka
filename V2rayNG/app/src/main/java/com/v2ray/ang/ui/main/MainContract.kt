@@ -34,6 +34,7 @@ data class MainUiState(
  * All possible user interaction intents
  */
 sealed interface MainAction {
+    data object OpenAppShare : MainAction
     data class LoadPublicSource(val sourceId: String, val selectAfterLoad: Boolean = true) : MainAction
     data class LoadOwnSubscription(val url: String) : MainAction
     data class LoadSavedSubscription(val groupId: String) : MainAction

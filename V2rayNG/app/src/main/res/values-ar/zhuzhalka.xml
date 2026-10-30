@@ -39,4 +39,19 @@
     <string name="buzz_invalid_url">Enter a valid HTTPS subscription URL.</string>
     <string name="buzz_disabled_source">This subscription is disabled. Enable it in Manage subscriptions.</string>
     <string name="buzz_no_unique">All servers from this source already exist in other lists.</string>
+    <string name="buzz_share_app">مشاركة Zhuzhalka</string>
+    <string name="buzz_share_app_intro">أرسل التطبيق إلى صديق. لا يتضمن ملف APK الاشتراكات الشخصية أو الإعدادات.</string>
+    <string name="buzz_share_app_qr">رمز QR للتنزيل</string>
+    <string name="buzz_share_app_qr_hint">افتح الكاميرا على هاتف آخر. يفتح رمز QR صفحة الإصدارات على GitHub؛ ويتطلب التنزيل اتصالاً بالإنترنت.</string>
+    <string name="buzz_share_app_apk">إرسال APK</string>
+    <string name="buzz_share_app_apk_hint">اختر Bluetooth أو Quick Share (Wi-Fi) من قائمة Android إذا كانا متاحين.</string>
+    <string name="buzz_share_app_link">إرسال الرابط</string>
+    <string name="buzz_share_app_compat">ستتم مشاركة النسخة المثبتة. إذا كانت غير متوافقة مع الجهاز الآخر، فنزّل ملف universal APK من صفحة الإصدارات.</string>
+    <string name="buzz_share_app_busy">جارٍ تجهيز APK…</string>
+    <string name="buzz_share_app_failed">تعذر تجهيز ملف APK. حاول مرة أخرى أو أرسل الرابط.</string>
+    <string name="buzz_share_app_split">يتكون هذا التثبيت من عدة أجزاء. أرسل الرابط ليتمكن صديقك من تنزيل ملف APK كامل.</string>
+    <string name="buzz_share_app_no_handler">تعذر على Android فتح قائمة المشاركة. يمكنك استخدام رمز QR.</string>
+    <string name="buzz_share_app_qr_failed">تعذر إنشاء رمز QR.</string>
+    <string name="buzz_share_app_qr_description">رمز QR: صفحة تنزيل Zhuzhalka</string>
+    <string name="buzz_share_app_retry">إعادة المحاولة</string>
 </resources>

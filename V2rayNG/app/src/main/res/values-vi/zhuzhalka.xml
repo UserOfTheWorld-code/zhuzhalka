@@ -39,4 +39,19 @@
     <string name="buzz_invalid_url">Enter a valid HTTPS subscription URL.</string>
     <string name="buzz_disabled_source">This subscription is disabled. Enable it in Manage subscriptions.</string>
     <string name="buzz_no_unique">All servers from this source already exist in other lists.</string>
+    <string name="buzz_share_app">Chia sẻ Zhuzhalka</string>
+    <string name="buzz_share_app_intro">Gửi ứng dụng cho bạn bè. APK không chứa các gói đăng ký hay cài đặt cá nhân.</string>
+    <string name="buzz_share_app_qr">Mã QR để tải xuống</string>
+    <string name="buzz_share_app_qr_hint">Mở máy ảnh trên điện thoại khác. Mã QR mở trang phát hành trên GitHub; cần có Internet để tải xuống.</string>
+    <string name="buzz_share_app_apk">Gửi APK</string>
+    <string name="buzz_share_app_apk_hint">Chọn Bluetooth hoặc Quick Share (Wi-Fi) trong menu Android nếu có.</string>
+    <string name="buzz_share_app_link">Gửi liên kết</string>
+    <string name="buzz_share_app_compat">Phiên bản đang cài đặt sẽ được chia sẻ. Nếu không tương thích với thiết bị khác, hãy tải universal APK từ trang phát hành.</string>
+    <string name="buzz_share_app_busy">Đang chuẩn bị APK…</string>
+    <string name="buzz_share_app_failed">Không thể chuẩn bị APK. Hãy thử lại hoặc gửi liên kết.</string>
+    <string name="buzz_share_app_split">Bản cài đặt này gồm nhiều phần. Hãy gửi liên kết để bạn bè tải APK đầy đủ.</string>
+    <string name="buzz_share_app_no_handler">Android không thể mở menu chia sẻ. Bạn có thể dùng mã QR.</string>
+    <string name="buzz_share_app_qr_failed">Không thể tạo mã QR.</string>
+    <string name="buzz_share_app_qr_description">Mã QR: trang tải Zhuzhalka</string>
+    <string name="buzz_share_app_retry">Thử lại</string>
 </resources>

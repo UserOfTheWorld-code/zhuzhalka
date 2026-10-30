@@ -49,6 +49,7 @@ import com.v2ray.ang.ui.server.ServerVlessActivity
 import com.v2ray.ang.ui.server.ServerVmessActivity
 import com.v2ray.ang.ui.server.ServerWireguardActivity
 import com.v2ray.ang.ui.settings.SettingsActivity
+import com.v2ray.ang.ui.shareapp.ShareAppActivity
 import com.v2ray.ang.ui.subscription.SubSettingActivity
 import com.v2ray.ang.ui.userasset.UserAssetActivity
 import com.v2ray.ang.util.LogUtil
@@ -120,6 +121,7 @@ class MainActivity : HelperBaseComponentActivity() {
                 viewModel = mainViewModel,
                 onAction = { action ->
                     when (action) {
+                        MainAction.OpenAppShare -> startActivity(Intent(this, ShareAppActivity::class.java))
                         MainAction.ToggleService -> handleSimpleFabAction()
                         is MainAction.SelectServer -> setSelectServer(action.guid)
                         else -> mainViewModel.onAction(action)
@@ -135,6 +137,7 @@ class MainActivity : HelperBaseComponentActivity() {
             mainViewModel = mainViewModel,
             onAction = { action ->
                 when (action) {
+                    MainAction.OpenAppShare -> startActivity(Intent(this, ShareAppActivity::class.java))
                     MainAction.ToggleService -> handleFabAction()
                     MainAction.TestCurrentServer -> handleLayoutTestClick()
                     MainAction.ImportQRcode -> importQRcode()

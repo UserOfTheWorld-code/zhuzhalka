@@ -63,6 +63,16 @@
                 android:resource="@xml/update_paths" />
         </provider>
 
+        <provider
+            android:name=".handler.AppShareProvider"
+            android:authorities="${applicationId}.share"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/app_share_paths" />
+        </provider>
+
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
             android:enabled="false"
@@ -214,6 +224,9 @@
         </activity>
         <activity
             android:name=".ui.checkupdate.CheckUpdateActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.shareapp.ShareAppActivity"
             android:exported="false" />
         <activity
             android:name=".ui.backup.BackupActivity"

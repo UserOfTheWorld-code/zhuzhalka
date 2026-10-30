@@ -39,4 +39,19 @@
     <string name="buzz_invalid_url">Enter a valid HTTPS subscription URL.</string>
     <string name="buzz_disabled_source">This subscription is disabled. Enable it in Manage subscriptions.</string>
     <string name="buzz_no_unique">All servers from this source already exist in other lists.</string>
+    <string name="buzz_share_app">分享 Zhuzhalka</string>
+    <string name="buzz_share_app_intro">將應用程式傳給朋友。APK 不包含個人訂閱與設定。</string>
+    <string name="buzz_share_app_qr">下載 QR 碼</string>
+    <string name="buzz_share_app_qr_hint">在另一支手機開啟相機。QR 碼會開啟 GitHub 發布頁面；下載需要網路連線。</string>
+    <string name="buzz_share_app_apk">傳送 APK</string>
+    <string name="buzz_share_app_apk_hint">在 Android 選單中選擇藍牙或 Quick Share（Wi-Fi），如果這些選項可用。</string>
+    <string name="buzz_share_app_link">傳送連結</string>
+    <string name="buzz_share_app_compat">分享的是目前安裝的版本。如果它與另一台裝置不相容，請從發布頁面下載 universal APK。</string>
+    <string name="buzz_share_app_busy">正在準備 APK…</string>
+    <string name="buzz_share_app_failed">無法準備 APK。請重試或傳送連結。</string>
+    <string name="buzz_share_app_split">此安裝包含多個部分。請傳送連結，讓朋友下載完整的 APK。</string>
+    <string name="buzz_share_app_no_handler">Android 無法開啟分享選單。你可以使用 QR 碼。</string>
+    <string name="buzz_share_app_qr_failed">無法產生 QR 碼。</string>
+    <string name="buzz_share_app_qr_description">QR 碼：Zhuzhalka 下載頁面</string>
+    <string name="buzz_share_app_retry">重試</string>
 </resources>

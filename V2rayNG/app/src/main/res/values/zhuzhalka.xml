@@ -39,4 +39,19 @@
     <string name="buzz_invalid_url">Enter a valid HTTPS subscription URL.</string>
     <string name="buzz_disabled_source">This subscription is disabled. Enable it in Manage subscriptions.</string>
     <string name="buzz_no_unique">All servers from this source already exist in other lists.</string>
+    <string name="buzz_share_app">Share Zhuzhalka</string>
+    <string name="buzz_share_app_intro">Send the app to a friend. The APK does not include personal subscriptions or settings.</string>
+    <string name="buzz_share_app_qr">QR code to download</string>
+    <string name="buzz_share_app_qr_hint">Open the camera on another phone. The QR code opens the GitHub releases page; downloading requires internet access.</string>
+    <string name="buzz_share_app_apk">Send APK</string>
+    <string name="buzz_share_app_apk_hint">Choose Bluetooth or Quick Share (Wi-Fi) from the Android menu, if available.</string>
+    <string name="buzz_share_app_link">Send link</string>
+    <string name="buzz_share_app_compat">The installed version will be shared. If it is incompatible with the other device, download the universal APK from the releases page.</string>
+    <string name="buzz_share_app_busy">Preparing APK…</string>
+    <string name="buzz_share_app_failed">Could not prepare the APK. Try again or send the link.</string>
+    <string name="buzz_share_app_split">This installation has multiple parts. Send the link so your friend can download a complete APK.</string>
+    <string name="buzz_share_app_no_handler">Android could not open the sharing menu. You can use the QR code.</string>
+    <string name="buzz_share_app_qr_failed">Could not create the QR code.</string>
+    <string name="buzz_share_app_qr_description">QR code: Zhuzhalka download page</string>
+    <string name="buzz_share_app_retry">Retry</string>
 </resources>

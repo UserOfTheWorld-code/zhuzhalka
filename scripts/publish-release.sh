@@ -2,7 +2,7 @@
 # Publish the signed alpha draft after a successful, manually requested build.
 set -euo pipefail
 
-TAG=v0.3.0-alpha.2
+TAG=v0.3.0-alpha.3
 : "${GH_TOKEN:?GitHub Actions must supply its job-scoped token.}"
 : "${GITHUB_REPOSITORY:?Run this script in GitHub Actions.}"
 : "${GITHUB_SHA:?Missing source commit.}"
@@ -15,12 +15,12 @@ TAG=v0.3.0-alpha.2
 ASSET_DIR="$(cd -- "${1:?Pass the release asset directory.}" && pwd)"
 work_dir="$(mktemp -d)"
 trap 'rm -rf -- "$work_dir"' EXIT
-assets=(Zhuzhalka_0.3.0-alpha.2_arm64-v8a.apk Zhuzhalka_0.3.0-alpha.2_universal.apk Zhuzhalka_0.3.0-alpha.2_sources.zip SHA256SUMS)
+assets=(Zhuzhalka_0.3.0-alpha.3_arm64-v8a.apk Zhuzhalka_0.3.0-alpha.3_universal.apk Zhuzhalka_0.3.0-alpha.3_sources.zip SHA256SUMS)
 
 python3 - "$ASSET_DIR" "$GITHUB_SHA" "$(dirname -- "${BASH_SOURCE[0]}")/release-signing-cert.sha256" <<'PY'
 import hashlib, json, pathlib, sys, zipfile
 directory = pathlib.Path(sys.argv[1])
-expected = {"Zhuzhalka_0.3.0-alpha.2_arm64-v8a.apk", "Zhuzhalka_0.3.0-alpha.2_universal.apk", "Zhuzhalka_0.3.0-alpha.2_sources.zip"}
+expected = {"Zhuzhalka_0.3.0-alpha.3_arm64-v8a.apk", "Zhuzhalka_0.3.0-alpha.3_universal.apk", "Zhuzhalka_0.3.0-alpha.3_sources.zip"}
 assert {p.name for p in directory.iterdir()} == expected | {"SHA256SUMS"}, "Unexpected release files"
 lines = (directory / "SHA256SUMS").read_text(encoding="ascii").splitlines()
 assert len(lines) == len(expected), "Unexpected checksum count"
@@ -31,10 +31,10 @@ for line in lines:
     with (directory / name).open("rb") as stream:
         actual[name] = hashlib.file_digest(stream, "sha256").hexdigest()
     assert checksum == actual[name], f"Checksum mismatch: {name}"
-with zipfile.ZipFile(directory / "Zhuzhalka_0.3.0-alpha.2_sources.zip") as archive:
-    info = json.loads(archive.read("Zhuzhalka_0.3.0-alpha.2_sources/BUILD_INFO.json"))
+with zipfile.ZipFile(directory / "Zhuzhalka_0.3.0-alpha.3_sources.zip") as archive:
+    info = json.loads(archive.read("Zhuzhalka_0.3.0-alpha.3_sources/BUILD_INFO.json"))
     assert info["source_commit"] == sys.argv[2], "Source archive belongs to another commit"
-    assert info["version"] == "0.3.0-alpha.2" and info["version_code"] == 5000301, "Unexpected release version"
+    assert info["version"] == "0.3.0-alpha.3" and info["version_code"] == 5000302, "Unexpected release version"
     assert info["signing_certificate_sha256"] == pathlib.Path(sys.argv[3]).read_text(encoding="ascii").strip(), "Unexpected signing identity"
 PY
 
@@ -66,22 +66,23 @@ verify_tag optional
 existing_assets="$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name')"
 while IFS= read -r existing; do
     case "$existing" in
-        ''|Zhuzhalka_0.3.0-alpha.2_arm64-v8a.apk|Zhuzhalka_0.3.0-alpha.2_universal.apk|Zhuzhalka_0.3.0-alpha.2_sources.zip|SHA256SUMS) ;;
+        ''|Zhuzhalka_0.3.0-alpha.3_arm64-v8a.apk|Zhuzhalka_0.3.0-alpha.3_universal.apk|Zhuzhalka_0.3.0-alpha.3_sources.zip|SHA256SUMS) ;;
         *) printf 'Unexpected draft asset: %s\n' "$existing" >&2; exit 1 ;;
     esac
 done <<< "$existing_assets"
 
 run_url="${GITHUB_SERVER_URL:-https://github.com}/$GITHUB_REPOSITORY/actions/runs/${GITHUB_RUN_ID:?}"
 cat > "$work_dir/notes.md" <<EOF
-## Жужалка 0.3.0-alpha.2 — alpha
+## Жужалка 0.3.0-alpha.3 — alpha
 
 Бесплатный Android-клиент на базе v2rayNG: открытые каталоги серверов, автоматический подбор и импорт сторонних подписок.
 
-Изменения 0.3.0-alpha.2:
+Изменения 0.3.0-alpha.3:
 
-- минималистичное оформление с чёрным фоном и нейтральными поверхностями;
-- единственный цветовой акцент — жёлтый #FFD43B; оформление не зависит от цветов обоев;
-- пчела сохранена; индикаторы, диалоги, экран обновлений и расширенные настройки используют общую палитру.
+- экран «Поделиться Жужалкой»: QR-код и ссылка на страницу релизов GitHub; для скачивания по ссылке нужен интернет;
+- передача установленного APK через системное меню Android, в том числе Bluetooth или Quick Share (Wi-Fi), если они доступны на устройстве;
+- APK содержит приложение без личных подписок и настроек; если установка состоит из нескольких частей, предлагается передать ссылку;
+- передаётся установленная версия для её архитектуры: при несовместимости получателю нужен universal APK со страницы релизов. Наличие транспорта и доставку файла определяет Android.
 
 Сохранён экспериментальный обмен сообщества из alpha.1:
 
@@ -92,7 +93,7 @@ cat > "$work_dir/notes.md" <<EOF
 - личная подписка публикуется только отдельным действием и подтверждением: полный URL, включая токен доступа, становится доступен всем участникам и операторам relay; делиться можно только своей подпиской с разрешения провайдера;
 - полученный список загружается только после просмотра полного URL и отдельного подтверждения; отзыв предложения не удаляет чужие копии.
 
-Обмен выполняется короткими операциями в открытом приложении. Постоянная связь между всеми телефонами, фоновая доставка и доступность relay не гарантируются. Это alpha-версия публичного протокола: закрытые группы друзей и зашифрованная передача подписок не реализованы. Протокол и результаты прошлой alpha.1 описаны в docs/community-network.md; проверки новой темы перечислены отдельно в docs/version-0.3-alpha.2-validation.md.
+Обмен выполняется короткими операциями в открытом приложении. Постоянная связь между всеми телефонами, фоновая доставка и доступность relay не гарантируются. Это alpha-версия публичного протокола: закрытые группы друзей и зашифрованная передача подписок не реализованы. Протокол и результаты прошлой alpha.1 описаны в docs/community-network.md; проверки оформления alpha.2 сохранены в docs/version-0.3-alpha.2-validation.md. Передача приложения описана в docs/version-0.3-alpha.3-validation.md.
 
 Сохраняются автоподбор с повторной проверкой недавних успешных и сохранённых профилей, загрузка источников только при необходимости, три параллельные HTTPS-проверки одного профиля и подтверждение отключения работающего VPN перед подбором. Проверка TLS не отключается; после выбора подключитесь снова.
 
@@ -118,7 +119,7 @@ EOF
 
 # Retrying an interrupted run may replace assets only while the release is draft.
 gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft --prerelease \
-    --target "$GITHUB_SHA" --title 'Жужалка 0.3.0-alpha.2 — alpha' --notes-file "$work_dir/notes.md"
+    --target "$GITHUB_SHA" --title 'Жужалка 0.3.0-alpha.3 — alpha' --notes-file "$work_dir/notes.md"
 upload_files=()
 for asset in "${assets[@]}"; do upload_files+=("$ASSET_DIR/$asset"); done
 gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" --clobber "${upload_files[@]}"
@@ -126,13 +127,13 @@ gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" --clobber "${upload_files[@
 # Read every uploaded byte back before exposing the release to downloaders.
 mkdir "$work_dir/downloaded"
 gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --dir "$work_dir/downloaded" \
-    --pattern 'Zhuzhalka_0.3.0-alpha.2_*.apk' --pattern 'Zhuzhalka_0.3.0-alpha.2_sources.zip' --pattern SHA256SUMS
+    --pattern 'Zhuzhalka_0.3.0-alpha.3_*.apk' --pattern 'Zhuzhalka_0.3.0-alpha.3_sources.zip' --pattern SHA256SUMS
 for asset in "${assets[@]}"; do cmp -- "$ASSET_DIR/$asset" "$work_dir/downloaded/$asset"; done
 gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets > "$work_dir/assets.json"
 python3 - "$work_dir/assets.json" <<'PY'
 import json, sys
 assets = json.load(open(sys.argv[1], encoding="utf-8"))["assets"]
-expected = {"Zhuzhalka_0.3.0-alpha.2_arm64-v8a.apk", "Zhuzhalka_0.3.0-alpha.2_universal.apk", "Zhuzhalka_0.3.0-alpha.2_sources.zip", "SHA256SUMS"}
+expected = {"Zhuzhalka_0.3.0-alpha.3_arm64-v8a.apk", "Zhuzhalka_0.3.0-alpha.3_universal.apk", "Zhuzhalka_0.3.0-alpha.3_sources.zip", "SHA256SUMS"}
 assert len(assets) == 4 and {asset["name"] for asset in assets} == expected, "Unexpected draft assets"
 PY
 gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false --prerelease --latest=false
@@ -142,7 +143,7 @@ python3 - "$work_dir/published.json" <<'PY'
 import json, sys
 release = json.load(open(sys.argv[1], encoding="utf-8"))
 assert release["isDraft"] is False and release["isPrerelease"] is True, "Unexpected release state"
-expected = {"Zhuzhalka_0.3.0-alpha.2_arm64-v8a.apk", "Zhuzhalka_0.3.0-alpha.2_universal.apk", "Zhuzhalka_0.3.0-alpha.2_sources.zip", "SHA256SUMS"}
+expected = {"Zhuzhalka_0.3.0-alpha.3_arm64-v8a.apk", "Zhuzhalka_0.3.0-alpha.3_universal.apk", "Zhuzhalka_0.3.0-alpha.3_sources.zip", "SHA256SUMS"}
 assert {asset["name"] for asset in release["assets"]} == expected, "Unexpected published assets"
 print(release["url"])
 PY

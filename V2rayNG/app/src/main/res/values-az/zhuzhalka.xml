@@ -39,4 +39,19 @@
     <string name="buzz_invalid_url">Enter a valid HTTPS subscription URL.</string>
     <string name="buzz_disabled_source">This subscription is disabled. Enable it in Manage subscriptions.</string>
     <string name="buzz_no_unique">All servers from this source already exist in other lists.</string>
+    <string name="buzz_share_app">Zhuzhalka tətbiqini paylaş</string>
+    <string name="buzz_share_app_intro">Tətbiqi dostunuza göndərin. Şəxsi abunəliklər və parametrlər APK-ya daxil deyil.</string>
+    <string name="buzz_share_app_qr">Endirmək üçün QR kod</string>
+    <string name="buzz_share_app_qr_hint">Başqa telefonda kameranı açın. QR kod GitHub buraxılışlar səhifəsini açır; endirmək üçün internet lazımdır.</string>
+    <string name="buzz_share_app_apk">APK göndər</string>
+    <string name="buzz_share_app_apk_hint">Android menyusunda Bluetooth və ya Quick Share (Wi-Fi) varsa, onu seçin.</string>
+    <string name="buzz_share_app_link">Keçid göndər</string>
+    <string name="buzz_share_app_compat">Quraşdırılmış versiya paylaşılır. Digər cihazla uyğun deyilsə, buraxılışlar səhifəsindən universal APK endirin.</string>
+    <string name="buzz_share_app_busy">APK hazırlanır…</string>
+    <string name="buzz_share_app_failed">APK hazırlana bilmədi. Yenidən cəhd edin və ya keçidi göndərin.</string>
+    <string name="buzz_share_app_split">Bu quraşdırma bir neçə hissədən ibarətdir. Dostunuzun tam APK endirməsi üçün keçidi göndərin.</string>
+    <string name="buzz_share_app_no_handler">Android paylaşım menyusunu aça bilmədi. QR koddan istifadə edə bilərsiniz.</string>
+    <string name="buzz_share_app_qr_failed">QR kod yaradıla bilmədi.</string>
+    <string name="buzz_share_app_qr_description">QR kod: Zhuzhalka endirmə səhifəsi</string>
+    <string name="buzz_share_app_retry">Yenidən cəhd et</string>
 </resources>

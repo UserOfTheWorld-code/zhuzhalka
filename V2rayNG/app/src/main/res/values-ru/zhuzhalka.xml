@@ -39,4 +39,19 @@
     <string name="buzz_invalid_url">Введите действительную HTTPS-ссылку на подписку.</string>
     <string name="buzz_disabled_source">Подписка выключена. Включите её в управлении подписками.</string>
     <string name="buzz_no_unique">Все серверы этого источника уже есть в других списках.</string>
+    <string name="buzz_share_app">Поделиться Жужалкой</string>
+    <string name="buzz_share_app_intro">Передайте приложение другу. Личные подписки и настройки в APK не входят.</string>
+    <string name="buzz_share_app_qr">QR-код для скачивания</string>
+    <string name="buzz_share_app_qr_hint">Откройте камеру на другом телефоне. QR ведёт на страницу релизов GitHub; для скачивания нужен интернет.</string>
+    <string name="buzz_share_app_apk">Передать APK</string>
+    <string name="buzz_share_app_apk_hint">В меню Android выберите Bluetooth или Quick Share (Wi-Fi), если они доступны.</string>
+    <string name="buzz_share_app_link">Отправить ссылку</string>
+    <string name="buzz_share_app_compat">Передаётся установленная версия. Если она не подходит другому устройству, скачайте universal APK со страницы релизов.</string>
+    <string name="buzz_share_app_busy">Подготавливаем APK…</string>
+    <string name="buzz_share_app_failed">Не удалось подготовить APK. Попробуйте ещё раз или передайте ссылку.</string>
+    <string name="buzz_share_app_split">Эта установка состоит из нескольких частей. Передайте ссылку, чтобы друг скачал полный APK.</string>
+    <string name="buzz_share_app_no_handler">Android не смог открыть меню отправки. Можно воспользоваться QR-кодом.</string>
+    <string name="buzz_share_app_qr_failed">Не удалось создать QR-код.</string>
+    <string name="buzz_share_app_qr_description">QR-код: страница скачивания Жужалки</string>
+    <string name="buzz_share_app_retry">Повторить</string>
 </resources>

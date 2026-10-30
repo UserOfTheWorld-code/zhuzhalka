@@ -39,4 +39,19 @@
     <string name="buzz_invalid_url">Enter a valid HTTPS subscription URL.</string>
     <string name="buzz_disabled_source">This subscription is disabled. Enable it in Manage subscriptions.</string>
     <string name="buzz_no_unique">All servers from this source already exist in other lists.</string>
+    <string name="buzz_share_app">اشتراک‌گذاری Zhuzhalka</string>
+    <string name="buzz_share_app_intro">برنامه را برای دوستتان بفرستید. اشتراک‌های شخصی و تنظیمات در APK قرار ندارند.</string>
+    <string name="buzz_share_app_qr">کد QR برای دانلود</string>
+    <string name="buzz_share_app_qr_hint">دوربین گوشی دیگری را باز کنید. کد QR صفحه انتشارهای GitHub را باز می‌کند؛ دانلود به اینترنت نیاز دارد.</string>
+    <string name="buzz_share_app_apk">ارسال APK</string>
+    <string name="buzz_share_app_apk_hint">در منوی Android، در صورت دسترس بودن، Bluetooth یا Quick Share (Wi-Fi) را انتخاب کنید.</string>
+    <string name="buzz_share_app_link">ارسال پیوند</string>
+    <string name="buzz_share_app_compat">نسخه نصب‌شده به اشتراک گذاشته می‌شود. اگر با دستگاه دیگر سازگار نیست، universal APK را از صفحه انتشارها دانلود کنید.</string>
+    <string name="buzz_share_app_busy">در حال آماده‌سازی APK…</string>
+    <string name="buzz_share_app_failed">آماده‌سازی APK انجام نشد. دوباره تلاش کنید یا پیوند را بفرستید.</string>
+    <string name="buzz_share_app_split">این نصب از چند بخش تشکیل شده است. پیوند را بفرستید تا دوستتان بتواند APK کامل را دانلود کند.</string>
+    <string name="buzz_share_app_no_handler">Android نتوانست منوی اشتراک‌گذاری را باز کند. می‌توانید از کد QR استفاده کنید.</string>
+    <string name="buzz_share_app_qr_failed">ساخت کد QR انجام نشد.</string>
+    <string name="buzz_share_app_qr_description">کد QR: صفحه دانلود Zhuzhalka</string>
+    <string name="buzz_share_app_retry">دوباره تلاش کنید</string>
 </resources>
