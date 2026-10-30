@@ -117,6 +117,7 @@ class MainActivity : HelperBaseComponentActivity() {
                     }
                 },
                 onSubscriptions = { navigateTo(MainDestination.Subscriptions) },
+                onUpdates = { navigateTo(MainDestination.CheckUpdate) },
                 onAdvanced = { advanced = true }
             )
             return

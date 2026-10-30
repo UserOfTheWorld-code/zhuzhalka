@@ -13,6 +13,7 @@ import com.v2ray.ang.dto.LocateTarget
 import com.v2ray.ang.dto.RealPingResult
 import com.v2ray.ang.dto.TestServiceMessage
 import com.v2ray.ang.dto.entities.ProfileItem
+import com.v2ray.ang.dto.entities.RecentSuccessfulServer
 import com.v2ray.ang.dto.entities.ServersCache
 import com.v2ray.ang.dto.entities.SubscriptionCache
 import com.v2ray.ang.extension.delay
@@ -24,6 +25,8 @@ import com.v2ray.ang.handler.PublicSourceCatalog
 import com.v2ray.ang.handler.PublicSourceImportResult
 import com.v2ray.ang.handler.PublicSourceImportStatus
 import com.v2ray.ang.handler.SettingsManager
+import com.v2ray.ang.handler.MmkvManager
+import com.v2ray.ang.handler.RecentSuccessfulServers
 import com.v2ray.ang.core.ServiceWebProbe
 import com.v2ray.ang.ui.base.BaseViewModel
 import com.v2ray.ang.util.LogUtil
@@ -595,44 +598,77 @@ class MainViewModel(
         sourceJob = viewModelScope.launch {
             _zhuzhalkaState.value = ZhuzhalkaState(busy = true, autoPicking = true, messageRes = R.string.buzz_loading)
             try {
-                // Refresh each free catalog independently. A failed source does not block the others.
-                for (source in PublicSourceCatalog.sources) {
-                    currentCoroutineContext().ensureActive()
-                    _zhuzhalkaState.update { it.copy(operationSource = source.id) }
-                    PublicSourceCatalog.addAndRefresh(source.id)
+                var recent = withContext(ioDispatcher) {
+                    RecentSuccessfulServers.retain(MmkvManager.decodeRecentSuccessfulServers(), System.currentTimeMillis())
+                        .filter { resolveAutoCandidate(dataSource, it.guid) != null }
                 }
-                setupGroupTab(forceRefresh = true).join()
-                val candidates = withContext(ioDispatcher) {
-                    interleaveCandidates(dataSource.getSubscriptions()
-                        .filter { it.guid.isNotEmpty() && it.subscription.enabled }
-                        .map { it.guid to dataSource.getServerGuidList(it.guid).shuffled() })
-                }
-                val deadline = SystemClock.elapsedRealtime() + 180_000L
-                _zhuzhalkaState.update { it.copy(total = candidates.size, messageRes = R.string.buzz_checking, operationSource = null) }
-                for ((index, candidate) in candidates.withIndex()) {
-                    currentCoroutineContext().ensureActive()
-                    if (uiState.value.isRunning || SystemClock.elapsedRealtime() >= deadline) break
-                    _zhuzhalkaState.update { it.copy(attempted = index + 1, testedGuid = null, probe = null) }
-                    val result = ServiceWebProbe.check(app, candidate.guid, deadline)
-                    currentCoroutineContext().ensureActive()
-                    _zhuzhalkaState.update { it.copy(testedGuid = candidate.guid, probe = result) }
-                    if (result.passed) {
-                        withContext(ioDispatcher) {
-                            // Profiles may have been replaced by a background subscription refresh.
-                            if (!uiState.value.isRunning) {
-                                applyZhuzhalkaSelection(dataSource, candidate.groupId, candidate.guid) { group, guid ->
-                                    _uiState.update { it.copy(selectedGroupId = group, selectedGuid = guid) }
-                                }
-                            }
+                persistRecentSuccessfulServers(recent)
+                val cachedCandidates = withContext(ioDispatcher) { recent.mapNotNull { resolveAutoCandidate(dataSource, it.guid) } }
+                // One probe budget covers both phases; downloading lists does not consume it.
+                var remainingProbeMillis = 180_000L
+                val found = pickCachedFirst(
+                    recent = cachedCandidates,
+                    refresh = {
+                        _zhuzhalkaState.update { it.copy(attempted = 0, total = 0, testedGuid = null, probe = null) }
+                        // A failed source does not block the other catalogs or their saved profiles.
+                        for (source in PublicSourceCatalog.sources) {
+                            currentCoroutineContext().ensureActive()
+                            _zhuzhalkaState.update { it.copy(operationSource = source.id) }
+                            PublicSourceCatalog.addAndRefresh(source.id)
                         }
                         setupGroupTab(forceRefresh = true).join()
-                        if (uiState.value.selectedGuid == candidate.guid) {
-                            _zhuzhalkaState.update { it.copy(messageRes = R.string.buzz_found) }
-                            return@launch
+                        withContext(ioDispatcher) {
+                            interleaveCandidates(dataSource.getSubscriptions()
+                                .filter { it.guid.isNotEmpty() && it.subscription.enabled }
+                                .map { it.guid to dataSource.getServerGuidList(it.guid).shuffled() })
                         }
-                    }
-                }
-                _zhuzhalkaState.update { it.copy(messageRes = R.string.buzz_not_found) }
+                    },
+                    canContinue = { !uiState.value.isRunning && remainingProbeMillis > 0L },
+                    attempt = { candidate, attempted, total ->
+                        val resolved = withContext(ioDispatcher) { resolveAutoCandidate(dataSource, candidate.guid) }
+                        if (resolved == null) {
+                            recent = recent.filterNot { it.guid == candidate.guid }
+                            persistRecentSuccessfulServers(recent)
+                            false
+                        } else {
+                            _zhuzhalkaState.update { it.copy(attempted = attempted, total = total,
+                                testedGuid = null, probe = null, operationSource = null, messageRes = R.string.buzz_checking) }
+                            val started = SystemClock.elapsedRealtime()
+                            val result = try {
+                                ServiceWebProbe.check(app, resolved.guid, started + remainingProbeMillis)
+                            } finally {
+                                remainingProbeMillis -= SystemClock.elapsedRealtime() - started
+                            }
+                            currentCoroutineContext().ensureActive()
+                            _zhuzhalkaState.update { it.copy(testedGuid = resolved.guid, probe = result) }
+                            if (!result.passed) {
+                                recent = recent.filterNot { it.guid == resolved.guid }
+                                persistRecentSuccessfulServers(recent)
+                                false
+                            } else {
+                                val selected = withContext(ioDispatcher) {
+                                    // Refreshes can replace a GUID while the native checks are running.
+                                    val current = resolveAutoCandidate(dataSource, resolved.guid)
+                                    !uiState.value.isRunning && current != null &&
+                                        applyZhuzhalkaSelection(dataSource, current.groupId, current.guid) { group, guid ->
+                                            _uiState.update { it.copy(selectedGroupId = group, selectedGuid = guid) }
+                                        }
+                                }
+                                if (selected) setupGroupTab(forceRefresh = true).join()
+                                val accepted = selected && uiState.value.selectedGuid == resolved.guid
+                                if (accepted) {
+                                    recent = withContext(ioDispatcher) {
+                                        RecentSuccessfulServers.remember(recent.filter { resolveAutoCandidate(dataSource, it.guid) != null },
+                                            resolved.guid, System.currentTimeMillis())
+                                    }
+                                    persistRecentSuccessfulServers(recent)
+                                }
+                                accepted
+                            }
+                        }
+                    },
+                )
+                _zhuzhalkaState.update { it.copy(messageRes = if (found) R.string.buzz_found else R.string.buzz_not_found) }
             } catch (cancelled: CancellationException) {
                 _zhuzhalkaState.update { it.copy(messageRes = R.string.buzz_cancelled) }
                 setupGroupTab(forceRefresh = true)
@@ -642,6 +678,17 @@ class MainViewModel(
                 _zhuzhalkaState.update { it.copy(messageRes = R.string.buzz_load_failed) }
             } finally {
                 _zhuzhalkaState.update { it.copy(busy = false, cancelling = false) }
+            }
+        }
+    }
+
+    private suspend fun persistRecentSuccessfulServers(entries: List<RecentSuccessfulServer>) {
+        withContext(ioDispatcher) {
+            try {
+                MmkvManager.encodeRecentSuccessfulServers(entries)
+            } catch (error: Exception) {
+                // Cache failure must not prevent selecting a server that just passed all web checks.
+                LogUtil.e(AppConfig.TAG, "Recent successful server cache write failed", IllegalStateException(error.javaClass.simpleName))
             }
         }
     }

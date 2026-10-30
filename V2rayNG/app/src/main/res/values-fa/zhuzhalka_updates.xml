@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="buzz_updates">به‌روزرسانی برنامه</string>
+    <string name="buzz_update_installed">نسخهٔ نصب‌شده: %1$s</string>
+    <string name="buzz_update_intro">به‌روزرسانی‌ها را از مخزن رسمی Жужалка در GitHub دریافت کنید. Android برای نصب از شما تأیید می‌خواهد.</string>
+    <string name="buzz_update_checking">در حال بررسی به‌روزرسانی‌ها…</string>
+    <string name="buzz_update_current">آخرین نسخهٔ موجود را دارید.</string>
+    <string name="buzz_update_available">به‌روزرسانی موجود است.</string>
+    <string name="buzz_update_downloading">در حال دریافت و بررسی APK…</string>
+    <string name="buzz_update_verifying">در حال بررسی فایل و امضا…</string>
+    <string name="buzz_update_ready">به‌روزرسانی تأیید شده و آمادهٔ نصب است.</string>
+    <string name="buzz_update_cancelled">لغو شد. می‌توانید دوباره تلاش کنید.</string>
+    <string name="buzz_update_version_size">نسخهٔ %1$s · %2$d مگابایت</string>
+    <string name="buzz_update_progress">دریافت‌شده: %1$d%%</string>
+    <string name="buzz_update_permission_hint">در صفحهٔ بعدی Android به Жужалка اجازه دهید به‌روزرسانی‌ها را نصب کند. سپس به اینجا برگردید و نصب را بزنید.</string>
+    <string name="buzz_update_allow">اجازهٔ نصب</string>
+    <string name="buzz_update_install_hint">صفحهٔ تأیید Android باز می‌شود. اشتراک‌ها و تنظیمات شما حفظ می‌شوند.</string>
+    <string name="buzz_update_install">نصب به‌روزرسانی</string>
+    <string name="buzz_update_download">دریافت به‌روزرسانی</string>
+    <string name="buzz_update_check">بررسی دوباره</string>
+    <string name="buzz_update_notes">تغییرات جدید</string>
+    <string name="buzz_update_network_error">اتصال به GitHub ممکن نشد. اتصال خود را بررسی کنید و دوباره تلاش کنید.</string>
+    <string name="buzz_update_unsupported">برای این نگارش برنامه به‌روزرسانی سازگاری موجود نیست.</string>
+    <string name="buzz_update_signature_error">امضای APK متفاوت است. نصب مسدود شد و برنامهٔ فعلی تغییر نکرده است.</string>
+    <string name="buzz_update_storage_error">ذخیرهٔ APK ممکن نشد. فضای خالی را بررسی کنید و دوباره تلاش کنید.</string>
+    <string name="buzz_update_not_newer">این APK جدیدتر از نسخهٔ نصب‌شده نیست.</string>
+    <string name="buzz_update_verification_error">به‌روزرسانی تأیید نشد و نصب نخواهد شد. دوباره بررسی کنید یا فایل را دوباره دریافت کنید.</string>
+    <string name="buzz_update_installer_error">باز کردن نصب‌کنندهٔ Android یا تنظیمات آن ممکن نشد. دوباره تلاش کنید.</string>
+</resources>

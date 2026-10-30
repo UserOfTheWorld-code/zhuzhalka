@@ -1,8 +1,44 @@
+import java.io.File
+import java.security.KeyStore
+import java.security.MessageDigest
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.jaredsburrows.license")
+}
+
+// Release credentials are supplied only to the local signing process or the
+// explicitly requested CI release step. Debug builds need no private key.
+val releaseStorePath = providers.environmentVariable("ZHUZHALKA_KEYSTORE_PATH").orNull
+val releaseStorePassword = providers.environmentVariable("ZHUZHALKA_KEYSTORE_PASSWORD").orNull
+val hasReleaseSigning = !releaseStorePath.isNullOrBlank() && !releaseStorePassword.isNullOrBlank()
+val releaseCertificatePin = rootProject.file("../scripts/release-signing-cert.sha256")
+
+val verifyReleaseSigning = tasks.register("verifyReleaseSigning") {
+    doLast {
+        check(hasReleaseSigning) {
+            "Release signing is required. Supply ZHUZHALKA_KEYSTORE_PATH and ZHUZHALKA_KEYSTORE_PASSWORD."
+        }
+        val keyFile = File(requireNotNull(releaseStorePath))
+        check(keyFile.isAbsolute && keyFile.isFile) { "Release keystore must be an existing absolute path." }
+        val password = requireNotNull(releaseStorePassword).toCharArray()
+        try {
+            val keyStore = KeyStore.getInstance("JKS")
+            keyFile.inputStream().use { keyStore.load(it, password) }
+            val certificate = checkNotNull(keyStore.getCertificate("zhuzhalka-release")) {
+                "Permanent release alias is missing."
+            }
+            val actual = MessageDigest.getInstance("SHA-256")
+                .digest(certificate.encoded).joinToString("") { "%02x".format(it) }
+            check(actual == releaseCertificatePin.readText().trim()) {
+                "The signing certificate differs from the permanent public certificate pin."
+            }
+        } finally {
+            password.fill('\u0000')
+        }
+    }
 }
 
 android {
@@ -13,8 +49,9 @@ android {
         applicationId = "app.zhuzhalka.vpn"
         minSdk = 24
         targetSdk = 37
-        versionCode = 1
-        versionName = "0.1.0"
+        // One monotonic code for all ABIs; exceeds every 0.1 Play Store/F-Droid code.
+        versionCode = 5000200
+        versionName = "0.2.0-beta.1"
 
         val abiFilterList = (properties["ABI_FILTERS"] as? String)?.split(';')
         splits {
@@ -38,8 +75,23 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("permanentRelease") {
+                storeFile = file(requireNotNull(releaseStorePath))
+                storePassword = releaseStorePassword
+                keyAlias = "zhuzhalka-release"
+                keyPassword = releaseStorePassword
+                enableV1Signing = false
+                enableV2Signing = true
+                enableV3Signing = true
+            }
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig = signingConfigs.findByName("permanentRelease")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -76,50 +128,6 @@ android {
     kotlin {
         compilerOptions {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-        }
-    }
-
-    applicationVariants.all {
-        val variant = this
-        val isFdroid = variant.productFlavors.any { it.name == "fdroid" }
-        if (isFdroid) {
-            val versionCodes =
-                mapOf(
-                    "armeabi-v7a" to 2, "arm64-v8a" to 1, "x86" to 4, "x86_64" to 3, "universal" to 0
-                )
-
-            variant.outputs
-                .map { it as com.android.build.gradle.internal.api.ApkVariantOutputImpl }
-                .forEach { output ->
-                    val abi = output.getFilter("ABI") ?: "universal"
-                    output.outputFileName = "Zhuzhalka_${variant.versionName}-fdroid_${abi}.apk"
-                    if (versionCodes.containsKey(abi)) {
-                        output.versionCodeOverride =
-                            (100 * variant.versionCode + versionCodes[abi]!!).plus(5000000)
-                    } else {
-                        return@forEach
-                    }
-                }
-        } else {
-            val versionCodes =
-                mapOf("armeabi-v7a" to 4, "arm64-v8a" to 4, "x86" to 4, "x86_64" to 4, "universal" to 4)
-
-            variant.outputs
-                .map { it as com.android.build.gradle.internal.api.ApkVariantOutputImpl }
-                .forEach { output ->
-                    val abi = if (output.getFilter("ABI") != null)
-                        output.getFilter("ABI")
-                    else
-                        "universal"
-
-                    output.outputFileName = "Zhuzhalka_${variant.versionName}_${abi}.apk"
-                    if (versionCodes.containsKey(abi)) {
-                        output.versionCodeOverride =
-                            (1000000 * versionCodes[abi]!!).plus(variant.versionCode)
-                    } else {
-                        return@forEach
-                    }
-                }
         }
     }
 
@@ -161,6 +169,24 @@ android {
         }
     }
 
+}
+
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        val suffix = if (variant.productFlavors.any { it.second == "fdroid" }) "-fdroid" else ""
+        variant.outputs.forEach { output ->
+            val abi = output.filters.firstOrNull {
+                it.filterType == com.android.build.api.variant.FilterConfiguration.FilterType.ABI
+            }?.identifier ?: "universal"
+            output.outputFileName.set(output.versionName.map { "Zhuzhalka_${it}${suffix}_${abi}.apk" })
+        }
+    }
+}
+
+tasks.configureEach {
+    if (name == "prePlaystoreReleaseBuild" || name == "preFdroidReleaseBuild") {
+        dependsOn(verifyReleaseSigning)
+    }
 }
 
 dependencies {

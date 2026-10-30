@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="buzz_updates">Cập nhật ứng dụng</string>
+    <string name="buzz_update_installed">Đã cài đặt: %1$s</string>
+    <string name="buzz_update_intro">Tải bản cập nhật từ kho Жужалка chính thức trên GitHub. Android sẽ yêu cầu bạn xác nhận cài đặt.</string>
+    <string name="buzz_update_checking">Đang kiểm tra bản cập nhật…</string>
+    <string name="buzz_update_current">Bạn đang dùng phiên bản mới nhất hiện có.</string>
+    <string name="buzz_update_available">Có bản cập nhật mới.</string>
+    <string name="buzz_update_downloading">Đang tải và kiểm tra APK…</string>
+    <string name="buzz_update_verifying">Đang kiểm tra tệp và chữ ký…</string>
+    <string name="buzz_update_ready">Bản cập nhật đã được xác minh và sẵn sàng cài đặt.</string>
+    <string name="buzz_update_cancelled">Đã hủy. Bạn có thể thử lại.</string>
+    <string name="buzz_update_version_size">Phiên bản %1$s · %2$d MB</string>
+    <string name="buzz_update_progress">Đã tải: %1$d%%</string>
+    <string name="buzz_update_permission_hint">Cho phép Жужалка cài đặt bản cập nhật trên màn hình Android tiếp theo. Sau đó quay lại đây và nhấn Cài đặt.</string>
+    <string name="buzz_update_allow">Cho phép cài đặt</string>
+    <string name="buzz_update_install_hint">Android sẽ mở màn hình xác nhận. Các gói đăng ký và cài đặt của bạn sẽ được giữ lại.</string>
+    <string name="buzz_update_install">Cài đặt bản cập nhật</string>
+    <string name="buzz_update_download">Tải bản cập nhật</string>
+    <string name="buzz_update_check">Kiểm tra lại</string>
+    <string name="buzz_update_notes">Có gì mới</string>
+    <string name="buzz_update_network_error">Không thể kết nối GitHub. Hãy kiểm tra kết nối và thử lại.</string>
+    <string name="buzz_update_unsupported">Không có bản cập nhật tương thích cho bản ứng dụng này.</string>
+    <string name="buzz_update_signature_error">APK có chữ ký khác. Đã chặn cài đặt; ứng dụng hiện tại không thay đổi.</string>
+    <string name="buzz_update_storage_error">Không thể lưu APK. Hãy kiểm tra dung lượng trống và thử lại.</string>
+    <string name="buzz_update_not_newer">APK này không mới hơn phiên bản đã cài đặt.</string>
+    <string name="buzz_update_verification_error">Không thể xác minh bản cập nhật nên sẽ không cài đặt. Hãy kiểm tra lại hoặc tải lại.</string>
+    <string name="buzz_update_installer_error">Không thể mở trình cài đặt Android hoặc phần cài đặt của trình đó. Hãy thử lại.</string>
+</resources>

@@ -13,6 +13,15 @@ export ANDROID_SDK_ROOT="$ANDROID_HOME"
 ANDROID_PLATFORM="${ANDROID_PLATFORM:-android-37.0}"
 ANDROID_BUILD_TOOLS="${ANDROID_BUILD_TOOLS:-37.0.0}"
 ANDROID_NDK_VERSION="${ANDROID_NDK_VERSION:-30.0.16248370}"
+ANDROID_BUILD_TYPE="${ANDROID_BUILD_TYPE:-debug}"
+case "$ANDROID_BUILD_TYPE" in
+    debug) build_variant=Debug ;;
+    release)
+        : "${ZHUZHALKA_KEYSTORE_PATH:?Release builds require the permanent keystore.}"
+        : "${ZHUZHALKA_KEYSTORE_PASSWORD:?Release builds require the keystore password.}"
+        build_variant=Release ;;
+    *) printf '%s\n' 'ANDROID_BUILD_TYPE must be debug or release.' >&2; exit 1 ;;
+esac
 export NDK_HOME="$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION"
 
 XRAY_TAG=v26.10.21
@@ -100,8 +109,8 @@ cd V2rayNG
 bash gradlew --no-daemon --console=plain --stacktrace \
     :app:testPlaystoreDebugUnitTest \
     :app:compilePlaystoreDebugKotlin \
-    :app:assemblePlaystoreDebug \
-    :app:assembleFdroidDebug
+    ":app:assemblePlaystore$build_variant" \
+    ":app:assembleFdroid$build_variant"
 
 cd app/build/outputs/apk
 find . -type f -name '*.apk' -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS

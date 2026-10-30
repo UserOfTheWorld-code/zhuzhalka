@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="buzz_updates">應用程式更新</string>
+    <string name="buzz_update_installed">已安裝：%1$s</string>
+    <string name="buzz_update_intro">從 GitHub 上 Жужалка 的官方儲存庫下載更新。Android 會要求您確認安裝。</string>
+    <string name="buzz_update_checking">正在檢查更新…</string>
+    <string name="buzz_update_current">您已安裝目前最新版本。</string>
+    <string name="buzz_update_available">有可用更新。</string>
+    <string name="buzz_update_downloading">正在下載並檢查 APK…</string>
+    <string name="buzz_update_verifying">正在檢查檔案和簽章…</string>
+    <string name="buzz_update_ready">更新已通過驗證，可以安裝。</string>
+    <string name="buzz_update_cancelled">已取消。您可以重試。</string>
+    <string name="buzz_update_version_size">版本 %1$s · %2$d MB</string>
+    <string name="buzz_update_progress">已下載：%1$d%%</string>
+    <string name="buzz_update_permission_hint">請在接下來的 Android 頁面中允許 Жужалка 安裝更新，然後返回此處並點選安裝。</string>
+    <string name="buzz_update_allow">允許安裝</string>
+    <string name="buzz_update_install_hint">Android 將開啟安裝確認頁面。您的訂閱和設定將保留。</string>
+    <string name="buzz_update_install">安裝更新</string>
+    <string name="buzz_update_download">下載更新</string>
+    <string name="buzz_update_check">再次檢查</string>
+    <string name="buzz_update_notes">更新內容</string>
+    <string name="buzz_update_network_error">無法連線至 GitHub。請檢查網路連線後重試。</string>
+    <string name="buzz_update_unsupported">此應用程式版本尚無相容的更新。</string>
+    <string name="buzz_update_signature_error">APK 簽章不同。已阻止安裝，目前的應用程式保持不變。</string>
+    <string name="buzz_update_storage_error">無法儲存 APK。請檢查可用儲存空間後重試。</string>
+    <string name="buzz_update_not_newer">此 APK 不比已安裝的版本更新。</string>
+    <string name="buzz_update_verification_error">更新未通過驗證，將不會安裝。請再次檢查或重新下載。</string>
+    <string name="buzz_update_installer_error">無法開啟 Android 安裝程式或其設定。請重試。</string>
+</resources>

@@ -4,6 +4,7 @@ import android.util.Log
 import com.tencent.mmkv.MMKV
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.dto.entities.ProfileItem
+import com.v2ray.ang.dto.entities.RecentSuccessfulServer
 import com.v2ray.ang.dto.entities.SubscriptionItem
 import com.v2ray.ang.enums.EConfigType
 import com.v2ray.ang.util.JsonUtil
@@ -75,6 +76,51 @@ class SubscriptionIndexTest {
         assertEquals(listOf("second", "first", "third"), MmkvManager.decodeSubsList())
         assertEquals(stored, mainValues["SUB_IDS"])
         verify(main, never()).encode(any<String>(), any<String>())
+    }
+
+    @Test
+    fun recentSuccessCacheRoundTripsGuidsAndTimestampsOnly() {
+        val entries = listOf(RecentSuccessfulServer("one", 1000), RecentSuccessfulServer("two", 999))
+        assertEquals(emptyList<RecentSuccessfulServer>(), MmkvManager.decodeRecentSuccessfulServers())
+        MmkvManager.encodeRecentSuccessfulServers(entries)
+        assertEquals(entries, MmkvManager.decodeRecentSuccessfulServers())
+        assertEquals(setOf("RECENT_SUCCESSFUL_SERVERS"), mainValues.keys)
+    }
+
+    @Test
+    fun failedRecentSuccessCacheWriteRestoresOldRecord() {
+        val previous = JsonUtil.toJson(listOf(RecentSuccessfulServer("keep", 1000)))
+        val replacement = JsonUtil.toJson(listOf(RecentSuccessfulServer("new", 2000)))
+        mainValues["RECENT_SUCCESSFUL_SERVERS"] = previous
+        doAnswer {
+            mainValues["RECENT_SUCCESSFUL_SERVERS"] = "partial-write"
+            false
+        }.whenever(main).encode("RECENT_SUCCESSFUL_SERVERS", replacement)
+
+        assertThrows(IllegalStateException::class.java) {
+            MmkvManager.encodeRecentSuccessfulServers(listOf(RecentSuccessfulServer("new", 2000)))
+        }
+        assertEquals(previous, mainValues["RECENT_SUCCESSFUL_SERVERS"])
+    }
+
+    @Test
+    fun unverifiedNewCacheWriteRemovesPartialRecord() {
+        val replacement = JsonUtil.toJson(listOf(RecentSuccessfulServer("new", 2000)))
+        doAnswer {
+            mainValues["RECENT_SUCCESSFUL_SERVERS"] = "partial-write"
+            true
+        }.whenever(main).encode("RECENT_SUCCESSFUL_SERVERS", replacement)
+
+        assertThrows(IllegalStateException::class.java) {
+            MmkvManager.encodeRecentSuccessfulServers(listOf(RecentSuccessfulServer("new", 2000)))
+        }
+        assertNull(mainValues["RECENT_SUCCESSFUL_SERVERS"])
+    }
+
+    @Test
+    fun nullCacheEntriesAreIgnoredWithoutCrashing() {
+        mainValues["RECENT_SUCCESSFUL_SERVERS"] = """[null,{"guid":"keep","verifiedAtMillis":1000}]"""
+        assertEquals(listOf(RecentSuccessfulServer("keep", 1000)), MmkvManager.decodeRecentSuccessfulServers())
     }
 
     @Test

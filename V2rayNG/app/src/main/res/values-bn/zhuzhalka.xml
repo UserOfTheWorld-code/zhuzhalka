@@ -8,7 +8,7 @@
     <string name="buzz_choose_server">Choose server</string>
     <string name="buzz_services_ok">WhatsApp ✓  Telegram ✓  X ✓ — web checks passed</string>
     <string name="buzz_auto">Auto select</string>
-    <string name="buzz_auto_hint">Refresh lists and check WhatsApp, Telegram and X. Search lasts about 3 minutes plus the current check.</string>
+    <string name="buzz_auto_hint">আগে সম্প্রতি কাজ করা সার্ভারগুলো পরীক্ষা করে; প্রয়োজনে তালিকা হালনাগাদ করে। WhatsApp, Telegram ও X পরীক্ষা করতে প্রায় ৩ মিনিট লাগে।</string>
     <string name="buzz_stop_to_edit">Disconnect to run Auto select. Lists can be refreshed through the current connection.</string>
     <string name="buzz_cancelling">Stopping after the current check…</string>
     <string name="buzz_progress">Checking server %1$d of %2$d</string>

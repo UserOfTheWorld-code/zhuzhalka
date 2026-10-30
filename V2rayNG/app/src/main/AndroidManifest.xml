@@ -31,6 +31,7 @@
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"
         tools:ignore="ForegroundServicesPolicy" />
@@ -51,6 +52,16 @@
         android:supportsRtl="true"
         android:theme="@style/AppThemeDayNight.NoActionBar"
         android:usesCleartextTraffic="true">
+
+        <provider
+            android:name=".ui.checkupdate.ZhuzhalkaUpdateProvider"
+            android:authorities="${applicationId}.updates"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/update_paths" />
+        </provider>
 
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"

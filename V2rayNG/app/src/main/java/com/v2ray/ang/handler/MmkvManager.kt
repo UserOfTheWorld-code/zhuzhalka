@@ -20,6 +20,7 @@ import com.v2ray.ang.BuildConfig
 import com.v2ray.ang.dto.entities.AssetUrlCache
 import com.v2ray.ang.dto.entities.AssetUrlItem
 import com.v2ray.ang.dto.entities.ProfileItem
+import com.v2ray.ang.dto.entities.RecentSuccessfulServer
 import com.v2ray.ang.extension.isGroupType
 import com.v2ray.ang.dto.entities.RulesetItem
 import com.v2ray.ang.dto.entities.ServerAffiliationInfo
@@ -46,6 +47,7 @@ object MmkvManager {
     private const val ID_ASSET = "ASSET"
     private const val ID_SETTING = "SETTING"
     private const val KEY_SELECTED_SERVER = "SELECTED_SERVER"
+    private const val KEY_RECENT_SUCCESSFUL_SERVERS = "RECENT_SUCCESSFUL_SERVERS"
     private const val KEY_ANG_CONFIGS = "ANG_CONFIGS"
     private const val KEY_SUB_SERVER_PREFIX = "SUB_SERVERS_"
     private const val KEY_SUB_IDS = "SUB_IDS"
@@ -184,6 +186,33 @@ object MmkvManager {
     fun setSelectServer(guid: String) {
         withProfileIndexLock {
             mainStorage.encode(KEY_SELECTED_SERVER, guid)
+        }
+    }
+
+    fun decodeRecentSuccessfulServers(): List<RecentSuccessfulServer> {
+        val json = mainStorage.decodeString(KEY_RECENT_SUCCESSFUL_SERVERS) ?: return emptyList()
+        return JsonUtil.fromJsonSafe(json, Array<RecentSuccessfulServer?>::class.java)?.filterNotNull().orEmpty()
+    }
+
+    /** A single checked record; failed writes restore the previous cache without changing profiles. */
+    fun encodeRecentSuccessfulServers(entries: List<RecentSuccessfulServer>) {
+        withProfileIndexLock {
+            val previous = mainStorage.decodeString(KEY_RECENT_SUCCESSFUL_SERVERS)
+            val json = JsonUtil.toJson(entries)
+            if (previous == json) return@withProfileIndexLock
+            try {
+                requireStorageWrite(mainStorage.encode(KEY_RECENT_SUCCESSFUL_SERVERS, json), "Recent server cache write failed")
+                check(mainStorage.decodeString(KEY_RECENT_SUCCESSFUL_SERVERS) == json) { "Recent server cache write could not be verified" }
+            } catch (error: Exception) {
+                try {
+                    if (previous == null) mainStorage.removeValueForKey(KEY_RECENT_SUCCESSFUL_SERVERS)
+                    else requireStorageWrite(mainStorage.encode(KEY_RECENT_SUCCESSFUL_SERVERS, previous), "Recent server cache rollback failed")
+                    check(mainStorage.decodeString(KEY_RECENT_SUCCESSFUL_SERVERS) == previous) { "Recent server cache rollback could not be verified" }
+                } catch (rollbackError: Exception) {
+                    error.addSuppressed(rollbackError)
+                }
+                throw error
+            }
         }
     }
 

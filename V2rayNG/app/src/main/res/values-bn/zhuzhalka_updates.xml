@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="buzz_updates">অ্যাপের আপডেট</string>
+    <string name="buzz_update_installed">ইনস্টল করা সংস্করণ: %1$s</string>
+    <string name="buzz_update_intro">GitHub-এ Жужалка-এর অফিসিয়াল রিপোজিটরি থেকে আপডেট ডাউনলোড করুন। Android ইনস্টলেশন নিশ্চিত করতে বলবে।</string>
+    <string name="buzz_update_checking">আপডেট খোঁজা হচ্ছে…</string>
+    <string name="buzz_update_current">আপনার কাছে সর্বশেষ উপলব্ধ সংস্করণ আছে।</string>
+    <string name="buzz_update_available">একটি আপডেট পাওয়া গেছে।</string>
+    <string name="buzz_update_downloading">APK ডাউনলোড ও যাচাই করা হচ্ছে…</string>
+    <string name="buzz_update_verifying">ফাইল ও স্বাক্ষর যাচাই করা হচ্ছে…</string>
+    <string name="buzz_update_ready">আপডেট যাচাই করা হয়েছে এবং ইনস্টল করার জন্য প্রস্তুত।</string>
+    <string name="buzz_update_cancelled">বাতিল করা হয়েছে। আবার চেষ্টা করতে পারেন।</string>
+    <string name="buzz_update_version_size">সংস্করণ %1$s · %2$d MB</string>
+    <string name="buzz_update_progress">ডাউনলোড হয়েছে: %1$d%%</string>
+    <string name="buzz_update_permission_hint">পরবর্তী Android স্ক্রিনে Жужалка-কে আপডেট ইনস্টল করার অনুমতি দিন। তারপর এখানে ফিরে এসে ইনস্টল করুন চাপুন।</string>
+    <string name="buzz_update_allow">ইনস্টল করার অনুমতি দিন</string>
+    <string name="buzz_update_install_hint">Android নিশ্চিতকরণের স্ক্রিন খুলবে। আপনার সাবস্ক্রিপশন ও সেটিংস সংরক্ষিত থাকবে।</string>
+    <string name="buzz_update_install">আপডেট ইনস্টল করুন</string>
+    <string name="buzz_update_download">আপডেট ডাউনলোড করুন</string>
+    <string name="buzz_update_check">আবার দেখুন</string>
+    <string name="buzz_update_notes">নতুন কী</string>
+    <string name="buzz_update_network_error">GitHub-এ সংযোগ করা যায়নি। সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।</string>
+    <string name="buzz_update_unsupported">অ্যাপের এই সংস্করণের জন্য কোনো সামঞ্জস্যপূর্ণ আপডেট নেই।</string>
+    <string name="buzz_update_signature_error">APK-এর স্বাক্ষর আলাদা। ইনস্টলেশন বন্ধ করা হয়েছে; বর্তমান অ্যাপ অপরিবর্তিত আছে।</string>
+    <string name="buzz_update_storage_error">APK সংরক্ষণ করা যায়নি। খালি জায়গা পরীক্ষা করে আবার চেষ্টা করুন।</string>
+    <string name="buzz_update_not_newer">এই APK ইনস্টল করা সংস্করণের চেয়ে নতুন নয়।</string>
+    <string name="buzz_update_verification_error">আপডেট যাচাই করা যায়নি, তাই ইনস্টল করা হবে না। আবার পরীক্ষা করুন বা পুনরায় ডাউনলোড করুন।</string>
+    <string name="buzz_update_installer_error">Android ইনস্টলার বা তার সেটিংস খোলা যায়নি। আবার চেষ্টা করুন।</string>
+</resources>

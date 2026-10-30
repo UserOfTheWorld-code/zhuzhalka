@@ -34,6 +34,7 @@ fun ZhuzhalkaScreen(
     viewModel: MainViewModel,
     onAction: (MainAction) -> Unit,
     onSubscriptions: () -> Unit,
+    onUpdates: () -> Unit,
     onAdvanced: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -57,6 +58,9 @@ fun ZhuzhalkaScreen(
                 Image(painterResource(R.drawable.ic_zhuzhalka), null, Modifier.size(42.dp))
                 Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineMedium,
                     modifier = Modifier.weight(1f).padding(start = 12.dp).semantics { heading() })
+                IconButton(onClick = onUpdates, enabled = !work.busy) {
+                    Icon(painterResource(R.drawable.ic_check_update_24dp), stringResource(R.string.buzz_updates))
+                }
                 TextButton(onClick = onAdvanced, enabled = !work.busy) { Text(stringResource(R.string.buzz_more)) }
             }
             Text(stringResource(if (state.isRunning) R.string.buzz_connected else R.string.buzz_disconnected),

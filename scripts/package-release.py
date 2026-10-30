@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
-"""Package the first beta's APKs and complete source, without machine files."""
+"""Package signed release APKs and complete source, without machine files."""
 
 import argparse
 import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import time
 import zipfile
 
-VERSION = "0.1.0"
+VERSION = "0.2.0-beta.1"
+VERSION_CODE = 5000200
 ROOT = Path(__file__).resolve().parents[1]
 ABIS = ("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
 
@@ -23,6 +25,23 @@ def git(*args: str) -> bytes:
 def digest(path: Path) -> str:
     with path.open("rb") as stream:
         return hashlib.file_digest(stream, "sha256").hexdigest()
+
+
+def verify_apk(path: Path, certificate_pin: str) -> None:
+    sdk = os.environ.get("ANDROID_HOME") or os.environ.get("ANDROID_SDK_ROOT")
+    if not sdk:
+        raise RuntimeError("Set ANDROID_HOME to verify release APK signatures and manifests.")
+    build_tools = Path(sdk) / "build-tools" / os.environ.get("ANDROID_BUILD_TOOLS", "37.0.0")
+    signer = build_tools / ("apksigner.bat" if os.name == "nt" else "apksigner")
+    aapt = build_tools / ("aapt2.exe" if os.name == "nt" else "aapt2")
+    signature = subprocess.check_output([str(signer), "verify", "--print-certs", str(path)], text=True)
+    certificates = set(re.findall(r"certificate SHA-256 digest:\s*([0-9a-fA-F]{64})", signature))
+    if {value.lower() for value in certificates} != {certificate_pin}:
+        raise RuntimeError(f"APK is not signed exclusively by the permanent release identity: {path.name}")
+    manifest = subprocess.check_output([str(aapt), "dump", "badging", str(path)], text=True)
+    expected = f"package: name='app.zhuzhalka.vpn' versionCode='{VERSION_CODE}' versionName='{VERSION}'"
+    if not manifest.startswith(expected) or "application-debuggable" in manifest:
+        raise RuntimeError(f"APK must be the non-debuggable release with the expected package/version: {path.name}")
 
 
 def package(output: Path) -> None:
@@ -38,12 +57,16 @@ def package(output: Path) -> None:
     output.mkdir(parents=True, exist_ok=True)
     if any(output.iterdir()):
         raise RuntimeError(f"Output directory must be empty: {output}")
+    certificate_pin = (ROOT / "scripts/release-signing-cert.sha256").read_text(encoding="ascii").strip()
+    if not re.fullmatch(r"[0-9a-f]{64}", certificate_pin):
+        raise RuntimeError("Invalid permanent signing certificate pin.")
 
     for abi in ("arm64-v8a", "universal"):
         name = f"Zhuzhalka_{VERSION}_{abi}.apk"
-        apk = ROOT / "V2rayNG/app/build/outputs/apk/playstore/debug" / name
+        apk = ROOT / "V2rayNG/app/build/outputs/apk/playstore/release" / name
         if not apk.is_file() or not zipfile.is_zipfile(apk):
             raise RuntimeError(f"Missing or invalid APK: {apk}")
+        verify_apk(apk, certificate_pin)
         shutil.copyfile(apk, output / name)
 
     entries = {}
@@ -80,10 +103,12 @@ def package(output: Path) -> None:
             bundle.writestr(info, data)
         manifest = {
             "version": VERSION,
+            "version_code": VERSION_CODE,
             "source_commit": revision,
             "submodules": submodules,
             "native_sha256": {relative: digest(ROOT / relative) for relative in native},
-            "signing": "Android debug signing; CI and local certificates may differ.",
+            "signing": "Permanent private release key; key material is never included in this archive.",
+            "signing_certificate_sha256": certificate_pin,
             "build_without_git": "Configure Android SDK, then run Gradle from V2rayNG; native inputs are included.",
         }
         bundle.writestr(prefix + "BUILD_INFO.json", json.dumps(manifest, indent=2) + "\n")

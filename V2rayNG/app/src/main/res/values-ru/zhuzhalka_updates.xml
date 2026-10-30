@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="buzz_updates">Обновления приложения</string>
+    <string name="buzz_update_installed">Установлена версия %1$s</string>
+    <string name="buzz_update_intro">Обновления из официального репозитория Жужалки на GitHub. Android попросит подтвердить установку.</string>
+    <string name="buzz_update_checking">Ищем обновления…</string>
+    <string name="buzz_update_current">У вас последняя доступная версия.</string>
+    <string name="buzz_update_available">Есть новая версия.</string>
+    <string name="buzz_update_downloading">Скачиваем и проверяем APK…</string>
+    <string name="buzz_update_verifying">Проверяем файл и подпись…</string>
+    <string name="buzz_update_ready">Обновление проверено и готово к установке.</string>
+    <string name="buzz_update_cancelled">Отменено. Можно попробовать снова.</string>
+    <string name="buzz_update_version_size">Версия %1$s · %2$d МБ</string>
+    <string name="buzz_update_progress">Скачано: %1$d%%</string>
+    <string name="buzz_update_permission_hint">На следующем экране Android разрешите Жужалке устанавливать обновления. Затем вернитесь сюда и нажмите «Установить».</string>
+    <string name="buzz_update_allow">Разрешить установку</string>
+    <string name="buzz_update_install_hint">Откроется системное подтверждение Android. Подписки и настройки сохранятся.</string>
+    <string name="buzz_update_install">Установить обновление</string>
+    <string name="buzz_update_download">Скачать обновление</string>
+    <string name="buzz_update_check">Проверить снова</string>
+    <string name="buzz_update_notes">Что нового</string>
+    <string name="buzz_update_network_error">Не удалось связаться с GitHub. Проверьте подключение и повторите попытку.</string>
+    <string name="buzz_update_unsupported">Для этой сборки приложения нет совместимого обновления.</string>
+    <string name="buzz_update_signature_error">У APK другая подпись. Установка заблокирована, текущее приложение сохранено.</string>
+    <string name="buzz_update_storage_error">Не удалось сохранить APK. Проверьте свободное место и повторите попытку.</string>
+    <string name="buzz_update_not_newer">Этот APK не новее установленной версии.</string>
+    <string name="buzz_update_verification_error">Обновление не прошло проверку и не будет установлено. Проверьте обновления или скачайте файл ещё раз.</string>
+    <string name="buzz_update_installer_error">Не удалось открыть установщик Android или его настройки. Попробуйте ещё раз.</string>
+</resources>

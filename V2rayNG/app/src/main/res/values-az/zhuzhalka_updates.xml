@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="buzz_updates">Tətbiq yeniləmələri</string>
+    <string name="buzz_update_installed">Quraşdırılmış versiya: %1$s</string>
+    <string name="buzz_update_intro">Yeniləmələri GitHub-dakı rəsmi Жужалка repozitoriyasından endirin. Android quraşdırmanı təsdiqləməyinizi istəyəcək.</string>
+    <string name="buzz_update_checking">Yeniləmələr yoxlanılır…</string>
+    <string name="buzz_update_current">Ən son mövcud versiyadan istifadə edirsiniz.</string>
+    <string name="buzz_update_available">Yeniləmə mövcuddur.</string>
+    <string name="buzz_update_downloading">APK endirilir və yoxlanılır…</string>
+    <string name="buzz_update_verifying">Fayl və imza yoxlanılır…</string>
+    <string name="buzz_update_ready">Yeniləmə yoxlanılıb və quraşdırılmağa hazırdır.</string>
+    <string name="buzz_update_cancelled">Ləğv edildi. Yenidən cəhd edə bilərsiniz.</string>
+    <string name="buzz_update_version_size">Versiya %1$s · %2$d MB</string>
+    <string name="buzz_update_progress">Endirilib: %1$d%%</string>
+    <string name="buzz_update_permission_hint">Növbəti Android ekranında Жужалка tətbiqinə yeniləmələri quraşdırmağa icazə verin. Sonra buraya qayıdın və Quraşdır düyməsinə toxunun.</string>
+    <string name="buzz_update_allow">Quraşdırmağa icazə ver</string>
+    <string name="buzz_update_install_hint">Android təsdiqləmə ekranını açacaq. Abunəlikləriniz və parametrləriniz saxlanılacaq.</string>
+    <string name="buzz_update_install">Yeniləməni quraşdır</string>
+    <string name="buzz_update_download">Yeniləməni endir</string>
+    <string name="buzz_update_check">Yenidən yoxla</string>
+    <string name="buzz_update_notes">Yeniliklər</string>
+    <string name="buzz_update_network_error">GitHub ilə əlaqə yaratmaq mümkün olmadı. Bağlantınızı yoxlayın və yenidən cəhd edin.</string>
+    <string name="buzz_update_unsupported">Tətbiqin bu buraxılışı üçün uyğun yeniləmə yoxdur.</string>
+    <string name="buzz_update_signature_error">APK faylının imzası fərqlidir. Quraşdırma bloklanıb; mövcud tətbiq dəyişməyib.</string>
+    <string name="buzz_update_storage_error">APK faylını saxlamaq mümkün olmadı. Boş yeri yoxlayın və yenidən cəhd edin.</string>
+    <string name="buzz_update_not_newer">Bu APK quraşdırılmış versiyadan daha yeni deyil.</string>
+    <string name="buzz_update_verification_error">Yeniləməni yoxlamaq mümkün olmadı və o quraşdırılmayacaq. Yenidən yoxlayın və ya faylı yenidən endirin.</string>
+    <string name="buzz_update_installer_error">Android quraşdırıcısını və ya onun parametrlərini açmaq mümkün olmadı. Yenidən cəhd edin.</string>
+</resources>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="buzz_updates">تحديثات التطبيق</string>
+    <string name="buzz_update_installed">الإصدار المثبّت: %1$s</string>
+    <string name="buzz_update_intro">نزّل التحديثات من مستودع Жужалка الرسمي على GitHub. سيطلب Android تأكيد التثبيت.</string>
+    <string name="buzz_update_checking">جارٍ البحث عن تحديثات…</string>
+    <string name="buzz_update_current">لديك أحدث إصدار متاح.</string>
+    <string name="buzz_update_available">يتوفر تحديث.</string>
+    <string name="buzz_update_downloading">جارٍ تنزيل ملف APK والتحقق منه…</string>
+    <string name="buzz_update_verifying">جارٍ التحقق من الملف والتوقيع…</string>
+    <string name="buzz_update_ready">تم التحقق من التحديث وهو جاهز للتثبيت.</string>
+    <string name="buzz_update_cancelled">تم الإلغاء. يمكنك المحاولة مجدداً.</string>
+    <string name="buzz_update_version_size">الإصدار %1$s · %2$d ميغابايت</string>
+    <string name="buzz_update_progress">تم تنزيل: %1$d%%</string>
+    <string name="buzz_update_permission_hint">اسمح لتطبيق Жужалка بتثبيت التحديثات في شاشة Android التالية. ثم عد إلى هنا واضغط على التثبيت.</string>
+    <string name="buzz_update_allow">السماح بالتثبيت</string>
+    <string name="buzz_update_install_hint">سيفتح Android شاشة تأكيد التثبيت. ستُحفظ اشتراكاتك وإعداداتك.</string>
+    <string name="buzz_update_install">تثبيت التحديث</string>
+    <string name="buzz_update_download">تنزيل التحديث</string>
+    <string name="buzz_update_check">التحقق مجدداً</string>
+    <string name="buzz_update_notes">ما الجديد</string>
+    <string name="buzz_update_network_error">تعذّر الاتصال بـ GitHub. تحقّق من اتصالك وحاول مجدداً.</string>
+    <string name="buzz_update_unsupported">لا يتوفر تحديث متوافق مع هذه النسخة من التطبيق.</string>
+    <string name="buzz_update_signature_error">توقيع ملف APK مختلف. تم حظر التثبيت ولم يتغير تطبيقك الحالي.</string>
+    <string name="buzz_update_storage_error">تعذّر حفظ ملف APK. تحقّق من المساحة المتاحة وحاول مجدداً.</string>
+    <string name="buzz_update_not_newer">ملف APK هذا ليس أحدث من الإصدار المثبّت.</string>
+    <string name="buzz_update_verification_error">تعذّر التحقق من التحديث ولن يتم تثبيته. تحقّق مجدداً أو أعد التنزيل.</string>
+    <string name="buzz_update_installer_error">تعذّر فتح مثبّت Android أو إعداداته. حاول مجدداً.</string>
+</resources>

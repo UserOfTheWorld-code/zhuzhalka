@@ -8,7 +8,7 @@
     <string name="buzz_choose_server">Выбрать сервер</string>
     <string name="buzz_services_ok">WhatsApp ✓  Telegram ✓  X ✓ — веб-проверки пройдены</string>
     <string name="buzz_auto">Автоподбор</string>
-    <string name="buzz_auto_hint">Обновит списки и проверит WhatsApp, Telegram и X. Поиск — около 3 минут, затем завершится текущая проверка.</string>
+    <string name="buzz_auto_hint">Сначала проверит недавние рабочие серверы; при необходимости обновит списки. WhatsApp, Telegram и X: около 3 минут проверок.</string>
     <string name="buzz_stop_to_edit">Для автоподбора отключитесь. Списки можно обновлять через текущее подключение.</string>
     <string name="buzz_cancelling">Остановка после текущей проверки…</string>
     <string name="buzz_progress">Проверка сервера %1$d из %2$d</string>

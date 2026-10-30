@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="buzz_updates">App updates</string>
+    <string name="buzz_update_installed">Installed: %1$s</string>
+    <string name="buzz_update_intro">Download updates from the official Zhuzhalka repository on GitHub. Android will ask you to confirm installation.</string>
+    <string name="buzz_update_checking">Checking for updates…</string>
+    <string name="buzz_update_current">You have the latest available version.</string>
+    <string name="buzz_update_available">An update is available.</string>
+    <string name="buzz_update_downloading">Downloading and checking the APK…</string>
+    <string name="buzz_update_verifying">Checking the file and signature…</string>
+    <string name="buzz_update_ready">The update is verified and ready to install.</string>
+    <string name="buzz_update_cancelled">Cancelled. You can try again.</string>
+    <string name="buzz_update_version_size">Version %1$s · %2$d MB</string>
+    <string name="buzz_update_progress">Downloaded: %1$d%%</string>
+    <string name="buzz_update_permission_hint">Allow Zhuzhalka to install updates on the next Android screen. Then return here and tap Install.</string>
+    <string name="buzz_update_allow">Allow installation</string>
+    <string name="buzz_update_install_hint">Android will open its confirmation screen. Your subscriptions and settings will be kept.</string>
+    <string name="buzz_update_install">Install update</string>
+    <string name="buzz_update_download">Download update</string>
+    <string name="buzz_update_check">Check again</string>
+    <string name="buzz_update_notes">What is new</string>
+    <string name="buzz_update_network_error">Cannot reach GitHub. Check your connection and try again.</string>
+    <string name="buzz_update_unsupported">No compatible update is available for this app edition.</string>
+    <string name="buzz_update_signature_error">The APK has a different signature. Installation is blocked; your current app is unchanged.</string>
+    <string name="buzz_update_storage_error">Cannot save the APK. Check free space and try again.</string>
+    <string name="buzz_update_not_newer">This APK is not newer than your installed version.</string>
+    <string name="buzz_update_verification_error">The update could not be verified. It will not be installed. Check again or retry the download.</string>
+    <string name="buzz_update_installer_error">Cannot open the Android installer or its settings. Try again.</string>
+</resources>

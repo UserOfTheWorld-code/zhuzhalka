@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       publish_release:
-        description: Publish v0.1.0-beta.1 after all checks pass (master only)
+        description: Publish signed v0.2.0-beta.1 after all checks pass (master only)
         required: true
         default: false
         type: boolean
@@ -52,16 +52,36 @@ jobs:
       # The hosted image includes the SDK and accepted licenses. The script checks
       # exact package versions and never accepts additional license terms itself.
       - name: Verify native inputs, run unit tests, and assemble debug APKs
+        if: ${{ !inputs.publish_release }}
         run: bash scripts/build-android.sh
 
-      # Android's normal debug key belongs to this runner; these APKs can have a
-      # different signing certificate from local builds or previous CI runs.
+      # Private signing data is available only in an explicitly requested run of
+      # trusted master. PRs and ordinary pushes never receive these secrets.
+      - name: Test and build with the permanent release identity
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_release && github.ref == 'refs/heads/master' }}
+        env:
+          ZHUZHALKA_KEYSTORE_BASE64: ${{ secrets.ZHUZHALKA_KEYSTORE_BASE64 }}
+          ZHUZHALKA_KEYSTORE_PASSWORD: ${{ secrets.ZHUZHALKA_KEYSTORE_PASSWORD }}
+          ANDROID_BUILD_TYPE: release
+        run: |
+          test -n "$ZHUZHALKA_KEYSTORE_BASE64" && test -n "$ZHUZHALKA_KEYSTORE_PASSWORD" || {
+            echo 'Configure the two permanent signing secrets before publishing.' >&2
+            exit 1
+          }
+          umask 077
+          export ZHUZHALKA_KEYSTORE_PATH="$RUNNER_TEMP/zhuzhalka-release.jks"
+          trap 'rm -f -- "$ZHUZHALKA_KEYSTORE_PATH"' EXIT
+          printf '%s' "$ZHUZHALKA_KEYSTORE_BASE64" | base64 --decode > "$ZHUZHALKA_KEYSTORE_PATH"
+          unset ZHUZHALKA_KEYSTORE_BASE64
+          bash scripts/build-android.sh
+
+      # Debug builds remain available for development, never as release assets.
       - name: Prepare the two downloadable APKs
         if: ${{ !inputs.publish_release }}
         run: |
           mkdir ci-apks
-          cp V2rayNG/app/build/outputs/apk/playstore/debug/Zhuzhalka_0.1.0_arm64-v8a.apk ci-apks/
-          cp V2rayNG/app/build/outputs/apk/playstore/debug/Zhuzhalka_0.1.0_universal.apk ci-apks/
+          cp V2rayNG/app/build/outputs/apk/playstore/debug/Zhuzhalka_0.2.0-beta.1_arm64-v8a.apk ci-apks/
+          cp V2rayNG/app/build/outputs/apk/playstore/debug/Zhuzhalka_0.2.0-beta.1_universal.apk ci-apks/
           cd ci-apks
           sha256sum ./*.apk > SHA256SUMS
 
@@ -79,9 +99,6 @@ jobs:
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_release && github.ref == 'refs/heads/master' }}
         run: |
           python3 scripts/package-release.py --output release-dist
-          for apk in release-dist/*.apk; do
-            "$ANDROID_HOME/build-tools/$ANDROID_BUILD_TOOLS/apksigner" verify --verbose --print-certs "$apk"
-          done
 
       - name: Upload checked beta release bundle
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_release && github.ref == 'refs/heads/master' }}
