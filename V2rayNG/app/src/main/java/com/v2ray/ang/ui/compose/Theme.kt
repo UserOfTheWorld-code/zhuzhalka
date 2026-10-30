@@ -1,24 +1,17 @@
 package com.v2ray.ang.ui.compose
 
 import android.app.Activity
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.v2ray.ang.AppConfig
@@ -27,99 +20,85 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-private val LightColor = lightColorScheme(
-    primary = Color(0xFF000000), // Black
-    onPrimary = Color(0xFFFFFFFF), // White
-    primaryContainer = Color(0xFFE0E0E0), // Light Gray
-    onPrimaryContainer = Color(0xFF000000), // Black
-    secondary = Color(0xFFf97910), // Orange
-    onSecondary = Color(0xFFFFFFFF), // White
-    secondaryContainer = Color(0xFFFFE8D6), // Pale Orange
-    onSecondaryContainer = Color(0xFF2B1700), // Dark Brown
-    tertiary = Color(0xFF009966), // Green
-    onTertiary = Color(0xFFFFFFFF), // White
-    tertiaryContainer = Color(0xFFA0F2D0), // Light Green
-    onTertiaryContainer = Color(0xFF00201A), // Dark Teal
-    error = Color(0xFFBA1A1A), // Red
-    errorContainer = Color(0xFFFFDAD6), // Light Red
-    onError = Color(0xFFFFFFFF), // White
-    onErrorContainer = Color(0xFF410002), // Dark Red
-    background = Color(0xFFFFFFFF), // White
-    onBackground = Color(0xFF1C1B1F), // Near Black
-    surface = Color(0xFFFFFFFF), // White
-    onSurface = Color(0xFF1C1B1F), // Near Black
-    surfaceVariant = Color(0xFFE7E0EC), // Light Purple Gray
-    onSurfaceVariant = Color(0xFF49454F), // Dark Gray
-    outline = Color(0xFF79747E), // Medium Gray
-    outlineVariant = Color(0xFFCAC4D0), // Light Gray
-    inverseSurface = Color(0xFF313033), // Dark Gray
-    inverseOnSurface = Color(0xFFF4EFF4), // Very Light Gray
-    inversePrimary = Color(0xFFC0C0C0), // Silver Gray
-    scrim = Color(0xFF000000), // Black
-    surfaceTint = Color(0xFF000000), // Black
-    surfaceContainerLowest = Color(0xFFFFFFFF), // White
-    surfaceContainerLow = Color(0xFFF7F7F7), // Very Light Gray
-    surfaceContainer = Color(0xFFF1F1F1), // Light Gray
-    surfaceContainerHigh = Color(0xFFEBEBEB), // Light Gray
-    surfaceContainerHighest = Color(0xFFE5E5E5), // Light Gray
+private val BrandYellow = Color(0xFFFFD43B)
+private val BrandSurface = Color(0xFF121212)
+private val BrandSurfaceRaised = Color(0xFF1C1C1C)
+private val BrandText = Color(0xFFF5F5F5)
+private val BrandTextSecondary = Color(0xFFA8A8A8)
+
+// One fixed palette keeps every screen consistent with the black-and-yellow brand.
+private val BrandColors = darkColorScheme(
+    primary = BrandYellow,
+    onPrimary = Color.Black,
+    primaryContainer = BrandSurfaceRaised,
+    onPrimaryContainer = BrandYellow,
+    secondary = BrandYellow,
+    onSecondary = Color.Black,
+    secondaryContainer = BrandSurfaceRaised,
+    onSecondaryContainer = BrandText,
+    tertiary = BrandYellow,
+    onTertiary = Color.Black,
+    tertiaryContainer = BrandSurfaceRaised,
+    onTertiaryContainer = BrandText,
+    error = BrandYellow,
+    errorContainer = BrandSurfaceRaised,
+    onError = Color.Black,
+    onErrorContainer = BrandYellow,
+    background = Color.Black,
+    onBackground = BrandText,
+    surface = Color.Black,
+    onSurface = BrandText,
+    surfaceVariant = BrandSurfaceRaised,
+    onSurfaceVariant = BrandTextSecondary,
+    outline = Color(0xFF707070),
+    outlineVariant = Color(0xFF303030),
+    inverseSurface = BrandSurfaceRaised,
+    inverseOnSurface = BrandText,
+    inversePrimary = BrandYellow,
+    scrim = Color.Black,
+    surfaceTint = Color.Black,
+    surfaceDim = Color.Black,
+    surfaceBright = BrandSurfaceRaised,
+    surfaceContainerLowest = Color.Black,
+    surfaceContainerLow = BrandSurface,
+    surfaceContainer = BrandSurface,
+    surfaceContainerHigh = BrandSurfaceRaised,
+    surfaceContainerHighest = BrandSurfaceRaised,
+    primaryFixed = BrandYellow,
+    primaryFixedDim = BrandYellow,
+    onPrimaryFixed = Color.Black,
+    onPrimaryFixedVariant = Color.Black,
+    secondaryFixed = BrandSurfaceRaised,
+    secondaryFixedDim = BrandSurfaceRaised,
+    onSecondaryFixed = BrandText,
+    onSecondaryFixedVariant = BrandTextSecondary,
+    tertiaryFixed = BrandSurfaceRaised,
+    tertiaryFixedDim = BrandSurfaceRaised,
+    onTertiaryFixed = BrandText,
+    onTertiaryFixedVariant = BrandTextSecondary,
 )
 
-private val DarkColor = darkColorScheme(
-    primary = Color(0xFFC0C0C0), // Silver Gray
-    onPrimary = Color(0xFF303030), // Dark Gray
-    primaryContainer = Color(0xFF474747), // Gray
-    onPrimaryContainer = Color(0xFFE0E0E0), // Light Gray
-    secondary = Color(0xFFf97910), // Orange
-    onSecondary = Color(0xFF4E2600), // Dark Brown
-    secondaryContainer = Color(0xFF6F3800), // Brown
-    onSecondaryContainer = Color(0xFFFFE8D6), // Pale Orange
-    tertiary = Color(0xFF83D6B5), // Mint Green
-    onTertiary = Color(0xFF00382E), // Dark Teal
-    tertiaryContainer = Color(0xFF005143), // Teal
-    onTertiaryContainer = Color(0xFFA0F2D0), // Light Green
-    error = Color(0xFFFFB4AB), // Light Red
-    errorContainer = Color(0xFF93000A), // Dark Red
-    onError = Color(0xFF690005), // Deep Red
-    onErrorContainer = Color(0xFFFFDAD6), // Light Red
-    background = Color(0xFF1C1B1F), // Near Black
-    onBackground = Color(0xFFE6E1E5), // Light Gray
-    surface = Color(0xFF1C1B1F), // Near Black
-    onSurface = Color(0xFFE6E1E5), // Light Gray
-    surfaceVariant = Color(0xFF49454F), // Dark Gray
-    onSurfaceVariant = Color(0xFFCAC4D0), // Light Gray
-    outline = Color(0xFF938F99), // Grayish Purple
-    outlineVariant = Color(0xFF49454F), // Dark Gray
-    inverseSurface = Color(0xFFE6E1E5), // Light Gray
-    inverseOnSurface = Color(0xFF1C1B1F), // Near Black
-    inversePrimary = Color(0xFF000000), // Black
-    scrim = Color(0xFF000000), // Black
-    surfaceTint = Color(0xFFC0C0C0), // Silver Gray
-    surfaceContainerLowest = Color(0xFF0F0F12), // Near Black
-    surfaceContainerLow = Color(0xFF1A191D), // Dark Gray
-    surfaceContainer = Color(0xFF1E1D21), // Dark Gray
-    surfaceContainerHigh = Color(0xFF282729), // Dark Gray
-    surfaceContainerHighest = Color(0xFF333234), // Dark Gray
-)
+// The result text distinguishes success from failure; color is only an accent.
+val colorPing = BrandYellow
+val colorPingRed = BrandYellow
+val colorConfigType = BrandTextSecondary
+val colorFabActive = BrandYellow
+val colorFabInactiveLight = BrandTextSecondary
+val colorFabInactiveDark = BrandTextSecondary
+val dividerColorLight = Color(0xFF303030)
+val dividerColorDark = Color(0xFF303030)
 
-// Semantic Colors
-val colorPing = Color(0xFF009966) // Green
-val colorPingRed = Color(0xFFFF0099) // Pink Red
-val colorConfigType = Color(0xFFf97910) // Orange
-val colorFabActive = Color(0xFFf97910) // Orange
-val colorFabInactiveLight = Color(0xFF9C9C9C) // Gray
-val colorFabInactiveDark = Color(0xFF646464) // Dark Gray
-val dividerColorLight = Color(0xFFE0E0E0) // Light Gray
-val dividerColorDark = Color(0xFF424242) // Dark Gray
+// Toast messages carry their meaning without additional semantic colors.
+val toastNormalBgLight = BrandSurfaceRaised
+val toastNormalBgDark = BrandSurfaceRaised
+val toastSuccessBg = BrandSurfaceRaised
+val toastErrorBg = BrandSurfaceRaised
+val toastInfoBg = BrandSurfaceRaised
+val toastIconCircleBg = Color(0x33F5F5F5)
+val toastTextColor = BrandText
 
-// Toast Colors 85%
-val toastNormalBgLight = Color(0xD9353A3E) // Dark Gray
-val toastNormalBgDark = Color(0xD94A4F54) // Darker Gray
-val toastSuccessBg = Color(0xD9388E3C) // Green
-val toastErrorBg = Color(0xD9D50000) // Red
-val toastInfoBg = Color(0xD93F51B5) // Indigo Blue
-val toastIconCircleBg = Color(0x33FFFFFF) // Semi-transparent White
-val toastTextColor = Color.White // White
-
+// Retain the existing preference API and stored values for backup compatibility.
+// The branded AppTheme deliberately does not use these older appearance options.
 object ThemeManager {
     private val _themeMode = MutableStateFlow(
         MmkvManager.decodeSettingsString(AppConfig.PREF_UI_MODE_NIGHT, "0") ?: "0"
@@ -149,33 +128,10 @@ object ThemeManager {
     }
 }
 
-@Composable
-fun resolveDarkTheme(): Boolean {
-    val mode by ThemeManager.themeMode.collectAsState()
-    return when (mode) {
-        "1" -> false
-        "2" -> true
-        else -> isSystemInDarkTheme()
-    }
-}
-
-val LocalDarkTheme = compositionLocalOf { false }
+val LocalDarkTheme = compositionLocalOf { true }
 
 @Composable
-fun AppTheme(
-    darkTheme: Boolean = resolveDarkTheme(),
-    content: @Composable () -> Unit
-) {
-    val dynamicColor by ThemeManager.dynamicColorEnabled.collectAsState()
-    val context = LocalContext.current
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColor
-        else -> LightColor
-    }
+fun AppTheme(content: @Composable () -> Unit) {
     val snackbarController = rememberAppSnackbarController()
 
     val view = LocalView.current
@@ -184,20 +140,20 @@ fun AppTheme(
             val activity = view.context as? Activity ?: return@SideEffect
             val window = activity.window
             WindowCompat.getInsetsController(window, view).apply {
-                isAppearanceLightStatusBars = !darkTheme
-                isAppearanceLightNavigationBars = !darkTheme
+                isAppearanceLightStatusBars = false
+                isAppearanceLightNavigationBars = false
             }
         }
     }
 
     CompositionLocalProvider(
-        LocalDarkTheme provides darkTheme,
+        LocalDarkTheme provides true,
         LocalAppSnackbar provides snackbarController
     ) {
         MaterialTheme(
-            colorScheme = colorScheme
+            colorScheme = BrandColors
         ) {
-            Box(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
                 AppSnackbarBridge(controller = snackbarController)
                 content()
                 AppSnackbarHost(hostState = snackbarController.hostState)

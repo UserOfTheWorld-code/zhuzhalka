@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       publish_release:
-        description: Publish signed v0.3.0-alpha.1 after all checks pass (master only)
+        description: Publish signed v0.3.0-alpha.2 after all checks pass (master only)
         required: true
         default: false
         type: boolean
@@ -80,8 +80,8 @@ jobs:
         if: ${{ !inputs.publish_release }}
         run: |
           mkdir ci-apks
-          cp V2rayNG/app/build/outputs/apk/playstore/debug/Zhuzhalka_0.3.0-alpha.1_arm64-v8a.apk ci-apks/
-          cp V2rayNG/app/build/outputs/apk/playstore/debug/Zhuzhalka_0.3.0-alpha.1_universal.apk ci-apks/
+          cp V2rayNG/app/build/outputs/apk/playstore/debug/Zhuzhalka_0.3.0-alpha.2_arm64-v8a.apk ci-apks/
+          cp V2rayNG/app/build/outputs/apk/playstore/debug/Zhuzhalka_0.3.0-alpha.2_universal.apk ci-apks/
           cd ci-apks
           sha256sum ./*.apk > SHA256SUMS
 

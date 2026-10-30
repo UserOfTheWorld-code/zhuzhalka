@@ -1,6 +1,7 @@
 package com.v2ray.ang.ui.main
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,14 +16,13 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -59,50 +59,67 @@ fun ZhuzhalkaScreen(
     Scaffold { padding ->
         Column(
             Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding)
-                .verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 12.dp),
+                .verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Image(painterResource(R.drawable.ic_zhuzhalka), null, Modifier.size(42.dp))
-                Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier.weight(1f).padding(start = 12.dp).semantics { heading() })
-                IconButton(onClick = onUpdates, enabled = !work.busy) {
-                    Icon(painterResource(R.drawable.ic_check_update_24dp), stringResource(R.string.buzz_updates))
+            BoxWithConstraints(Modifier.fillMaxWidth()) {
+                val stackActions = maxWidth < 300.dp * LocalDensity.current.fontScale
+                Column {
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Image(painterResource(R.drawable.ic_zhuzhalka), null, Modifier.size(42.dp))
+                        Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.weight(1f).padding(start = 12.dp).semantics { heading() })
+                        if (!stackActions) ZhuzhalkaHeaderActions(!work.busy, onUpdates, onAdvanced)
+                    }
+                    if (stackActions) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically) {
+                        ZhuzhalkaHeaderActions(!work.busy, onUpdates, onAdvanced)
+                    }
                 }
-                TextButton(onClick = onAdvanced, enabled = !work.busy) { Text(stringResource(R.string.buzz_more)) }
             }
             Text(stringResource(if (state.isRunning) R.string.buzz_connected else R.string.buzz_disconnected),
-                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (state.isRunning) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
             Button(
                 onClick = { onAction(MainAction.ToggleService) },
                 enabled = state.isRunning || (!work.busy && selected != null),
                 shape = CircleShape,
                 contentPadding = PaddingValues(horizontal = 12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFCD45), contentColor = Color(0xFF241E32)),
-                modifier = Modifier.size(164.dp)
+                colors = ButtonDefaults.buttonColors(),
+                modifier = Modifier.width(176.dp).heightIn(min = 176.dp)
             ) {
-                Text(stringResource(if (state.isRunning) R.string.buzz_disconnect else R.string.buzz_connect),
-                    style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center,
-                    maxLines = 1, softWrap = false)
-            }
-            OutlinedButton(onClick = { showServers = true }, enabled = canEdit && state.groups.isNotEmpty(),
-                modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp)) {
-                Column(Modifier.padding(6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(selected?.profile?.remarks?.takeIf { it.isNotBlank() } ?: stringResource(R.string.buzz_choose_server),
-                        maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
-                    if (groupName.isNotBlank()) Text(groupName, style = MaterialTheme.typography.labelSmall)
+                Column(Modifier.padding(vertical = 20.dp), horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Icon(painterResource(R.drawable.ic_buzz_power), null, Modifier.size(32.dp))
+                    Text(stringResource(if (state.isRunning) R.string.buzz_disconnect else R.string.buzz_connect),
+                        style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.SemiBold)
                 }
+            }
+            FilledTonalButton(onClick = { showServers = true }, enabled = canEdit && state.groups.isNotEmpty(),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp), shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.filledTonalButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)) {
+                Column(Modifier.weight(1f).padding(vertical = 6.dp), horizontalAlignment = Alignment.Start) {
+                    Text(selected?.profile?.remarks?.takeIf { it.isNotBlank() } ?: stringResource(R.string.buzz_choose_server),
+                        maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Start)
+                    if (groupName.isNotBlank()) Text(groupName, style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Icon(painterResource(R.drawable.ic_expand_more_24dp), null,
+                    Modifier.padding(start = 12.dp).size(20.dp), tint = MaterialTheme.colorScheme.primary)
             }
             if (work.probe?.passed == true && work.testedGuid == state.selectedGuid) {
                 Text(stringResource(R.string.buzz_services_ok), style = MaterialTheme.typography.labelLarge,
                     textAlign = TextAlign.Center)
             }
-            Button(onClick = {
+            OutlinedButton(onClick = {
                 if (state.isRunning) showDisconnectForAutoPick = true
                 else onAction(MainAction.AutoPick)
             }, enabled = !work.busy,
-                modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
+                modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp), shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, if (work.busy) MaterialTheme.colorScheme.outlineVariant else MaterialTheme.colorScheme.primary)) {
                 Text(stringResource(R.string.buzz_auto))
             }
             Text(stringResource(R.string.buzz_auto_hint), style = MaterialTheme.typography.bodySmall,
@@ -122,7 +139,8 @@ fun ZhuzhalkaScreen(
                     textAlign = TextAlign.Center)
             }
             Text(stringResource(R.string.buzz_public_lists), style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.fillMaxWidth().semantics { heading() })
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp).semantics { heading() })
             PublicSourceCatalog.sources.forEach { source ->
                 val cached = state.subscriptionButtons.firstOrNull { it.publicSourceId == source.id }
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -130,8 +148,9 @@ fun ZhuzhalkaScreen(
                         if (cached == null) onAction(MainAction.LoadPublicSource(source.id))
                         else { onAction(MainAction.SelectGroup(cached.groupId)); showServers = true }
                     }, enabled = canEdit,
-                        modifier = Modifier.weight(1f), shape = RoundedCornerShape(14.dp)) {
-                        Text(source.displayName, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        modifier = Modifier.weight(1f).heightIn(min = 48.dp), shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)) {
+                        Text(source.displayName, Modifier.fillMaxWidth(), maxLines = 2, overflow = TextOverflow.Ellipsis)
                     }
                     TextButton(onClick = { onAction(MainAction.LoadPublicSource(source.id, selectAfterLoad = false)) }, enabled = !work.busy) {
                         Text(stringResource(R.string.buzz_refresh))
@@ -143,8 +162,9 @@ fun ZhuzhalkaScreen(
                     Column(Modifier.fillMaxWidth()) {
                         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                             OutlinedButton(onClick = { onAction(MainAction.SelectGroup(subscription.groupId)); showServers = true },
-                                enabled = canEdit, modifier = Modifier.weight(1f), shape = RoundedCornerShape(14.dp)) {
-                                Text(subscription.name, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                enabled = canEdit, modifier = Modifier.weight(1f).heightIn(min = 48.dp), shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)) {
+                                Text(subscription.name, Modifier.fillMaxWidth(), maxLines = 2, overflow = TextOverflow.Ellipsis)
                             }
                             TextButton(onClick = { onAction(MainAction.LoadSavedSubscription(subscription.groupId)) }, enabled = !work.busy) {
                                 Text(stringResource(R.string.buzz_refresh))
@@ -161,11 +181,12 @@ fun ZhuzhalkaScreen(
                 }
             }
             OutlinedButton(onClick = { showSubscription = true }, enabled = canEdit,
-                modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp)) {
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp), shape = RoundedCornerShape(12.dp)) {
                 Text(stringResource(R.string.buzz_own))
             }
             TextButton(onClick = onSubscriptions, enabled = !work.busy) { Text(stringResource(R.string.buzz_manage)) }
-            OutlinedButton(onClick = { showCommunity = true }, modifier = Modifier.fillMaxWidth()) {
+            OutlinedButton(onClick = { showCommunity = true },
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp), shape = RoundedCornerShape(12.dp)) {
                 Text(stringResource(R.string.buzz_community_title))
             }
             Text(stringResource(R.string.buzz_public_note), style = MaterialTheme.typography.bodySmall,
@@ -281,24 +302,15 @@ fun ZhuzhalkaScreen(
         } }
     )
 
-    if (showSubscription) AlertDialog(
-        onDismissRequest = { showSubscription = false },
-        modifier = Modifier.imePadding().consumeWindowInsets(WindowInsets.navigationBars),
-        title = { Text(stringResource(R.string.buzz_own)) },
-        text = {
-            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(stringResource(R.string.buzz_url_hint))
-                OutlinedTextField(value = subscriptionUrl, onValueChange = { subscriptionUrl = it },
-                    label = { Text(stringResource(R.string.buzz_url)) }, singleLine = false,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri), modifier = Modifier.fillMaxWidth())
-            }
-        },
-        confirmButton = { TextButton(onClick = {
+    if (showSubscription) ZhuzhalkaSubscriptionDialog(
+        url = subscriptionUrl,
+        onUrlChange = { subscriptionUrl = it },
+        onDismiss = { showSubscription = false },
+        onConfirm = {
             onAction(MainAction.LoadOwnSubscription(subscriptionUrl.trim()))
             subscriptionUrl = ""
             showSubscription = false
-        }, enabled = subscriptionUrl.isNotBlank()) { Text(stringResource(R.string.buzz_add)) } },
-        dismissButton = { TextButton(onClick = { showSubscription = false }) { Text(stringResource(R.string.action_cancel)) } }
+        }
     )
 
     if (showServers) AlertDialog(
@@ -321,6 +333,14 @@ fun ZhuzhalkaScreen(
         },
         confirmButton = { TextButton(onClick = { showServers = false }) { Text(stringResource(R.string.action_cancel)) } }
     )
+}
+
+@Composable
+private fun ZhuzhalkaHeaderActions(enabled: Boolean, onUpdates: () -> Unit, onAdvanced: () -> Unit) {
+    IconButton(onClick = onUpdates, enabled = enabled) {
+        Icon(painterResource(R.drawable.ic_check_update_24dp), stringResource(R.string.buzz_updates))
+    }
+    TextButton(onClick = onAdvanced, enabled = enabled) { Text(stringResource(R.string.buzz_more)) }
 }
 
 @Composable

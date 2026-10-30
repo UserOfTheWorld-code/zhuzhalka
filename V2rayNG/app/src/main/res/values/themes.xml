@@ -1,12 +1,25 @@
 <resources>
-    <color name="window_background_light">#FFFFFFFF</color>
-    <color name="window_background_dark">#FF1C1B1F</color>
+    <color name="window_background_light">#FF000000</color>
+    <color name="window_background_dark">#FF000000</color>
+    <color name="brand_accent">#FFFFD43B</color>
+    <color name="brand_text">#FFF5F5F5</color>
+    <color name="brand_text_secondary">#FFA8A8A8</color>
 
-    <style name="AppThemeBaseCommon" parent="Theme.AppCompat.DayNight.NoActionBar">
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowBackground">@color/window_background_light</item>
+    <style name="AppThemeBaseCommon" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">@color/window_background_dark</item>
+        <item name="colorPrimaryDark">@color/window_background_dark</item>
+        <item name="colorAccent">@color/brand_accent</item>
+        <item name="colorError">@color/brand_accent</item>
+        <item name="colorControlNormal">@color/brand_text_secondary</item>
+        <item name="colorControlActivated">@color/brand_accent</item>
+        <item name="android:colorAccent">@color/brand_accent</item>
+        <item name="android:colorBackground">@color/window_background_dark</item>
+        <item name="android:textColorPrimary">@color/brand_text</item>
+        <item name="android:textColorSecondary">@color/brand_text_secondary</item>
+        <item name="android:statusBarColor">@color/window_background_dark</item>
+        <item name="android:navigationBarColor">@color/window_background_dark</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowBackground">@color/window_background_dark</item>
     </style>
 
     <!-- API 27+ adds navigation bar icon appearance in the versioned base theme. -->

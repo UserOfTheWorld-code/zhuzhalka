@@ -8,7 +8,7 @@
     <string name="buzz_choose_server">Выбрать сервер</string>
     <string name="buzz_services_ok">WhatsApp ✓  Telegram ✓  X ✓ — веб-проверки пройдены</string>
     <string name="buzz_auto">Автоподбор</string>
-    <string name="buzz_auto_hint">Сначала проверит недавние рабочие и сохранённые серверы; при необходимости обновит источники. Веб-проверки WhatsApp, Telegram и X выполняются параллельно.</string>
+    <string name="buzz_auto_hint">Проверяет веб-доступ к WhatsApp, Telegram и X.</string>
     <string name="buzz_stop_to_edit">Для смены сервера автоподбор предложит отключить VPN.</string>
     <string name="buzz_disconnect_pick_title">Подобрать другой сервер?</string>
     <string name="buzz_disconnect_pick_text">Сначала отключим текущий VPN, затем проверим серверы. После выбора подключитесь снова.</string>

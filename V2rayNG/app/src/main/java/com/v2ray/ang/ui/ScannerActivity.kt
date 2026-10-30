@@ -275,7 +275,7 @@ fun ScannerOverlay() {
     val scanBoxSize = 250.dp
     val cornerLength = 24.dp
     val cornerWidth = 3.dp
-    val cornerColor = Color(0xFF4CAF50)
+    val cornerColor = MaterialTheme.colorScheme.primary
 
     Box(modifier = Modifier.fillMaxSize()) {
         Canvas(modifier = Modifier.fillMaxSize()) {

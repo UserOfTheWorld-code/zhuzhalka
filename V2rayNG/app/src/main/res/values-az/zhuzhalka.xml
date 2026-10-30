@@ -8,7 +8,7 @@
     <string name="buzz_choose_server">Choose server</string>
     <string name="buzz_services_ok">WhatsApp ✓  Telegram ✓  X ✓ — web checks passed</string>
     <string name="buzz_auto">Auto select</string>
-    <string name="buzz_auto_hint">Əvvəlcə son işlək və saxlanmış serverləri yoxlayır; mənbələri yalnız lazım olduqda yeniləyir. WhatsApp, Telegram və X veb yoxlamaları paralel aparılır.</string>
+    <string name="buzz_auto_hint">WhatsApp, Telegram və X-ə veb çıxışını yoxlayır.</string>
     <string name="buzz_stop_to_edit">Serveri dəyişmək üçün avtomatik seçim VPN bağlantısını kəsməyi təklif edəcək.</string>
     <string name="buzz_disconnect_pick_title">Başqa server seçilsin?</string>
     <string name="buzz_disconnect_pick_text">Əvvəlcə cari VPN bağlantısını kəsəcəyik, sonra serverləri yoxlayacağıq. Server seçildikdən sonra yenidən qoşulun.</string>

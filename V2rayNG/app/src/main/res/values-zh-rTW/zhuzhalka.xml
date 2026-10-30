@@ -8,7 +8,7 @@
     <string name="buzz_choose_server">Choose server</string>
     <string name="buzz_services_ok">WhatsApp ✓  Telegram ✓  X ✓ — web checks passed</string>
     <string name="buzz_auto">Auto select</string>
-    <string name="buzz_auto_hint">優先檢查最近可用及已儲存的伺服器，僅在需要時更新來源。WhatsApp、Telegram 和 X 的網頁檢查會平行執行。</string>
+    <string name="buzz_auto_hint">檢查 WhatsApp、Telegram 和 X 的網頁存取。</string>
     <string name="buzz_stop_to_edit">自動選擇會在切換伺服器前提示中斷 VPN。</string>
     <string name="buzz_disconnect_pick_title">選擇其他伺服器？</string>
     <string name="buzz_disconnect_pick_text">將先中斷目前的 VPN，再檢查伺服器。選好後請重新連線。</string>

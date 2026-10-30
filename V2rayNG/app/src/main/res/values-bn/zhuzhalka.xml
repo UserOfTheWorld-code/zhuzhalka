@@ -8,7 +8,7 @@
     <string name="buzz_choose_server">Choose server</string>
     <string name="buzz_services_ok">WhatsApp ✓  Telegram ✓  X ✓ — web checks passed</string>
     <string name="buzz_auto">Auto select</string>
-    <string name="buzz_auto_hint">প্রথমে সম্প্রতি কাজ করা ও সংরক্ষিত সার্ভার পরীক্ষা করে; প্রয়োজন হলেই উৎস হালনাগাদ করে। WhatsApp, Telegram ও X-এর ওয়েব পরীক্ষা একসঙ্গে চলে।</string>
+    <string name="buzz_auto_hint">WhatsApp, Telegram ও X-এর ওয়েব অ্যাক্সেস পরীক্ষা করে।</string>
     <string name="buzz_stop_to_edit">সার্ভার বদলানোর আগে স্বয়ংক্রিয় নির্বাচন VPN সংযোগ বিচ্ছিন্ন করার প্রস্তাব দেবে।</string>
     <string name="buzz_disconnect_pick_title">অন্য সার্ভার নির্বাচন করবেন?</string>
     <string name="buzz_disconnect_pick_text">প্রথমে বর্তমান VPN সংযোগ বিচ্ছিন্ন করব, তারপর সার্ভার পরীক্ষা করব। সার্ভার নির্বাচনের পরে আবার সংযোগ করুন।</string>

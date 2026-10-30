@@ -8,7 +8,7 @@
     <string name="buzz_choose_server">Choose server</string>
     <string name="buzz_services_ok">WhatsApp ✓  Telegram ✓  X ✓ — web checks passed</string>
     <string name="buzz_auto">Auto select</string>
-    <string name="buzz_auto_hint">Kiểm tra các máy chủ vừa hoạt động và đã lưu trước; chỉ cập nhật nguồn khi cần. Các kiểm tra web WhatsApp, Telegram và X chạy song song.</string>
+    <string name="buzz_auto_hint">Kiểm tra khả năng truy cập web đến WhatsApp, Telegram và X.</string>
     <string name="buzz_stop_to_edit">Tự động chọn sẽ đề nghị ngắt VPN trước khi đổi máy chủ.</string>
     <string name="buzz_disconnect_pick_title">Chọn máy chủ khác?</string>
     <string name="buzz_disconnect_pick_text">Trước tiên sẽ ngắt VPN hiện tại, sau đó kiểm tra các máy chủ. Hãy kết nối lại sau khi chọn được máy chủ.</string>

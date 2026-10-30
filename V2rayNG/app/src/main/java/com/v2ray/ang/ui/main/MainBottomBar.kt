@@ -27,7 +27,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -110,7 +109,7 @@ fun MainBottomBar(
                 contentDescription = stringResource(
                     if (isRunning) R.string.acc_stop else R.string.acc_start
                 ),
-                tint = Color.White,
+                tint = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier
                     .size(24.dp)
                     .graphicsLayer { rotationZ = rotationAnim.value }

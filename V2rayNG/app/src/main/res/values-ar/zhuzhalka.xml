@@ -8,7 +8,7 @@
     <string name="buzz_choose_server">Choose server</string>
     <string name="buzz_services_ok">WhatsApp ✓  Telegram ✓  X ✓ — web checks passed</string>
     <string name="buzz_auto">Auto select</string>
-    <string name="buzz_auto_hint">يفحص أولاً الخوادم التي عملت مؤخراً والخوادم المحفوظة، ويحدّث المصادر عند الحاجة فقط. تُجرى فحوصات الويب لـ WhatsApp وTelegram وX بالتوازي.</string>
+    <string name="buzz_auto_hint">يتحقق من الوصول عبر الويب إلى WhatsApp وTelegram وX.</string>
     <string name="buzz_stop_to_edit">سيطلب الاختيار التلقائي فصل VPN قبل تغيير الخادم.</string>
     <string name="buzz_disconnect_pick_title">هل تريد اختيار خادم آخر؟</string>
     <string name="buzz_disconnect_pick_text">سنفصل اتصال VPN الحالي، ثم نفحص الخوادم. أعد الاتصال بعد اختيار خادم.</string>
