@@ -3,6 +3,10 @@ package com.v2ray.ang.ui.main
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.core.ServiceWebProbe
 import com.v2ray.ang.dto.entities.ProfileItem
+import com.v2ray.ang.handler.CommunityEndpointKey
+import com.v2ray.ang.handler.CommunityRanking
+import com.v2ray.ang.handler.CommunityVote
+import com.v2ray.ang.handler.PublicSourceCatalog
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 
@@ -40,6 +44,44 @@ internal fun loadEligibleAutoCandidates(
     val identities = mutableSetOf<ProfileItem>()
     return prioritized.filter { identities.add(profiles.getValue(it.guid).duplicateIdentity()) }
 }
+
+/** Call off-main after the current group/profile snapshot; private subscriptions yield no public key. */
+internal fun communityEndpointKey(dataSource: MainDataSource, candidate: AutoCandidate, testedProfile: ProfileItem? = null): CommunityEndpointKey? {
+    val subscription = dataSource.getSubscriptionItem(candidate.groupId) ?: return null
+    val source = PublicSourceCatalog.sources.firstOrNull { it.subscriptionUrl == subscription.url } ?: return null
+    val current = resolveAutoCandidate(dataSource, candidate.guid) ?: return null
+    if (current.groupId != candidate.groupId) return null
+    val profile = testedProfile ?: dataSource.decodeServerConfig(candidate.guid) ?: return null
+    if (profile.subscriptionId.ifBlank { AppConfig.DEFAULT_SUBSCRIPTION_ID } != candidate.groupId) return null
+    return CommunityRanking.publicEndpointKey(source.id, subscription, profile)
+}
+
+/** Snapshot each group index once. Final attempt resolution still rejects deletions and mutations. */
+internal fun snapshotCommunityKeys(dataSource: MainDataSource, candidates: List<AutoCandidate>): Map<String, CommunityEndpointKey> {
+    val keys = mutableMapOf<String, CommunityEndpointKey>()
+    for ((groupId, groupCandidates) in candidates.groupBy { it.groupId }) {
+        val subscription = dataSource.getSubscriptionItem(groupId) ?: continue
+        if (!subscription.enabled) continue
+        val source = PublicSourceCatalog.sources.firstOrNull { it.subscriptionUrl == subscription.url } ?: continue
+        val indexed = dataSource.getServerGuidList(groupId).toHashSet()
+        for (candidate in groupCandidates.distinctBy { it.guid }) {
+            if (candidate.guid !in indexed) continue
+            val profile = dataSource.decodeServerConfig(candidate.guid) ?: continue
+            if (profile.subscriptionId.ifBlank { AppConfig.DEFAULT_SUBSCRIPTION_ID } != groupId) continue
+            CommunityRanking.publicEndpointKey(source.id, subscription, profile)?.let { keys[candidate.guid] = it }
+        }
+    }
+    return keys
+}
+
+internal fun rankCommunityCandidates(
+    candidates: List<AutoCandidate>,
+    keys: Map<String, CommunityEndpointKey>,
+    votes: List<CommunityVote>,
+    nowMillis: Long,
+    selectedGuid: String?,
+): List<AutoCandidate> = CommunityRanking.promote(candidates, votes, nowMillis,
+    keyOf = { keys[it.guid] }, protectedPrefixCount = if (candidates.firstOrNull()?.guid == selectedGuid) 1 else 0)
 
 internal data class AutoPickLimits(
     val recentAttempts: Int = 5,

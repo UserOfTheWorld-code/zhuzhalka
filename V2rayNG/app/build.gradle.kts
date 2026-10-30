@@ -50,8 +50,8 @@ android {
         minSdk = 24
         targetSdk = 37
         // One monotonic code for all ABIs; exceeds every 0.1 Play Store/F-Droid code.
-        versionCode = 5000201
-        versionName = "0.2.0-beta.2"
+        versionCode = 5000300
+        versionName = "0.3.0-alpha.1"
 
         val abiFilterList = (properties["ABI_FILTERS"] as? String)?.split(';')
         splits {
@@ -189,6 +189,11 @@ tasks.configureEach {
     }
 }
 
+// The upstream JVM facade tries Android's loader first. Host tests must use the desktop JNI loader.
+configurations.matching { it.name.endsWith("UnitTestRuntimeClasspath") }.configureEach {
+    exclude(group = "fr.acinq.secp256k1", module = "secp256k1-kmp-jni-android")
+}
+
 dependencies {
     // Core Libraries
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar", "*.jar"))))
@@ -215,6 +220,8 @@ dependencies {
     implementation(libs.mmkv.static)
     implementation(libs.gson)
     implementation(libs.okhttp)
+    implementation(libs.secp256k1.core)
+    implementation(libs.secp256k1.android)
 
     // Reactive and Utility Libraries
     implementation(libs.kotlinx.coroutines.android)
@@ -246,5 +253,7 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.mockwebserver)
+    testRuntimeOnly(libs.secp256k1.jvm)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 }

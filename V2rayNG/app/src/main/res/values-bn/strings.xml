@@ -564,4 +564,26 @@
     <string name="sub_info_open_page">সাবস্ক্রিপশন তথ্যের পাতা খুলুন</string>
     <string name="sub_info_unlimited">সীমাহীন</string>
 
+    <string name="buzz_community_title">Жужалка নেটওয়ার্ক</string>
+    <string name="buzz_community_enable">অংশগ্রহণ চালু করুন</string>
+    <string name="buzz_community_consent">অ্যাপটি অন্তর্ভুক্ত উন্মুক্ত তালিকার সার্ভার শনাক্তকারী হ্যাশ, ওয়েব পরীক্ষার ফল, পূর্ণ মানে নেওয়া বিলম্ব, পরীক্ষার সময় এবং এই ইনস্টলেশনের পাবলিক কী প্রকাশ্যে পাঠাবে। রিলে সার্ভার আপনার IP ঠিকানাও দেখতে পায়। ব্যক্তিগত সাবস্ক্রিপশন ও সংযোগের গোপন তথ্য স্বয়ংক্রিয়ভাবে শেয়ার হয় না। অন্যরা প্রকাশ্য তথ্য কপি করতে পারে; অংশগ্রহণ বন্ধ করলেও এসব কপি ফিরিয়ে নেওয়া যায় না।</string>
+    <string name="buzz_community_share_named">শেয়ার করুন: %1$s</string>
+    <string name="buzz_community_share_title">সাবস্ক্রিপশন প্রকাশ করবেন?</string>
+    <string name="buzz_community_share_warning">অ্যাক্সেস টোকেনসহ সম্পূর্ণ সাবস্ক্রিপশন URL সব অংশগ্রহণকারী ও রিলে পরিচালকের কাছে প্রকাশ করা হবে। তাঁরা সাবস্ক্রিপশন ব্যবহার ও লিংক কপি করতে পারবেন। শুধু নিজের সাবস্ক্রিপশন শেয়ার করুন এবং কেবল প্রদানকারী প্রকাশ্য শেয়ারের অনুমতি দিলে। কপি ফিরিয়ে নেওয়া যায় না। ব্যক্তিগত সাবস্ক্রিপশন কখনো স্বয়ংক্রিয়ভাবে প্রকাশ হয় না।</string>
+    <string name="buzz_community_publish">সবার জন্য প্রকাশ করুন</string>
+    <string name="buzz_community_load_title">প্রস্তাবিত তালিকা লোড করবেন?</string>
+    <string name="buzz_community_load_warning">এই ঠিকানাটি অন্য একজন অংশগ্রহণকারী শেয়ার করেছেন। এর বিষয়বস্তু বিশ্বস্ত ধরা হয় না এবং বদলাতে পারে। লোড করলে ওই সাইটে অনুরোধ যাবে এবং সাইট আপনার IP ঠিকানা দেখতে পাবে। লোড চাপার পরেই তালিকা আনা হবে; সার্ভারগুলো তবুও স্থানীয় পরীক্ষার মধ্য দিয়ে যাবে।</string>
+    <string name="buzz_community_load">তালিকা লোড করুন</string>
+    <string name="buzz_community_stop_sharing">আমার তালিকা শেয়ার বন্ধ করুন</string>
+    <string name="buzz_community_stop_warning">আপনার বর্তমান তালিকার প্রস্তাব পরবর্তী আদান-প্রদান থেকে সরানো হবে। অংশগ্রহণকারী বা রিলে ইতিমধ্যে যে কপি রেখেছে তা ফিরিয়ে নেওয়া যায় না। আপনার স্থানীয় সাবস্ক্রিপশন মুছে যাবে না।</string>
+    <string name="buzz_community_intro">স্বতন্ত্র উন্মুক্ত রিলের মাধ্যমে মূল্যায়ন ও ইচ্ছাকৃতভাবে প্রকাশিত তালিকা আদান-প্রদান করুন। পৌঁছানো বা প্রাপ্যতার নিশ্চয়তা নেই।</string>
+    <string name="buzz_community_participate">নেটওয়ার্কে অংশ নিন</string>
+    <string name="buzz_community_syncing">তথ্য প্রস্তুত বা আদান-প্রদান হচ্ছে…</string>
+    <string name="buzz_community_failed">কাজটি সম্পূর্ণ করা যায়নি। আবার চেষ্টা করুন; কিছু তথ্য ইতিমধ্যে রিলেতে পৌঁছে থাকতে পারে।</string>
+    <string name="buzz_community_counts">পাবলিক কী: %1$d · মূল্যায়ন: %2$d</string>
+    <string name="buzz_community_hint">একাধিক কী একই ব্যক্তির হতে পারে। মূল্যায়ন শুধু সার্ভার সাজাতে সাহায্য করে; স্থানীয় পরীক্ষা আবশ্যক। তালিকা শেয়ারের আগে অংশগ্রহণ চালু করুন।</string>
+    <string name="buzz_community_sync">এখন সিঙ্ক করুন</string>
+    <string name="buzz_community_lists">প্রস্তাবিত তালিকা</string>
+    <string name="buzz_community_empty">বর্তমানে বৈধ তালিকার প্রস্তাব নেই।</string>
+
 </resources>

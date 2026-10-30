@@ -175,6 +175,43 @@ HTTP Date **2026-10-30 13:16:19 UTC**. В Next.js-данных страницы 
   но публикатор прямо отмечает, что эти сторонние серверы ему не принадлежат. Не включён как
   отдельный источник собственных серверов другого VPN-провайдера.
 
+## Криптография подписанных событий сообщества
+
+В версии `0.3.0-alpha.1` используются Maven-артефакты
+`fr.acinq.secp256k1:secp256k1-kmp:0.24.0` и
+`fr.acinq.secp256k1:secp256k1-kmp-jni-android:0.24.0` с транзитивным JNI common binding
+той же версии. Для обычных JVM-тестов применяется `secp256k1-kmp-jni-jvm:0.24.0`;
+его desktop-библиотеки не являются Android-зависимостью приложения.
+
+Первичный источник — [ACINQ/secp256k1-kmp, тег v0.24.0](https://github.com/ACINQ/secp256k1-kmp/tree/v0.24.0),
+который на проверке 30 октября 2026 года указывает на коммит
+`e9d5c95f85bd326f3f6a5d4fd075ec11510de472`. Обёртка распространяется по
+[Apache-2.0](https://github.com/ACINQ/secp256k1-kmp/blob/v0.24.0/LICENSE).
+В LICENSE сохранена строка `Copyrigh 2014 ACINQ SAS` с исходным написанием;
+в Kotlin API — `Copyright 2020 ACINQ SAS`. Отдельного файла NOTICE в полном дереве
+этого тега не найдено; запрос корневого NOTICE вернул HTTP 404.
+
+[`.gitmodules`](https://github.com/ACINQ/secp256k1-kmp/blob/v0.24.0/.gitmodules)
+ссылается на `bitcoin-core/secp256k1`. Gitlink `native/secp256k1` закрепляет коммит
+[`6e2c8bc4ecdc6e71dbe7a368f360d8d453ce435d`](https://github.com/bitcoin-core/secp256k1/tree/6e2c8bc4ecdc6e71dbe7a368f360d8d453ce435d).
+Его [COPYING](https://github.com/bitcoin-core/secp256k1/blob/6e2c8bc4ecdc6e71dbe7a368f360d8d453ce435d/COPYING)
+содержит MIT-разрешение и `Copyright (c) 2013 Pieter Wuille`. Этот native-код входит
+в JNI-библиотеку ACINQ; он не заменяет Xray или HEV.
+
+Точные уведомления добавлены в
+[`open_source_licenses.html`](V2rayNG/app/src/main/assets/open_source_licenses.html):
+полный MIT-текст включён локально, а Apache-2.0 ссылается на уже содержащийся в этом же
+HTML полный текст лицензии. Термины Apache сверены с upstream без учёта пробелов;
+остальные существующие уведомления не перегенерировались.
+
+Официальный [Android AAR 0.24.0](https://repo.maven.apache.org/maven2/fr/acinq/secp256k1/secp256k1-kmp-jni-android/0.24.0/secp256k1-kmp-jni-android-0.24.0.aar)
+имеет размер 5 069 537 байт и SHA-256
+`a4d75fc5221aee205de869c495983699a943e44ee0331142494296303037e090`.
+Архив включает четыре ABI и объявляет minSdk 21; разбор ELF и ограничения проверки
+описаны в [документе сообщества](docs/community-network.md).
+Ревизии взяты из источника тега и gitlink; независимая воспроизводимая пересборка AAR
+с побайтовым сравнением не выполнялась.
+
 ## Границы проверки
 
 Каталоги намеренно публикуются как бесплатные публичные источники. Независимая проверка

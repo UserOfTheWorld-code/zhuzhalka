@@ -562,4 +562,26 @@
     <string name="sub_info_open_page">開啟訂閱資訊頁面</string>
     <string name="sub_info_unlimited">無限制</string>
 
+    <string name="buzz_community_title">Жужалка 網路</string>
+    <string name="buzz_community_enable">啟用參與</string>
+    <string name="buzz_community_consent">應用程式將公開分享內建公開目錄中伺服器的雜湊識別碼、網頁檢查結果、取整的延遲、檢查時間和本次安裝的公鑰。中繼伺服器也能看到您的 IP 位址。個人訂閱和連線憑證不會自動分享。其他人可能複製公開資料；退出參與無法收回這些副本。</string>
+    <string name="buzz_community_share_named">分享：%1$s</string>
+    <string name="buzz_community_share_title">公開訂閱？</string>
+    <string name="buzz_community_share_warning">完整訂閱連結（包括存取權杖）將向所有參與者和中繼營運者公開。他們可以使用訂閱並複製連結。僅分享您自己的訂閱，且必須得到服務商允許公開分享。副本無法收回。個人訂閱絕不會自動公開。</string>
+    <string name="buzz_community_publish">向所有人公開</string>
+    <string name="buzz_community_load_title">載入推薦清單？</string>
+    <string name="buzz_community_load_warning">此位址由另一位參與者分享。其內容尚未受到信任，且可能改變。載入時會向該網站傳送請求，網站能夠看到您的 IP 位址。只有點選載入後才會下載清單；伺服器仍需通過本機檢查。</string>
+    <string name="buzz_community_load">載入清單</string>
+    <string name="buzz_community_stop_sharing">停止分享我的清單</string>
+    <string name="buzz_community_stop_warning">您目前分享的清單將不再出現在後續交換中。參與者或中繼已儲存的副本無法收回。本機訂閱不會被刪除。</string>
+    <string name="buzz_community_intro">透過獨立的公開中繼交換評分和明確公開的清單。不保證送達或可用性。</string>
+    <string name="buzz_community_participate">參與網路</string>
+    <string name="buzz_community_syncing">正在準備或交換資料…</string>
+    <string name="buzz_community_failed">未能完成操作。請重試；部分資料可能已到達中繼。</string>
+    <string name="buzz_community_counts">公鑰：%1$d · 評分：%2$d</string>
+    <string name="buzz_community_hint">多個金鑰可能屬於同一人。評分僅協助排列候選伺服器；本機檢查仍然必要。分享清單前請先啟用參與。</string>
+    <string name="buzz_community_sync">立即同步</string>
+    <string name="buzz_community_lists">推薦清單</string>
+    <string name="buzz_community_empty">目前沒有有效的清單推薦。</string>
+
 </resources>

@@ -564,4 +564,26 @@
     <string name="sub_info_open_page">باز کردن صفحه اطلاعات اشتراک</string>
     <string name="sub_info_unlimited">نامحدود</string>
 
+    <string name="buzz_community_title">شبکهٔ Жужалка</string>
+    <string name="buzz_community_enable">فعال‌کردن مشارکت</string>
+    <string name="buzz_community_consent">برنامه هش شناسهٔ سرورهای فهرست‌های عمومی داخلی، نتیجهٔ بررسی وب، تأخیر گرد‌شده، زمان بررسی و کلید عمومی این نصب را علنی منتشر می‌کند. سرورهای واسط نشانی IP شما را نیز می‌بینند. اشتراک‌های شخصی و اطلاعات اتصال خودکار به اشتراک گذاشته نمی‌شوند. دیگران می‌توانند داده‌های عمومی را کپی کنند؛ غیرفعال‌کردن مشارکت این نسخه‌ها را پس نمی‌گیرد.</string>
+    <string name="buzz_community_share_named">اشتراک‌گذاری: %1$s</string>
+    <string name="buzz_community_share_title">اشتراک علنی شود؟</string>
+    <string name="buzz_community_share_warning">نشانی کامل اشتراک، شامل توکن دسترسی، برای همهٔ مشارکت‌کنندگان و گردانندگان سرورهای واسط منتشر می‌شود. آن‌ها می‌توانند از اشتراک استفاده و پیوند را کپی کنند. فقط اشتراک خود را و تنها با اجازهٔ ارائه‌دهنده برای انتشار عمومی به اشتراک بگذارید. نسخه‌های کپی قابل پس‌گرفتن نیستند. اشتراک‌های شخصی هرگز خودکار منتشر نمی‌شوند.</string>
+    <string name="buzz_community_publish">انتشار برای همه</string>
+    <string name="buzz_community_load_title">فهرست پیشنهادی بارگیری شود؟</string>
+    <string name="buzz_community_load_warning">این نشانی را مشارکت‌کنندهٔ دیگری فرستاده است. محتوای آن قابل اعتماد فرض نمی‌شود و ممکن است تغییر کند. بارگیری درخواستی به آن سایت می‌فرستد و سایت IP شما را می‌بیند. فهرست فقط پس از فشردن بارگیری دریافت می‌شود؛ سرورها همچنان باید محلی بررسی شوند.</string>
+    <string name="buzz_community_load">بارگیری فهرست</string>
+    <string name="buzz_community_stop_sharing">توقف اشتراک‌گذاری فهرست‌هایم</string>
+    <string name="buzz_community_stop_warning">پیشنهادهای فعلی فهرست شما از تبادل‌های بعدی کنار گذاشته می‌شوند. نسخه‌هایی که مشارکت‌کنندگان یا واسط‌ها ذخیره کرده‌اند قابل پس‌گرفتن نیستند. اشتراک‌های محلی حذف نمی‌شوند.</string>
+    <string name="buzz_community_intro">تبادل ارزیابی‌ها و فهرست‌های صریحاً منتشرشده از طریق واسط‌های عمومی مستقل. تحویل و دسترس‌پذیری تضمین نمی‌شود.</string>
+    <string name="buzz_community_participate">مشارکت در شبکه</string>
+    <string name="buzz_community_syncing">در حال آماده‌سازی یا تبادل داده…</string>
+    <string name="buzz_community_failed">عملیات کامل نشد. دوباره تلاش کنید؛ ممکن است بخشی از داده‌ها به واسط رسیده باشد.</string>
+    <string name="buzz_community_counts">کلیدهای عمومی: %1$d · ارزیابی‌ها: %2$d</string>
+    <string name="buzz_community_hint">چند کلید ممکن است متعلق به یک نفر باشد. ارزیابی‌ها فقط ترتیب گزینه‌ها را بهبود می‌دهند؛ بررسی محلی همچنان لازم است. پیش از اشتراک‌گذاری فهرست، مشارکت را فعال کنید.</string>
+    <string name="buzz_community_sync">همگام‌سازی اکنون</string>
+    <string name="buzz_community_lists">فهرست‌های پیشنهادی</string>
+    <string name="buzz_community_empty">پیشنهاد معتبر فعلی برای فهرست وجود ندارد.</string>
+
 </resources>

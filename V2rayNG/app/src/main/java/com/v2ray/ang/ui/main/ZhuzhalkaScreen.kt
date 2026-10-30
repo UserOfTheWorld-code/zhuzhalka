@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -28,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.v2ray.ang.R
 import com.v2ray.ang.handler.PublicSourceCatalog
+import java.net.URI
 
 @Composable
 fun ZhuzhalkaScreen(
@@ -39,11 +41,17 @@ fun ZhuzhalkaScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val work by viewModel.zhuzhalkaState.collectAsStateWithLifecycle()
+    val community by viewModel.communityState.collectAsStateWithLifecycle()
     val servers by viewModel.serversForGroup(state.selectedGroupId).collectAsStateWithLifecycle()
     var showServers by rememberSaveable { mutableStateOf(false) }
     var showSubscription by rememberSaveable { mutableStateOf(false) }
     var showDisconnectForAutoPick by rememberSaveable { mutableStateOf(false) }
     var subscriptionUrl by rememberSaveable { mutableStateOf("") }
+    var showCommunity by rememberSaveable { mutableStateOf(false) }
+    var showCommunityConsent by rememberSaveable { mutableStateOf(false) }
+    var communityShareGroupId by rememberSaveable { mutableStateOf<String?>(null) }
+    var communityOfferUrl by rememberSaveable { mutableStateOf<String?>(null) }
+    var showStopCommunitySharing by rememberSaveable { mutableStateOf(false) }
     val selected = servers.firstOrNull { it.guid == state.selectedGuid }
     val groupName = state.groups.firstOrNull { it.id == state.selectedGroupId }?.remarks.orEmpty()
     val canEdit = !work.busy && !state.isRunning
@@ -131,13 +139,24 @@ fun ZhuzhalkaScreen(
                 }
             }
             state.subscriptionButtons.filter { it.publicSourceId == null }.forEach { subscription ->
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    OutlinedButton(onClick = { onAction(MainAction.SelectGroup(subscription.groupId)); showServers = true },
-                        enabled = canEdit, modifier = Modifier.weight(1f), shape = RoundedCornerShape(14.dp)) {
-                        Text(subscription.name, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    }
-                    TextButton(onClick = { onAction(MainAction.LoadSavedSubscription(subscription.groupId)) }, enabled = !work.busy) {
-                        Text(stringResource(R.string.buzz_refresh))
+                key(subscription.groupId) {
+                    Column(Modifier.fillMaxWidth()) {
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            OutlinedButton(onClick = { onAction(MainAction.SelectGroup(subscription.groupId)); showServers = true },
+                                enabled = canEdit, modifier = Modifier.weight(1f), shape = RoundedCornerShape(14.dp)) {
+                                Text(subscription.name, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                            }
+                            TextButton(onClick = { onAction(MainAction.LoadSavedSubscription(subscription.groupId)) }, enabled = !work.busy) {
+                                Text(stringResource(R.string.buzz_refresh))
+                            }
+                        }
+                        TextButton(onClick = {
+                            if (community.enabled) communityShareGroupId = subscription.groupId
+                            else showCommunity = true
+                        }, enabled = community.ready && !community.syncing && !work.busy,
+                            modifier = Modifier.align(Alignment.End)) {
+                            Text(stringResource(R.string.buzz_community_share_named, subscription.name))
+                        }
                     }
                 }
             }
@@ -146,12 +165,108 @@ fun ZhuzhalkaScreen(
                 Text(stringResource(R.string.buzz_own))
             }
             TextButton(onClick = onSubscriptions, enabled = !work.busy) { Text(stringResource(R.string.buzz_manage)) }
+            OutlinedButton(onClick = { showCommunity = true }, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.buzz_community_title))
+            }
             Text(stringResource(R.string.buzz_public_note), style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
             Text(stringResource(R.string.buzz_credit), style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
+
+    if (showCommunity) CommunityDialog(
+        state = community,
+        busy = work.busy,
+        onDismiss = { showCommunity = false },
+        onToggle = { enabled ->
+            if (enabled) showCommunityConsent = true
+            else onAction(MainAction.SetCommunityEnabled(false))
+        },
+        onSync = { onAction(MainAction.SyncCommunity) },
+        onOffer = { communityOfferUrl = it },
+        onStopSharing = { showStopCommunitySharing = true }
+    )
+
+    if (showCommunityConsent) AlertDialog(
+        onDismissRequest = { showCommunityConsent = false },
+        title = { Text(stringResource(R.string.buzz_community_enable)) },
+        text = { Column(Modifier.verticalScroll(rememberScrollState())) {
+            Text(stringResource(R.string.buzz_community_consent))
+        } },
+        confirmButton = { TextButton(onClick = {
+            showCommunityConsent = false
+            onAction(MainAction.SetCommunityEnabled(true))
+        }, enabled = community.ready && !community.syncing && !work.busy) {
+            Text(stringResource(R.string.buzz_community_enable))
+        } },
+        dismissButton = { TextButton(onClick = { showCommunityConsent = false }) {
+            Text(stringResource(R.string.action_cancel))
+        } }
+    )
+
+    communityShareGroupId?.let { groupId ->
+        val subscription = state.subscriptionButtons.firstOrNull { it.groupId == groupId && it.publicSourceId == null }
+        AlertDialog(
+            onDismissRequest = { communityShareGroupId = null },
+            title = { Text(stringResource(R.string.buzz_community_share_title)) },
+            text = { Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                subscription?.let { Text(it.name, style = MaterialTheme.typography.titleSmall) }
+                subscription?.let { Text(it.url) }
+                Text(stringResource(R.string.buzz_community_share_warning))
+            } },
+            confirmButton = { TextButton(onClick = {
+                communityShareGroupId = null
+                showCommunity = true
+                subscription?.let { onAction(MainAction.ShareCommunitySubscription(groupId, it.url)) }
+            }, enabled = subscription != null && community.enabled && !community.syncing && !work.busy) {
+                Text(stringResource(R.string.buzz_community_publish))
+            } },
+            dismissButton = { TextButton(onClick = { communityShareGroupId = null }) {
+                Text(stringResource(R.string.action_cancel))
+            } }
+        )
+    }
+
+    communityOfferUrl?.let { url ->
+        val offer = community.offers.firstOrNull { it.url == url }
+        AlertDialog(
+            onDismissRequest = { communityOfferUrl = null },
+            title = { Text(stringResource(R.string.buzz_community_load_title)) },
+            text = { Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                offer?.let { Text(it.name, style = MaterialTheme.typography.titleSmall) }
+                Text(url)
+                Text(stringResource(R.string.buzz_community_load_warning))
+            } },
+            confirmButton = { TextButton(onClick = {
+                offer?.let {
+                    communityOfferUrl = null
+                    showCommunity = false
+                    onAction(MainAction.LoadCommunityList(it.url, it.name))
+                }
+            }, enabled = offer != null && community.enabled && !community.syncing && canEdit) {
+                Text(stringResource(R.string.buzz_community_load))
+            } },
+            dismissButton = { TextButton(onClick = { communityOfferUrl = null }) {
+                Text(stringResource(R.string.action_cancel))
+            } }
+        )
+    }
+
+    if (showStopCommunitySharing) AlertDialog(
+        onDismissRequest = { showStopCommunitySharing = false },
+        title = { Text(stringResource(R.string.buzz_community_stop_sharing)) },
+        text = { Text(stringResource(R.string.buzz_community_stop_warning)) },
+        confirmButton = { TextButton(onClick = {
+            showStopCommunitySharing = false
+            onAction(MainAction.StopCommunitySharing)
+        }, enabled = community.enabled && !community.syncing && !work.busy) {
+            Text(stringResource(R.string.buzz_community_stop_sharing))
+        } },
+        dismissButton = { TextButton(onClick = { showStopCommunitySharing = false }) {
+            Text(stringResource(R.string.action_cancel))
+        } }
+    )
 
     if (showDisconnectForAutoPick) AlertDialog(
         onDismissRequest = { showDisconnectForAutoPick = false },
@@ -205,5 +320,63 @@ fun ZhuzhalkaScreen(
             }
         },
         confirmButton = { TextButton(onClick = { showServers = false }) { Text(stringResource(R.string.action_cancel)) } }
+    )
+}
+
+@Composable
+private fun CommunityDialog(
+    state: CommunityUiState,
+    busy: Boolean,
+    onDismiss: () -> Unit,
+    onToggle: (Boolean) -> Unit,
+    onSync: () -> Unit,
+    onOffer: (String) -> Unit,
+    onStopSharing: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.buzz_community_title)) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(stringResource(R.string.buzz_community_intro))
+                Row(Modifier.fillMaxWidth().toggleable(value = state.enabled,
+                    enabled = state.ready && (state.enabled || (!state.syncing && !busy)), role = Role.Switch,
+                    onValueChange = onToggle).padding(vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(R.string.buzz_community_participate), Modifier.weight(1f).padding(end = 12.dp))
+                    Switch(checked = state.enabled, onCheckedChange = null)
+                }
+                if (!state.ready || state.syncing) {
+                    LinearProgressIndicator(Modifier.fillMaxWidth())
+                    Text(stringResource(R.string.buzz_community_syncing))
+                }
+                if (state.failed) Text(stringResource(R.string.buzz_community_failed), color = MaterialTheme.colorScheme.error)
+                Text(stringResource(R.string.buzz_community_counts, state.peerCount, state.voteCount))
+                Text(stringResource(R.string.buzz_community_hint), style = MaterialTheme.typography.bodySmall)
+                OutlinedButton(onClick = onSync, enabled = state.ready && state.enabled && !state.syncing && !busy,
+                    modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.buzz_community_sync)) }
+                Text(stringResource(R.string.buzz_community_lists), style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.semantics { heading() })
+                if (state.offers.isEmpty()) Text(stringResource(R.string.buzz_community_empty))
+                state.offers.forEach { offer ->
+                    key(offer.url) {
+                        val host = remember(offer.url) { runCatching { URI(offer.url).host }.getOrNull().orEmpty() }
+                        OutlinedButton(onClick = { onOffer(offer.url) },
+                            enabled = state.enabled && !state.syncing && !busy,
+                            modifier = Modifier.fillMaxWidth()) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(offer.name, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                Text(host, style = MaterialTheme.typography.labelSmall)
+                            }
+                        }
+                    }
+                }
+                if (state.ownOfferCount > 0) TextButton(onClick = onStopSharing,
+                    enabled = state.enabled && !state.syncing && !busy) {
+                    Text(stringResource(R.string.buzz_community_stop_sharing))
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_close)) } }
     )
 }

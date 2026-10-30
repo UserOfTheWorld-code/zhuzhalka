@@ -565,4 +565,26 @@
     <string name="sub_info_traffic" translatable="false">%1$s / %2$s</string>
     <string name="sub_info_unlimited">Unlimited</string>
 
+    <string name="buzz_community_title">Zhuzhalka network</string>
+    <string name="buzz_community_enable">Enable participation</string>
+    <string name="buzz_community_consent">The app will publicly share hashes identifying servers from its built-in public catalogs, web-check results, rounded latency, check times and this installation’s public key. Relays also see your IP address. Personal subscriptions and connection credentials are not shared automatically. Other people can copy public data; disabling participation cannot recall those copies.</string>
+    <string name="buzz_community_share_named">Share: %1$s</string>
+    <string name="buzz_community_share_title">Publish subscription?</string>
+    <string name="buzz_community_share_warning">The FULL subscription URL, INCLUDING any access token, will be published to ALL participants and relay operators. They may use the subscription and copy its link. Share only your own subscription and only if its provider permits public sharing. Copies cannot be recalled. Personal subscriptions are never shared automatically.</string>
+    <string name="buzz_community_publish">Publish for everyone</string>
+    <string name="buzz_community_load_title">Load a suggested list?</string>
+    <string name="buzz_community_load_warning">This address was shared by another participant. Its contents are untrusted and may change. Loading it sends a request to that site, which can see your IP address. The list is fetched only after you press Load; servers still require local checks.</string>
+    <string name="buzz_community_load">Load list</string>
+    <string name="buzz_community_stop_sharing">Stop sharing my lists</string>
+    <string name="buzz_community_stop_warning">Your current list offers will be withdrawn from future exchanges. Copies already saved by participants or relays cannot be recalled. This does not delete your local subscriptions.</string>
+    <string name="buzz_community_intro">Exchange ratings and explicitly shared lists through independent public relays. Delivery and availability are not guaranteed.</string>
+    <string name="buzz_community_participate">Participate in the network</string>
+    <string name="buzz_community_syncing">Preparing or exchanging data…</string>
+    <string name="buzz_community_failed">The operation could not be completed. Try again; some data may already have reached a relay.</string>
+    <string name="buzz_community_counts">Public keys: %1$d · Ratings: %2$d</string>
+    <string name="buzz_community_hint">Several keys may belong to one person. Ratings only help order candidates; local checks remain required. Enable participation before sharing a list.</string>
+    <string name="buzz_community_sync">Sync now</string>
+    <string name="buzz_community_lists">Suggested lists</string>
+    <string name="buzz_community_empty">No current list offers.</string>
+
 </resources>

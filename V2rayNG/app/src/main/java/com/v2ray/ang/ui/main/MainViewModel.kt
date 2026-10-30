@@ -27,6 +27,10 @@ import com.v2ray.ang.handler.PublicSourceImportStatus
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.RecentSuccessfulServers
+import com.v2ray.ang.handler.CommunityRanking
+import com.v2ray.ang.handler.CommunityRepository
+import com.v2ray.ang.handler.CommunitySnapshot
+import com.v2ray.ang.handler.CommunityVote
 import com.v2ray.ang.core.ServiceWebProbe
 import com.v2ray.ang.ui.base.BaseViewModel
 import com.v2ray.ang.util.LogUtil
@@ -99,6 +103,12 @@ class MainViewModel(
     private val _zhuzhalkaState = MutableStateFlow(ZhuzhalkaState())
     val zhuzhalkaState = _zhuzhalkaState.asStateFlow()
     private var sourceJob: Job? = null
+    private val communityRepository = CommunityRepository.android()
+    private val _communityState = MutableStateFlow(CommunityUiState())
+    internal val communityState = _communityState.asStateFlow()
+    private var communityJob: Job? = null
+    private var communityOperationId = 0L
+    private var communityVotes: List<CommunityVote> = emptyList()
 
     // ---------- Keyword filtering ----------
     @Volatile
@@ -129,6 +139,7 @@ class MainViewModel(
     init {
         collectServiceEvents()
         setupGroupTab()
+        runCommunityOperation { communityRepository.snapshot() }
     }
 
     private fun collectServiceEvents() {
@@ -297,6 +308,28 @@ class MainViewModel(
                 if (sourceJob?.isActive == true) {
                     _zhuzhalkaState.update { it.copy(cancelling = true) }
                     sourceJob?.cancel()
+                }
+            }
+            is MainAction.SetCommunityEnabled -> if (!action.enabled || (!_zhuzhalkaState.value.busy && !_communityState.value.syncing)) {
+                runCommunityOperation { communityRepository.setEnabled(action.enabled) }
+            }
+            MainAction.SyncCommunity -> if (!_zhuzhalkaState.value.busy && !_communityState.value.syncing) {
+                runCommunityOperation { communityRepository.snapshot() }
+            }
+            is MainAction.ShareCommunitySubscription -> if (!_zhuzhalkaState.value.busy && !_communityState.value.syncing) runCommunityOperation {
+                val subscription = withContext(ioDispatcher) { dataSource.getSubscriptionItem(action.groupId)?.copy() }
+                val offer = requireNotNull(communityOfferForConfirmedSubscription(subscription,
+                    action.expectedUrl, getString(R.string.buzz_own), System.currentTimeMillis()))
+                communityRepository.share(offer)
+            }
+            MainAction.StopCommunitySharing -> if (!_zhuzhalkaState.value.busy && !_communityState.value.syncing) {
+                runCommunityOperation { communityRepository.stopSharing() }
+            }
+            is MainAction.LoadCommunityList -> {
+                // A received offer grants no permission to fetch. Only this explicit UI action does.
+                val offer = _communityState.value.offers.firstOrNull { it.url == action.url && it.name == action.name }
+                if (offer != null && _communityState.value.enabled && !_zhuzhalkaState.value.busy && !uiState.value.isRunning) {
+                    loadZhuzhalkaSource(null, offer.url, customName = offer.name)
                 }
             }
             MainAction.Initialize -> initialize()
@@ -502,7 +535,7 @@ class MainViewModel(
                         subscriptionButtons = dataSource.getSubscriptions().filter { it.guid.isNotEmpty() && it.subscription.url.isNotBlank() }.map { sub ->
                             SubscriptionButton(sub.guid, sub.subscription.remarks,
                                 PublicSourceCatalog.sources.firstOrNull { it.subscriptionUrl == sub.subscription.url }?.id,
-                                sub.subscription.lastUpdated)
+                                sub.subscription.lastUpdated, sub.subscription.url)
                         },
                     )
                 }
@@ -566,14 +599,14 @@ class MainViewModel(
         }
     }
 
-    private fun loadZhuzhalkaSource(sourceId: String?, url: String?, groupId: String? = null, selectAfterLoad: Boolean = true) {
+    private fun loadZhuzhalkaSource(sourceId: String?, url: String?, groupId: String? = null, selectAfterLoad: Boolean = true, customName: String? = null) {
         if (_zhuzhalkaState.value.busy) return
         sourceJob = viewModelScope.launch {
             _zhuzhalkaState.value = ZhuzhalkaState(busy = true, operationSource = sourceId)
             try {
                 val saved = groupId?.let { withContext(ioDispatcher) { dataSource.getSubscriptionItem(it) } }
                 val result = if (sourceId != null) PublicSourceCatalog.addAndRefresh(sourceId)
-                    else PublicSourceCatalog.addCustomAndRefresh(saved?.remarks ?: getString(R.string.buzz_own), saved?.url ?: url.orEmpty())
+                    else PublicSourceCatalog.addCustomAndRefresh(saved?.remarks ?: customName ?: getString(R.string.buzz_own), saved?.url ?: url.orEmpty())
                 _zhuzhalkaState.update { it.copy(messageRes = importResultMessage(result), importedCount = result.configCount) }
                 if ((result.status == PublicSourceImportStatus.SUCCESS || result.status == PublicSourceImportStatus.NO_UNIQUE_SERVERS) && result.subscriptionId != null) {
                     if (selectAfterLoad && result.configCount > 0 && !uiState.value.isRunning) withContext(ioDispatcher) {
@@ -630,7 +663,9 @@ class MainViewModel(
                 val found = pickProgressively(
                     recent = cachedCandidates,
                     loadSaved = {
-                        withContext(ioDispatcher) { loadEligibleAutoCandidates(dataSource, dataSource.getSelectServer()) }
+                        rankCommunityCandidates(withContext(ioDispatcher) {
+                            loadEligibleAutoCandidates(dataSource, dataSource.getSelectServer())
+                        })
                     },
                     sourceIds = PublicSourceCatalog.sources.map { it.id },
                     refreshSource = { sourceId, _ ->
@@ -638,11 +673,12 @@ class MainViewModel(
                         currentCoroutineContext().ensureActive()
                         _zhuzhalkaState.update { it.copy(operationSource = sourceId) }
                         val imported = PublicSourceCatalog.addAndRefresh(sourceId)
-                        withContext(ioDispatcher) {
+                        val refreshed = withContext(ioDispatcher) {
                             imported.subscriptionId?.let { groupId ->
                                 loadEligibleAutoCandidates(dataSource, groupIds = setOf(groupId))
                             }.orEmpty()
                         }
+                        rankCommunityCandidates(refreshed)
                     },
                     resolve = { candidate ->
                         withContext(ioDispatcher) {
@@ -669,6 +705,14 @@ class MainViewModel(
                                 return@attempt false
                             }
                             _zhuzhalkaState.update { it.copy(testedGuid = resolved.guid, probe = result) }
+                            if (_communityState.value.enabled) {
+                                try {
+                                    val key = withContext(ioDispatcher) { communityEndpointKey(dataSource, resolved, testedProfile) }
+                                    if (key != null) communityRepository.record(CommunityVote(key, "", System.currentTimeMillis(),
+                                        result.passed, if (result.passed) CommunityRanking.roundLatencyMillis(result.delays.values.max()) else null))
+                                } catch (cancelled: CancellationException) { throw cancelled }
+                                catch (error: Exception) { logCommunityFailure(error) }
+                            }
                             if (!result.passed) {
                                 recent = recent.filterNot { it.guid == resolved.guid }
                                 persistRecentSuccessfulServers(recent)
@@ -709,8 +753,60 @@ class MainViewModel(
                     if (it.waitingForDisconnect) R.string.buzz_stop_failed else R.string.buzz_load_failed) }
             } finally {
                 _zhuzhalkaState.update { it.copy(busy = false, autoPicking = false, cancelling = false, waitingForDisconnect = false) }
+                // Never supersede a pending opt-out or an explicit sharing operation.
+                if (_communityState.value.enabled && communityJob?.isActive != true) {
+                    runCommunityOperation { communityRepository.snapshot() }
+                }
             }
         }
+    }
+
+    private suspend fun rankCommunityCandidates(candidates: List<AutoCandidate>): List<AutoCandidate> {
+        if (!_communityState.value.enabled || communityVotes.isEmpty()) return candidates
+        val votes = communityVotes
+        val selected = uiState.value.selectedGuid
+        val keys = withContext(ioDispatcher) {
+            snapshotCommunityKeys(dataSource, candidates)
+        }
+        return withContext(defaultDispatcher) {
+            rankCommunityCandidates(candidates, keys, votes, System.currentTimeMillis(), selected)
+        }
+    }
+
+    private fun runCommunityOperation(change: suspend () -> CommunitySnapshot) {
+        val operationId = ++communityOperationId
+        val previous = communityJob
+        previous?.cancel()
+        communityJob = viewModelScope.launch {
+            previous?.join()
+            _communityState.update { it.copy(syncing = true, failed = false) }
+            try {
+                val snapshot = change()
+                currentCoroutineContext().ensureActive()
+                if (operationId != communityOperationId) return@launch
+                communityVotes = snapshot.votes
+                _communityState.value = communityUiState(snapshot, syncing = snapshot.enabled)
+                if (snapshot.enabled) {
+                    val exchanged = communityRepository.sync()
+                    val current = communityRepository.snapshot()
+                    currentCoroutineContext().ensureActive()
+                    if (operationId != communityOperationId) return@launch
+                    communityVotes = current.votes
+                    _communityState.value = communityUiState(current,
+                        failed = exchanged.readableRelays == 0 || (exchanged.publicationAttempted && exchanged.publishedRelays == 0))
+                }
+            } catch (cancelled: CancellationException) { throw cancelled }
+            catch (error: Exception) {
+                logCommunityFailure(error)
+                if (operationId == communityOperationId) _communityState.update { it.copy(ready = true, failed = true) }
+            } finally {
+                if (operationId == communityOperationId) _communityState.update { it.copy(syncing = false) }
+            }
+        }
+    }
+
+    private fun logCommunityFailure(error: Exception) {
+        LogUtil.e(AppConfig.TAG, "Community operation failed", IllegalStateException(error.javaClass.simpleName))
     }
 
     private suspend fun persistRecentSuccessfulServers(entries: List<RecentSuccessfulServer>) {

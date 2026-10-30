@@ -565,4 +565,26 @@
     <string name="sub_info_traffic" translatable="false">%1$s / %2$s</string>
     <string name="sub_info_unlimited">Limitsiz</string>
 
+    <string name="buzz_community_title">Жужалка şəbəkəsi</string>
+    <string name="buzz_community_enable">İştirakı aktivləşdir</string>
+    <string name="buzz_community_consent">Tətbiq daxili açıq kataloqlardakı serverlərin həş identifikatorlarını, veb yoxlama nəticələrini, yuvarlaqlaşdırılmış gecikməni, yoxlama vaxtını və bu quraşdırmanın açıq açarını ictimai paylaşacaq. Relay serverləri IP ünvanınızı da görür. Şəxsi abunəliklər və qoşulma məlumatları avtomatik paylaşılmır. Başqaları açıq məlumatları köçürə bilər; iştirakı söndürmək bu nüsxələri geri qaytarmır.</string>
+    <string name="buzz_community_share_named">Paylaş: %1$s</string>
+    <string name="buzz_community_share_title">Abunəliyi açıq paylaşmaq?</string>
+    <string name="buzz_community_share_warning">Giriş tokeni DAXİL OLMAQLA TAM abunəlik URL-i BÜTÜN iştirakçılara və relay operatorlarına açıq olacaq. Onlar abunəlikdən istifadə edə və keçidi köçürə bilərlər. Yalnız öz abunəliyinizi və yalnız provayder açıq paylaşıma icazə verdikdə paylaşın. Nüsxələri geri çağırmaq mümkün deyil. Şəxsi abunəliklər heç vaxt avtomatik yayımlanmır.</string>
+    <string name="buzz_community_publish">Hamı üçün yayımla</string>
+    <string name="buzz_community_load_title">Təklif olunan siyahı yüklənsin?</string>
+    <string name="buzz_community_load_warning">Bu ünvanı başqa iştirakçı paylaşıb. Məzmun etibarlı sayılmır və dəyişə bilər. Yükləmə zamanı sayta sorğu göndərilir və sayt IP ünvanınızı görə bilər. Siyahı yalnız Yüklə düyməsindən sonra alınır; serverlər yenə yerli yoxlamadan keçməlidir.</string>
+    <string name="buzz_community_load">Siyahını yüklə</string>
+    <string name="buzz_community_stop_sharing">Siyahılarımı paylaşmağı dayandır</string>
+    <string name="buzz_community_stop_warning">Cari siyahı təklifləriniz gələcək mübadilədən çıxarılacaq. İştirakçıların və relay serverlərinin artıq saxladığı nüsxələri geri çağırmaq mümkün deyil. Yerli abunəliklər silinmir.</string>
+    <string name="buzz_community_intro">Müstəqil açıq relay serverləri vasitəsilə qiymətləndirmələri və açıq paylaşılmış siyahıları mübadilə edin. Çatdırılma və əlçatanlığa zəmanət verilmir.</string>
+    <string name="buzz_community_participate">Şəbəkədə iştirak et</string>
+    <string name="buzz_community_syncing">Məlumat hazırlanır və ya mübadilə olunur…</string>
+    <string name="buzz_community_failed">Əməliyyat tamamlana bilmədi. Yenidən sınayın; məlumatın bir hissəsi relay serverinə çatmış ola bilər.</string>
+    <string name="buzz_community_counts">Açıq açarlar: %1$d · Qiymətləndirmələr: %2$d</string>
+    <string name="buzz_community_hint">Bir neçə açar bir şəxsə aid ola bilər. Qiymətləndirmələr yalnız namizədlərin sırasına kömək edir; yerli yoxlamalar zəruridir. Siyahı paylaşmazdan əvvəl iştirakı aktivləşdirin.</string>
+    <string name="buzz_community_sync">İndi sinxronlaşdır</string>
+    <string name="buzz_community_lists">Təklif olunan siyahılar</string>
+    <string name="buzz_community_empty">Hazırda qüvvədə olan siyahı təklifi yoxdur.</string>
+
 </resources>

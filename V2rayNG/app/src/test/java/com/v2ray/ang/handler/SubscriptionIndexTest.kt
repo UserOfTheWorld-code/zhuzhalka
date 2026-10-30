@@ -88,6 +88,48 @@ class SubscriptionIndexTest {
     }
 
     @Test
+    fun communityRecordsAreIndependentAndDoNotChangeProfilesOrSelection() {
+        mainValues["SELECTED_SERVER"] = "keep"
+        profileValues["keep"] = "profile"
+        assertNull(MmkvManager.decodeCommunityIdentityRecord())
+        assertNull(MmkvManager.decodeCommunityStateRecord())
+        MmkvManager.encodeCommunityIdentityRecord("wrapped-key")
+        MmkvManager.encodeCommunityStateRecord("community-state")
+        assertEquals("wrapped-key", MmkvManager.decodeCommunityIdentityRecord())
+        assertEquals("community-state", MmkvManager.decodeCommunityStateRecord())
+        assertEquals("keep", mainValues["SELECTED_SERVER"])
+        assertEquals(mapOf("keep" to "profile"), profileValues)
+    }
+
+    @Test
+    fun failedCommunityStateWriteRestoresPreviousRecord() {
+        mainValues["COMMUNITY_STATE_V1"] = "previous"
+        doAnswer {
+            mainValues["COMMUNITY_STATE_V1"] = "partial-write"
+            false
+        }.whenever(main).encode("COMMUNITY_STATE_V1", "new-state")
+        assertThrows(IllegalStateException::class.java) { MmkvManager.encodeCommunityStateRecord("new-state") }
+        assertEquals("previous", MmkvManager.decodeCommunityStateRecord())
+    }
+
+    @Test
+    fun unverifiedNewCommunityIdentityWriteRemovesPartialRecord() {
+        doAnswer {
+            mainValues["COMMUNITY_IDENTITY_V1"] = "partial-write"
+            true
+        }.whenever(main).encode("COMMUNITY_IDENTITY_V1", "wrapped-key")
+        assertThrows(IllegalStateException::class.java) { MmkvManager.encodeCommunityIdentityRecord("wrapped-key") }
+        assertNull(MmkvManager.decodeCommunityIdentityRecord())
+    }
+
+    @Test
+    fun unchangedCommunityRecordDoesNotRewriteStorage() {
+        mainValues["COMMUNITY_STATE_V1"] = "same-state"
+        MmkvManager.encodeCommunityStateRecord("same-state")
+        verify(main, never()).encode(any<String>(), any<String>())
+    }
+
+    @Test
     fun failedRecentSuccessCacheWriteRestoresOldRecord() {
         val previous = JsonUtil.toJson(listOf(RecentSuccessfulServer("keep", 1000)))
         val replacement = JsonUtil.toJson(listOf(RecentSuccessfulServer("new", 2000)))

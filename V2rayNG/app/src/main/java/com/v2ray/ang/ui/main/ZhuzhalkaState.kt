@@ -81,7 +81,7 @@ internal fun applyZhuzhalkaSelection(
     }
 }
 
-data class SubscriptionButton(val groupId: String, val name: String, val publicSourceId: String?, val lastUpdated: Long)
+data class SubscriptionButton(val groupId: String, val name: String, val publicSourceId: String?, val lastUpdated: Long, val url: String = "")
 
 /** Interleave catalogs so a large first subscription cannot starve the other ones. */
 internal fun interleaveCandidates(groups: List<Pair<String, List<String>>>): List<AutoCandidate> {

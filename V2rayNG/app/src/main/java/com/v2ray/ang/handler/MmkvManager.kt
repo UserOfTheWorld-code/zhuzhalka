@@ -48,6 +48,8 @@ object MmkvManager {
     private const val ID_SETTING = "SETTING"
     private const val KEY_SELECTED_SERVER = "SELECTED_SERVER"
     private const val KEY_RECENT_SUCCESSFUL_SERVERS = "RECENT_SUCCESSFUL_SERVERS"
+    private const val KEY_COMMUNITY_IDENTITY = "COMMUNITY_IDENTITY_V1"
+    private const val KEY_COMMUNITY_STATE = "COMMUNITY_STATE_V1"
     private const val KEY_ANG_CONFIGS = "ANG_CONFIGS"
     private const val KEY_SUB_SERVER_PREFIX = "SUB_SERVERS_"
     private const val KEY_SUB_IDS = "SUB_IDS"
@@ -192,6 +194,35 @@ object MmkvManager {
     fun decodeRecentSuccessfulServers(): List<RecentSuccessfulServer> {
         val json = mainStorage.decodeString(KEY_RECENT_SUCCESSFUL_SERVERS) ?: return emptyList()
         return JsonUtil.fromJsonSafe(json, Array<RecentSuccessfulServer?>::class.java)?.filterNotNull().orEmpty()
+    }
+
+    internal fun decodeCommunityIdentityRecord(): String? = mainStorage.decodeString(KEY_COMMUNITY_IDENTITY)
+
+    internal fun encodeCommunityIdentityRecord(record: String) = encodeCommunityRecord(KEY_COMMUNITY_IDENTITY, record)
+
+    internal fun decodeCommunityStateRecord(): String? = mainStorage.decodeString(KEY_COMMUNITY_STATE)
+
+    internal fun encodeCommunityStateRecord(record: String) = encodeCommunityRecord(KEY_COMMUNITY_STATE, record)
+
+    /** Community records never modify profile data; a failed publication restores its previous record. */
+    private fun encodeCommunityRecord(key: String, record: String) {
+        withProfileIndexLock {
+            val previous = mainStorage.decodeString(key)
+            if (previous == record) return@withProfileIndexLock
+            try {
+                requireStorageWrite(mainStorage.encode(key, record), "Community record write failed")
+                check(mainStorage.decodeString(key) == record) { "Community record could not be verified" }
+            } catch (error: Exception) {
+                try {
+                    if (previous == null) mainStorage.removeValueForKey(key)
+                    else requireStorageWrite(mainStorage.encode(key, previous), "Community record rollback failed")
+                    check(mainStorage.decodeString(key) == previous) { "Community rollback could not be verified" }
+                } catch (rollbackError: Exception) {
+                    error.addSuppressed(rollbackError)
+                }
+                throw error
+            }
+        }
     }
 
     /** A single checked record; failed writes restore the previous cache without changing profiles. */

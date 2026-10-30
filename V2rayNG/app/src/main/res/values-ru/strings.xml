@@ -568,4 +568,26 @@
     <string name="sub_info_open_page">Открыть страницу подписки</string>
     <string name="sub_info_unlimited">Без ограничений</string>
 
+    <string name="buzz_community_title">Сеть Жужалки</string>
+    <string name="buzz_community_enable">Включить участие</string>
+    <string name="buzz_community_consent">Приложение будет публично передавать хеши серверов из встроенных открытых каталогов, результаты веб-проверок, округлённую задержку, время проверки и публичный ключ этой установки. Relay-серверы также видят ваш IP-адрес. Личные подписки и данные для подключения автоматически не передаются. Публичные данные могут скопировать другие люди; отключение участия не удалит эти копии.</string>
+    <string name="buzz_community_share_named">Поделиться: %1$s</string>
+    <string name="buzz_community_share_title">Опубликовать подписку?</string>
+    <string name="buzz_community_share_warning">ПОЛНАЯ ссылка подписки, ВКЛЮЧАЯ токен доступа, будет опубликована для ВСЕХ участников и операторов relay. Они смогут пользоваться подпиской и копировать ссылку. Делитесь только своей подпиской и только если её провайдер разрешает публичное распространение. Отозвать копии невозможно. Личные подписки никогда не публикуются автоматически.</string>
+    <string name="buzz_community_publish">Опубликовать для всех</string>
+    <string name="buzz_community_load_title">Загрузить предложенный список?</string>
+    <string name="buzz_community_load_warning">Этот адрес прислал другой участник. Его содержимому нельзя доверять заранее, и оно может измениться. При загрузке сайт получит запрос и увидит ваш IP-адрес. Список загрузится только после нажатия кнопки; серверы по-прежнему требуют локальной проверки.</string>
+    <string name="buzz_community_load">Загрузить список</string>
+    <string name="buzz_community_stop_sharing">Перестать делиться списками</string>
+    <string name="buzz_community_stop_warning">Ваши текущие предложения списков будут убраны из дальнейшего обмена. Копии, уже сохранённые участниками или relay-серверами, отозвать невозможно. Локальные подписки не удаляются.</string>
+    <string name="buzz_community_intro">Обмен оценками и явно опубликованными списками через независимые публичные relay-серверы. Доставка и доступность не гарантированы.</string>
+    <string name="buzz_community_participate">Участвовать в сети</string>
+    <string name="buzz_community_syncing">Подготавливаем или передаём данные…</string>
+    <string name="buzz_community_failed">Не удалось завершить операцию. Попробуйте снова; часть данных уже могла попасть на relay-сервер.</string>
+    <string name="buzz_community_counts">Публичных ключей: %1$d · Оценок: %2$d</string>
+    <string name="buzz_community_hint">Несколько ключей могут принадлежать одному человеку. Оценки лишь меняют порядок кандидатов; локальные проверки обязательны. Перед публикацией списка включите участие.</string>
+    <string name="buzz_community_sync">Обновить сейчас</string>
+    <string name="buzz_community_lists">Предложения списков</string>
+    <string name="buzz_community_empty">Актуальных предложений списков нет.</string>
+
 </resources>

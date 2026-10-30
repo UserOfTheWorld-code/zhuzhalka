@@ -40,6 +40,11 @@ sealed interface MainAction {
     data object AutoPick : MainAction
     data object DisconnectAndAutoPick : MainAction
     data object CancelAutoPick : MainAction
+    data class SetCommunityEnabled(val enabled: Boolean) : MainAction
+    data object SyncCommunity : MainAction
+    data class ShareCommunitySubscription(val groupId: String, val expectedUrl: String) : MainAction
+    data object StopCommunitySharing : MainAction
+    data class LoadCommunityList(val url: String, val name: String) : MainAction
     data object Initialize : MainAction
     data object RefreshGroups : MainAction
     data object ToggleService : MainAction

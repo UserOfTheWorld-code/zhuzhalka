@@ -562,4 +562,26 @@
     <string name="sub_info_open_page">打开订阅信息页面</string>
     <string name="sub_info_unlimited">无限制</string>
 
+    <string name="buzz_community_title">Жужалка 网络</string>
+    <string name="buzz_community_enable">启用参与</string>
+    <string name="buzz_community_consent">应用将公开分享内置公共目录中服务器的哈希标识、网页检查结果、取整的延迟、检查时间和本次安装的公钥。中继服务器也能看到您的 IP 地址。个人订阅和连接凭据不会自动分享。其他人可能复制公开数据；退出参与无法收回这些副本。</string>
+    <string name="buzz_community_share_named">分享：%1$s</string>
+    <string name="buzz_community_share_title">公开订阅？</string>
+    <string name="buzz_community_share_warning">完整订阅链接（包括访问令牌）将向所有参与者和中继运营者公开。他们可以使用订阅并复制链接。仅分享您自己的订阅，且必须得到服务商允许公开分享。副本无法收回。个人订阅绝不会自动公开。</string>
+    <string name="buzz_community_publish">向所有人公开</string>
+    <string name="buzz_community_load_title">加载推荐列表？</string>
+    <string name="buzz_community_load_warning">此地址由另一位参与者分享。其内容未经信任，且可能改变。加载时会向该网站发送请求，网站能够看到您的 IP 地址。只有点击加载后才会下载列表；服务器仍需通过本地检查。</string>
+    <string name="buzz_community_load">加载列表</string>
+    <string name="buzz_community_stop_sharing">停止分享我的列表</string>
+    <string name="buzz_community_stop_warning">您当前分享的列表将不再出现在后续交换中。参与者或中继已保存的副本无法收回。本地订阅不会被删除。</string>
+    <string name="buzz_community_intro">通过独立的公共中继交换评分和明确公开的列表。不保证送达或可用性。</string>
+    <string name="buzz_community_participate">参与网络</string>
+    <string name="buzz_community_syncing">正在准备或交换数据…</string>
+    <string name="buzz_community_failed">未能完成操作。请重试；部分数据可能已到达中继。</string>
+    <string name="buzz_community_counts">公钥：%1$d · 评分：%2$d</string>
+    <string name="buzz_community_hint">多个密钥可能属于同一人。评分仅帮助排列候选服务器；本地检查仍然必需。分享列表前请先启用参与。</string>
+    <string name="buzz_community_sync">立即同步</string>
+    <string name="buzz_community_lists">推荐列表</string>
+    <string name="buzz_community_empty">目前没有有效的列表推荐。</string>
+
 </resources>
