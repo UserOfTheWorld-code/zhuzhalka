@@ -38,6 +38,7 @@ sealed interface MainAction {
     data class LoadOwnSubscription(val url: String) : MainAction
     data class LoadSavedSubscription(val groupId: String) : MainAction
     data object AutoPick : MainAction
+    data object DisconnectAndAutoPick : MainAction
     data object CancelAutoPick : MainAction
     data object Initialize : MainAction
     data object RefreshGroups : MainAction

@@ -8,8 +8,16 @@
     <string name="buzz_choose_server">Choose server</string>
     <string name="buzz_services_ok">WhatsApp ✓  Telegram ✓  X ✓ — web checks passed</string>
     <string name="buzz_auto">Auto select</string>
-    <string name="buzz_auto_hint">Kiểm tra các máy chủ hoạt động gần đây trước; cập nhật danh sách khi cần. Kiểm tra WhatsApp, Telegram và X mất khoảng 3 phút.</string>
-    <string name="buzz_stop_to_edit">Disconnect to run Auto select. Lists can be refreshed through the current connection.</string>
+    <string name="buzz_auto_hint">Kiểm tra các máy chủ vừa hoạt động và đã lưu trước; chỉ cập nhật nguồn khi cần. Các kiểm tra web WhatsApp, Telegram và X chạy song song.</string>
+    <string name="buzz_stop_to_edit">Tự động chọn sẽ đề nghị ngắt VPN trước khi đổi máy chủ.</string>
+    <string name="buzz_disconnect_pick_title">Chọn máy chủ khác?</string>
+    <string name="buzz_disconnect_pick_text">Trước tiên sẽ ngắt VPN hiện tại, sau đó kiểm tra các máy chủ. Hãy kết nối lại sau khi chọn được máy chủ.</string>
+    <string name="buzz_disconnect_pick_confirm">Ngắt kết nối và chọn máy chủ</string>
+    <string name="buzz_stopping_vpn">Đang ngắt VPN…</string>
+    <string name="buzz_stop_failed">Không xác nhận được VPN đã ngắt. Hãy ngắt VPN rồi thử tự động chọn lại.</string>
+    <string name="buzz_no_compatible">Danh sách này không có máy chủ phù hợp để tự động chọn. Hãy thử nguồn khác.</string>
+    <string name="buzz_profile_unsupported">Hồ sơ này không phù hợp để kết nối ở chế độ đơn giản. Hãy thử tự động chọn hoặc máy chủ khác.</string>
+    <string name="buzz_profile_insecure">Máy chủ này tắt xác minh chứng chỉ, tính năng không còn được hỗ trợ. Tự động chọn sẽ bỏ qua và kiểm tra các máy chủ khác.</string>
     <string name="buzz_cancelling">Stopping after the current check…</string>
     <string name="buzz_progress">Checking server %1$d of %2$d</string>
     <string name="buzz_loading">Downloading server lists…</string>
@@ -25,7 +33,7 @@
     <string name="buzz_cancelled">Stopped. You can select a server manually.</string>
     <string name="buzz_load_failed">Could not load this list. Check your connection or try another source.</string>
     <string name="buzz_checking">Checking WhatsApp, Telegram and X…</string>
-    <string name="buzz_not_found">No tested server passed all three web checks. Try again to search in a different order.</string>
+    <string name="buzz_not_found">Không máy chủ nào đã kiểm tra vượt qua cả ba kiểm tra web. Hãy cập nhật danh sách hoặc thử nguồn khác.</string>
     <string name="buzz_found">A server passed all three web checks. Tap Connect.</string>
     <string name="buzz_loaded">Loaded %1$d profiles. You can connect or run Auto select.</string>
     <string name="buzz_invalid_url">Enter a valid HTTPS subscription URL.</string>

@@ -95,6 +95,15 @@ class MainActivity : HelperBaseComponentActivity() {
             if (restartService) LauncherManager.restartService(this)
         }
 
+    // A separate registered launcher keeps the simple/advanced origin across recreation.
+    // Profiles and settings can change while Android's VPN consent activity is open.
+    private val requestSimpleVpnPermission =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) lifecycleScope.launch {
+                if (mainViewModel.prepareSimpleVpnStart()) startV2Ray()
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mainViewModel.onAction(MainAction.Initialize)
@@ -201,7 +210,10 @@ class MainActivity : HelperBaseComponentActivity() {
             return
         }
         lifecycleScope.launch {
-            if (mainViewModel.prepareSimpleVpnStart()) requestServiceStart()
+            if (mainViewModel.prepareSimpleVpnStart()) {
+                val intent = VpnService.prepare(this@MainActivity)
+                if (intent == null) startV2Ray() else requestSimpleVpnPermission.launch(intent)
+            }
         }
     }
 

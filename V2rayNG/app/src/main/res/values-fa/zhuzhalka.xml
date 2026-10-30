@@ -8,8 +8,16 @@
     <string name="buzz_choose_server">Choose server</string>
     <string name="buzz_services_ok">WhatsApp ✓  Telegram ✓  X ✓ — web checks passed</string>
     <string name="buzz_auto">Auto select</string>
-    <string name="buzz_auto_hint">ابتدا سرورهایی را که اخیراً کار کرده‌اند بررسی می‌کند؛ در صورت نیاز فهرست‌ها را به‌روز می‌کند. بررسی WhatsApp، Telegram و X حدود ۳ دقیقه طول می‌کشد.</string>
-    <string name="buzz_stop_to_edit">Disconnect to run Auto select. Lists can be refreshed through the current connection.</string>
+    <string name="buzz_auto_hint">ابتدا سرورهای اخیراً فعال و ذخیره‌شده را بررسی می‌کند؛ منابع فقط در صورت نیاز به‌روز می‌شوند. بررسی وب WhatsApp، Telegram و X هم‌زمان انجام می‌شود.</string>
+    <string name="buzz_stop_to_edit">انتخاب خودکار برای تغییر سرور پیشنهاد می‌کند VPN را قطع کنید.</string>
+    <string name="buzz_disconnect_pick_title">سرور دیگری انتخاب شود؟</string>
+    <string name="buzz_disconnect_pick_text">ابتدا VPN فعلی را قطع می‌کنیم، سپس سرورها را بررسی می‌کنیم. پس از انتخاب سرور دوباره متصل شوید.</string>
+    <string name="buzz_disconnect_pick_confirm">قطع اتصال و انتخاب سرور</string>
+    <string name="buzz_stopping_vpn">در حال قطع VPN…</string>
+    <string name="buzz_stop_failed">قطع اتصال VPN تأیید نشد. آن را قطع کنید و انتخاب خودکار را دوباره انجام دهید.</string>
+    <string name="buzz_no_compatible">این فهرست سرور مناسبی برای انتخاب خودکار ندارد. منبع دیگری را امتحان کنید.</string>
+    <string name="buzz_profile_unsupported">این پروفایل برای اتصال در حالت ساده مناسب نیست. انتخاب خودکار یا سرور دیگری را امتحان کنید.</string>
+    <string name="buzz_profile_insecure">این سرور بررسی گواهی را غیرفعال کرده است که دیگر پشتیبانی نمی‌شود. انتخاب خودکار از آن عبور می‌کند و سرورهای دیگر را بررسی می‌کند.</string>
     <string name="buzz_cancelling">Stopping after the current check…</string>
     <string name="buzz_progress">Checking server %1$d of %2$d</string>
     <string name="buzz_loading">Downloading server lists…</string>
@@ -25,7 +33,7 @@
     <string name="buzz_cancelled">Stopped. You can select a server manually.</string>
     <string name="buzz_load_failed">Could not load this list. Check your connection or try another source.</string>
     <string name="buzz_checking">Checking WhatsApp, Telegram and X…</string>
-    <string name="buzz_not_found">No tested server passed all three web checks. Try again to search in a different order.</string>
+    <string name="buzz_not_found">هیچ‌یک از سرورهای بررسی‌شده هر سه بررسی وب را با موفقیت نگذرانده است. فهرست را به‌روز کنید یا منبع دیگری را امتحان کنید.</string>
     <string name="buzz_found">A server passed all three web checks. Tap Connect.</string>
     <string name="buzz_loaded">Loaded %1$d profiles. You can connect or run Auto select.</string>
     <string name="buzz_invalid_url">Enter a valid HTTPS subscription URL.</string>

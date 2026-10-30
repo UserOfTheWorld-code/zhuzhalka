@@ -8,8 +8,16 @@
     <string name="buzz_choose_server">Choose server</string>
     <string name="buzz_services_ok">WhatsApp ✓  Telegram ✓  X ✓ — web checks passed</string>
     <string name="buzz_auto">Auto select</string>
-    <string name="buzz_auto_hint">Əvvəlcə son işləyən serverləri yoxlayır; lazım olduqda siyahıları yeniləyir. WhatsApp, Telegram və X yoxlamaları təxminən 3 dəqiqə çəkir.</string>
-    <string name="buzz_stop_to_edit">Disconnect to run Auto select. Lists can be refreshed through the current connection.</string>
+    <string name="buzz_auto_hint">Əvvəlcə son işlək və saxlanmış serverləri yoxlayır; mənbələri yalnız lazım olduqda yeniləyir. WhatsApp, Telegram və X veb yoxlamaları paralel aparılır.</string>
+    <string name="buzz_stop_to_edit">Serveri dəyişmək üçün avtomatik seçim VPN bağlantısını kəsməyi təklif edəcək.</string>
+    <string name="buzz_disconnect_pick_title">Başqa server seçilsin?</string>
+    <string name="buzz_disconnect_pick_text">Əvvəlcə cari VPN bağlantısını kəsəcəyik, sonra serverləri yoxlayacağıq. Server seçildikdən sonra yenidən qoşulun.</string>
+    <string name="buzz_disconnect_pick_confirm">Bağlantını kəs və server seç</string>
+    <string name="buzz_stopping_vpn">VPN bağlantısı kəsilir…</string>
+    <string name="buzz_stop_failed">VPN bağlantısının kəsildiyi təsdiqlənmədi. Bağlantını kəsin və avtomatik seçimi yenidən sınayın.</string>
+    <string name="buzz_no_compatible">Bu siyahıda avtomatik seçim üçün uyğun server yoxdur. Başqa mənbə sınayın.</string>
+    <string name="buzz_profile_unsupported">Bu profil sadə rejimdə qoşulmaq üçün uyğun deyil. Avtomatik seçimi və ya başqa serveri sınayın.</string>
+    <string name="buzz_profile_insecure">Bu server sertifikat yoxlamasını söndürür və bu artıq dəstəklənmir. Avtomatik seçim onu keçib digər serverləri yoxlayacaq.</string>
     <string name="buzz_cancelling">Stopping after the current check…</string>
     <string name="buzz_progress">Checking server %1$d of %2$d</string>
     <string name="buzz_loading">Downloading server lists…</string>
@@ -25,7 +33,7 @@
     <string name="buzz_cancelled">Stopped. You can select a server manually.</string>
     <string name="buzz_load_failed">Could not load this list. Check your connection or try another source.</string>
     <string name="buzz_checking">Checking WhatsApp, Telegram and X…</string>
-    <string name="buzz_not_found">No tested server passed all three web checks. Try again to search in a different order.</string>
+    <string name="buzz_not_found">Yoxlanmış serverlərdən heç biri hər üç veb yoxlamasından keçmədi. Siyahını yeniləyin və ya başqa mənbə sınayın.</string>
     <string name="buzz_found">A server passed all three web checks. Tap Connect.</string>
     <string name="buzz_loaded">Loaded %1$d profiles. You can connect or run Auto select.</string>
     <string name="buzz_invalid_url">Enter a valid HTTPS subscription URL.</string>

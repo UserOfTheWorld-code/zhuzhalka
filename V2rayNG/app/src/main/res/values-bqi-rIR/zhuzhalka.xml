@@ -8,8 +8,16 @@
     <string name="buzz_choose_server">Choose server</string>
     <string name="buzz_services_ok">WhatsApp ✓  Telegram ✓  X ✓ — web checks passed</string>
     <string name="buzz_auto">Auto select</string>
-    <string name="buzz_auto_hint">Checks recent working servers first; refreshes lists if needed. WhatsApp, Telegram and X: about 3 minutes of checks.</string>
-    <string name="buzz_stop_to_edit">Disconnect to run Auto select. Lists can be refreshed through the current connection.</string>
+    <string name="buzz_auto_hint">Checks recent working and saved servers first; refreshes sources only if needed. WhatsApp, Telegram and X web checks run in parallel.</string>
+    <string name="buzz_stop_to_edit">Auto select will ask to disconnect the VPN before changing servers.</string>
+    <string name="buzz_disconnect_pick_title">Find another server?</string>
+    <string name="buzz_disconnect_pick_text">We will disconnect the current VPN, then check servers. Connect again after a server is selected.</string>
+    <string name="buzz_disconnect_pick_confirm">Disconnect and find a server</string>
+    <string name="buzz_stopping_vpn">Disconnecting VPN…</string>
+    <string name="buzz_stop_failed">Could not confirm that the VPN disconnected. Disconnect it and try Auto select again.</string>
+    <string name="buzz_no_compatible">This list has no servers suitable for Auto select. Try another source.</string>
+    <string name="buzz_profile_unsupported">This profile cannot connect in simple mode. Try Auto select or another server.</string>
+    <string name="buzz_profile_insecure">This server disables certificate verification, which is no longer supported. Auto select will skip it and check other servers.</string>
     <string name="buzz_cancelling">Stopping after the current check…</string>
     <string name="buzz_progress">Checking server %1$d of %2$d</string>
     <string name="buzz_loading">Downloading server lists…</string>
@@ -25,7 +33,7 @@
     <string name="buzz_cancelled">Stopped. You can select a server manually.</string>
     <string name="buzz_load_failed">Could not load this list. Check your connection or try another source.</string>
     <string name="buzz_checking">Checking WhatsApp, Telegram and X…</string>
-    <string name="buzz_not_found">No tested server passed all three web checks. Try again to search in a different order.</string>
+    <string name="buzz_not_found">No tested server passed all three web checks. Refresh the list or try another source.</string>
     <string name="buzz_found">A server passed all three web checks. Tap Connect.</string>
     <string name="buzz_loaded">Loaded %1$d profiles. You can connect or run Auto select.</string>
     <string name="buzz_invalid_url">Enter a valid HTTPS subscription URL.</string>

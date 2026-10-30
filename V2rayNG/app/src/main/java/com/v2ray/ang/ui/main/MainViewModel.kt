@@ -292,6 +292,7 @@ class MainViewModel(
             is MainAction.LoadOwnSubscription -> loadZhuzhalkaSource(null, action.url)
             is MainAction.LoadSavedSubscription -> loadZhuzhalkaSource(null, null, action.groupId, selectAfterLoad = false)
             MainAction.AutoPick -> autoPickZhuzhalka()
+            MainAction.DisconnectAndAutoPick -> autoPickZhuzhalka(disconnectFirst = true)
             MainAction.CancelAutoPick -> {
                 if (sourceJob?.isActive == true) {
                     _zhuzhalkaState.update { it.copy(cancelling = true) }
@@ -545,8 +546,13 @@ class MainViewModel(
     // ---------- Business actions (coroutine-based) ----------
     suspend fun prepareSimpleVpnStart(): Boolean {
         if (_zhuzhalkaState.value.busy || uiState.value.isRunning) return false
-        _zhuzhalkaState.update { it.copy(busy = true, messageRes = null) }
+        _zhuzhalkaState.update { it.copy(busy = true, messageRes = null, testedGuid = null, probe = null) }
         return try {
+            val issue = withContext(ioDispatcher) { simpleConnectionIssue(dataSource, dataSource.getSelectServer()) }
+            if (issue != null) {
+                _zhuzhalkaState.update { it.copy(messageRes = issue) }
+                return false
+            }
             withContext(ioDispatcher) { SettingsManager.prepareSimpleVpnMode() }
             !uiState.value.isRunning
         } catch (cancelled: CancellationException) {
@@ -571,7 +577,8 @@ class MainViewModel(
                 _zhuzhalkaState.update { it.copy(messageRes = importResultMessage(result), importedCount = result.configCount) }
                 if ((result.status == PublicSourceImportStatus.SUCCESS || result.status == PublicSourceImportStatus.NO_UNIQUE_SERVERS) && result.subscriptionId != null) {
                     if (selectAfterLoad && result.configCount > 0 && !uiState.value.isRunning) withContext(ioDispatcher) {
-                        val first = dataSource.getServerGuidList(result.subscriptionId).firstOrNull()
+                        val first = loadEligibleAutoCandidates(dataSource, groupIds = setOf(result.subscriptionId)).firstOrNull()?.guid
+                        if (first == null) _zhuzhalkaState.update { it.copy(messageRes = R.string.buzz_no_compatible) }
                         if (first != null && !uiState.value.isRunning) {
                             applyZhuzhalkaSelection(dataSource, result.subscriptionId, first) { group, guid ->
                                 _uiState.update { it.copy(selectedGroupId = group, selectedGuid = guid) }
@@ -593,38 +600,59 @@ class MainViewModel(
         }
     }
 
-    private fun autoPickZhuzhalka() {
-        if (_zhuzhalkaState.value.busy || uiState.value.isRunning) return
+    private fun autoPickZhuzhalka(disconnectFirst: Boolean = false) {
+        if (_zhuzhalkaState.value.busy || (uiState.value.isRunning && !disconnectFirst)) return
         sourceJob = viewModelScope.launch {
-            _zhuzhalkaState.value = ZhuzhalkaState(busy = true, autoPicking = true, messageRes = R.string.buzz_loading)
+            _zhuzhalkaState.value = ZhuzhalkaState(busy = true, autoPicking = true,
+                waitingForDisconnect = uiState.value.isRunning, messageRes = R.string.buzz_loading)
             try {
+                val stopped = awaitAutoPickDisconnect(
+                    running = uiState.value.isRunning,
+                    disconnectConfirmed = disconnectFirst,
+                    runningUpdates = uiState.map { it.isRunning },
+                    requestStop = { dataSource.sendMsg2Service(AppConfig.MSG_STATE_STOP, "") },
+                    hasVpnRoute = { ServiceWebProbe.hasVpnRoute(app) },
+                )
+                if (!stopped) {
+                    _zhuzhalkaState.update { it.copy(messageRes = R.string.buzz_stop_failed) }
+                    return@launch
+                }
+                _zhuzhalkaState.update { it.copy(waitingForDisconnect = false) }
+                // Keep the search opportunity while removing unnecessary work. The budget now
+                // includes catalog downloads; blocking HTTP/JNI calls can finish after it expires.
+                val deadline = SystemClock.elapsedRealtime() + 180_000L
                 var recent = withContext(ioDispatcher) {
                     RecentSuccessfulServers.retain(MmkvManager.decodeRecentSuccessfulServers(), System.currentTimeMillis())
                         .filter { resolveAutoCandidate(dataSource, it.guid) != null }
                 }
                 persistRecentSuccessfulServers(recent)
                 val cachedCandidates = withContext(ioDispatcher) { recent.mapNotNull { resolveAutoCandidate(dataSource, it.guid) } }
-                // One probe budget covers both phases; downloading lists does not consume it.
-                var remainingProbeMillis = 180_000L
-                val found = pickCachedFirst(
+                val found = pickProgressively(
                     recent = cachedCandidates,
-                    refresh = {
+                    loadSaved = {
+                        withContext(ioDispatcher) { loadEligibleAutoCandidates(dataSource, dataSource.getSelectServer()) }
+                    },
+                    sourceIds = PublicSourceCatalog.sources.map { it.id },
+                    refreshSource = { sourceId, _ ->
                         _zhuzhalkaState.update { it.copy(attempted = 0, total = 0, testedGuid = null, probe = null) }
-                        // A failed source does not block the other catalogs or their saved profiles.
-                        for (source in PublicSourceCatalog.sources) {
-                            currentCoroutineContext().ensureActive()
-                            _zhuzhalkaState.update { it.copy(operationSource = source.id) }
-                            PublicSourceCatalog.addAndRefresh(source.id)
-                        }
-                        setupGroupTab(forceRefresh = true).join()
+                        currentCoroutineContext().ensureActive()
+                        _zhuzhalkaState.update { it.copy(operationSource = sourceId) }
+                        val imported = PublicSourceCatalog.addAndRefresh(sourceId)
                         withContext(ioDispatcher) {
-                            interleaveCandidates(dataSource.getSubscriptions()
-                                .filter { it.guid.isNotEmpty() && it.subscription.enabled }
-                                .map { it.guid to dataSource.getServerGuidList(it.guid).shuffled() })
+                            imported.subscriptionId?.let { groupId ->
+                                loadEligibleAutoCandidates(dataSource, groupIds = setOf(groupId))
+                            }.orEmpty()
                         }
                     },
-                    canContinue = { !uiState.value.isRunning && remainingProbeMillis > 0L },
-                    attempt = { candidate, attempted, total ->
+                    resolve = { candidate ->
+                        withContext(ioDispatcher) {
+                            resolveAutoCandidate(dataSource, candidate.guid)?.let { dataSource.decodeServerConfig(it.guid) }
+                        }
+                    },
+                    nowMillis = SystemClock::elapsedRealtime,
+                    deadlineMillis = deadline,
+                    canContinue = { !uiState.value.isRunning },
+                    attempt = attempt@{ candidate, attempted, total, probeDeadline ->
                         val resolved = withContext(ioDispatcher) { resolveAutoCandidate(dataSource, candidate.guid) }
                         if (resolved == null) {
                             recent = recent.filterNot { it.guid == candidate.guid }
@@ -633,13 +661,13 @@ class MainViewModel(
                         } else {
                             _zhuzhalkaState.update { it.copy(attempted = attempted, total = total,
                                 testedGuid = null, probe = null, operationSource = null, messageRes = R.string.buzz_checking) }
-                            val started = SystemClock.elapsedRealtime()
-                            val result = try {
-                                ServiceWebProbe.check(app, resolved.guid, started + remainingProbeMillis)
-                            } finally {
-                                remainingProbeMillis -= SystemClock.elapsedRealtime() - started
-                            }
+                            val testedProfile = withContext(ioDispatcher) { dataSource.decodeServerConfig(resolved.guid) }
+                                ?: return@attempt false
+                            val result = ServiceWebProbe.check(app, resolved.guid, probeDeadline)
                             currentCoroutineContext().ensureActive()
+                            if (withContext(ioDispatcher) { resolveTestedAutoCandidate(dataSource, resolved.guid, testedProfile) } == null) {
+                                return@attempt false
+                            }
                             _zhuzhalkaState.update { it.copy(testedGuid = resolved.guid, probe = result) }
                             if (!result.passed) {
                                 recent = recent.filterNot { it.guid == resolved.guid }
@@ -647,8 +675,8 @@ class MainViewModel(
                                 false
                             } else {
                                 val selected = withContext(ioDispatcher) {
-                                    // Refreshes can replace a GUID while the native checks are running.
-                                    val current = resolveAutoCandidate(dataSource, resolved.guid)
+                                    // Refreshes may replace either the GUID or its connection settings during JNI.
+                                    val current = resolveTestedAutoCandidate(dataSource, resolved.guid, testedProfile)
                                     !uiState.value.isRunning && current != null &&
                                         applyZhuzhalkaSelection(dataSource, current.groupId, current.guid) { group, guid ->
                                             _uiState.update { it.copy(selectedGroupId = group, selectedGuid = guid) }
@@ -656,6 +684,7 @@ class MainViewModel(
                                 }
                                 if (selected) setupGroupTab(forceRefresh = true).join()
                                 val accepted = selected && uiState.value.selectedGuid == resolved.guid
+                                if (!accepted) _zhuzhalkaState.update { it.copy(testedGuid = null, probe = null) }
                                 if (accepted) {
                                     recent = withContext(ioDispatcher) {
                                         RecentSuccessfulServers.remember(recent.filter { resolveAutoCandidate(dataSource, it.guid) != null },
@@ -668,6 +697,7 @@ class MainViewModel(
                         }
                     },
                 )
+                if (!found) setupGroupTab(forceRefresh = true).join()
                 _zhuzhalkaState.update { it.copy(messageRes = if (found) R.string.buzz_found else R.string.buzz_not_found) }
             } catch (cancelled: CancellationException) {
                 _zhuzhalkaState.update { it.copy(messageRes = R.string.buzz_cancelled) }
@@ -675,9 +705,10 @@ class MainViewModel(
                 throw cancelled
             } catch (error: Exception) {
                 LogUtil.e(AppConfig.TAG, "Auto selection failed", IllegalStateException(error.javaClass.simpleName))
-                _zhuzhalkaState.update { it.copy(messageRes = R.string.buzz_load_failed) }
+                _zhuzhalkaState.update { it.copy(messageRes =
+                    if (it.waitingForDisconnect) R.string.buzz_stop_failed else R.string.buzz_load_failed) }
             } finally {
-                _zhuzhalkaState.update { it.copy(busy = false, cancelling = false) }
+                _zhuzhalkaState.update { it.copy(busy = false, autoPicking = false, cancelling = false, waitingForDisconnect = false) }
             }
         }
     }
@@ -1108,7 +1139,7 @@ class MainViewModel(
 
     // ---------- Running state ----------
     private fun updateRunningState(running: Boolean, clearTestingText: Boolean = true) {
-        if (running && _zhuzhalkaState.value.autoPicking) sourceJob?.cancel()
+        if (running && _zhuzhalkaState.value.autoPicking && !_zhuzhalkaState.value.waitingForDisconnect) sourceJob?.cancel()
         if (!running || clearTestingText) testRequests.invalidateCurrent()
         _uiState.update { state ->
             state.copy(

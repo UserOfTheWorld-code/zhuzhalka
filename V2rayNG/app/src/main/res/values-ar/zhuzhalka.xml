@@ -8,8 +8,16 @@
     <string name="buzz_choose_server">Choose server</string>
     <string name="buzz_services_ok">WhatsApp ✓  Telegram ✓  X ✓ — web checks passed</string>
     <string name="buzz_auto">Auto select</string>
-    <string name="buzz_auto_hint">يفحص الخوادم التي عملت مؤخراً أولاً، ويحدّث القوائم عند الحاجة. فحوص WhatsApp وTelegram وX تستغرق نحو 3 دقائق.</string>
-    <string name="buzz_stop_to_edit">Disconnect to run Auto select. Lists can be refreshed through the current connection.</string>
+    <string name="buzz_auto_hint">يفحص أولاً الخوادم التي عملت مؤخراً والخوادم المحفوظة، ويحدّث المصادر عند الحاجة فقط. تُجرى فحوصات الويب لـ WhatsApp وTelegram وX بالتوازي.</string>
+    <string name="buzz_stop_to_edit">سيطلب الاختيار التلقائي فصل VPN قبل تغيير الخادم.</string>
+    <string name="buzz_disconnect_pick_title">هل تريد اختيار خادم آخر؟</string>
+    <string name="buzz_disconnect_pick_text">سنفصل اتصال VPN الحالي، ثم نفحص الخوادم. أعد الاتصال بعد اختيار خادم.</string>
+    <string name="buzz_disconnect_pick_confirm">فصل الاتصال واختيار خادم</string>
+    <string name="buzz_stopping_vpn">جارٍ فصل VPN…</string>
+    <string name="buzz_stop_failed">تعذّر تأكيد فصل VPN. افصله ثم أعد محاولة الاختيار التلقائي.</string>
+    <string name="buzz_no_compatible">لا تحتوي هذه القائمة على خوادم مناسبة للاختيار التلقائي. جرّب مصدراً آخر.</string>
+    <string name="buzz_profile_unsupported">لا يناسب هذا الملف الاتصال في الوضع البسيط. جرّب الاختيار التلقائي أو خادماً آخر.</string>
+    <string name="buzz_profile_insecure">يعطّل هذا الخادم التحقق من الشهادة، وهو أمر لم يعد مدعوماً. سيتخطاه الاختيار التلقائي ويفحص خوادم أخرى.</string>
     <string name="buzz_cancelling">Stopping after the current check…</string>
     <string name="buzz_progress">Checking server %1$d of %2$d</string>
     <string name="buzz_loading">Downloading server lists…</string>
@@ -25,7 +33,7 @@
     <string name="buzz_cancelled">Stopped. You can select a server manually.</string>
     <string name="buzz_load_failed">Could not load this list. Check your connection or try another source.</string>
     <string name="buzz_checking">Checking WhatsApp, Telegram and X…</string>
-    <string name="buzz_not_found">No tested server passed all three web checks. Try again to search in a different order.</string>
+    <string name="buzz_not_found">لم يجتز أي خادم جميع فحوصات الويب الثلاثة. حدّث القائمة أو جرّب مصدراً آخر.</string>
     <string name="buzz_found">A server passed all three web checks. Tap Connect.</string>
     <string name="buzz_loaded">Loaded %1$d profiles. You can connect or run Auto select.</string>
     <string name="buzz_invalid_url">Enter a valid HTTPS subscription URL.</string>

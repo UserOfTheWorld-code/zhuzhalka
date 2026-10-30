@@ -8,8 +8,16 @@
     <string name="buzz_choose_server">Choose server</string>
     <string name="buzz_services_ok">WhatsApp ✓  Telegram ✓  X ✓ — web checks passed</string>
     <string name="buzz_auto">Auto select</string>
-    <string name="buzz_auto_hint">優先檢查最近可用的伺服器；必要時更新清單。WhatsApp、Telegram 和 X 的檢查約需 3 分鐘。</string>
-    <string name="buzz_stop_to_edit">Disconnect to run Auto select. Lists can be refreshed through the current connection.</string>
+    <string name="buzz_auto_hint">優先檢查最近可用及已儲存的伺服器，僅在需要時更新來源。WhatsApp、Telegram 和 X 的網頁檢查會平行執行。</string>
+    <string name="buzz_stop_to_edit">自動選擇會在切換伺服器前提示中斷 VPN。</string>
+    <string name="buzz_disconnect_pick_title">選擇其他伺服器？</string>
+    <string name="buzz_disconnect_pick_text">將先中斷目前的 VPN，再檢查伺服器。選好後請重新連線。</string>
+    <string name="buzz_disconnect_pick_confirm">中斷並選擇伺服器</string>
+    <string name="buzz_stopping_vpn">正在中斷 VPN…</string>
+    <string name="buzz_stop_failed">無法確認 VPN 已中斷。請先中斷，再重試自動選擇。</string>
+    <string name="buzz_no_compatible">此清單沒有適合自動選擇的伺服器。請嘗試其他來源。</string>
+    <string name="buzz_profile_unsupported">此設定檔不適合在簡易模式下連線。請嘗試自動選擇或其他伺服器。</string>
+    <string name="buzz_profile_insecure">此伺服器停用了憑證驗證，此設定已不再受支援。自動選擇會略過它並檢查其他伺服器。</string>
     <string name="buzz_cancelling">Stopping after the current check…</string>
     <string name="buzz_progress">Checking server %1$d of %2$d</string>
     <string name="buzz_loading">Downloading server lists…</string>
@@ -25,7 +33,7 @@
     <string name="buzz_cancelled">Stopped. You can select a server manually.</string>
     <string name="buzz_load_failed">Could not load this list. Check your connection or try another source.</string>
     <string name="buzz_checking">Checking WhatsApp, Telegram and X…</string>
-    <string name="buzz_not_found">No tested server passed all three web checks. Try again to search in a different order.</string>
+    <string name="buzz_not_found">已檢查的伺服器均未通過全部三項網頁檢查。請更新清單或嘗試其他來源。</string>
     <string name="buzz_found">A server passed all three web checks. Tap Connect.</string>
     <string name="buzz_loaded">Loaded %1$d profiles. You can connect or run Auto select.</string>
     <string name="buzz_invalid_url">Enter a valid HTTPS subscription URL.</string>

@@ -8,8 +8,16 @@
     <string name="buzz_choose_server">Выбрать сервер</string>
     <string name="buzz_services_ok">WhatsApp ✓  Telegram ✓  X ✓ — веб-проверки пройдены</string>
     <string name="buzz_auto">Автоподбор</string>
-    <string name="buzz_auto_hint">Сначала проверит недавние рабочие серверы; при необходимости обновит списки. WhatsApp, Telegram и X: около 3 минут проверок.</string>
-    <string name="buzz_stop_to_edit">Для автоподбора отключитесь. Списки можно обновлять через текущее подключение.</string>
+    <string name="buzz_auto_hint">Сначала проверит недавние рабочие и сохранённые серверы; при необходимости обновит источники. Веб-проверки WhatsApp, Telegram и X выполняются параллельно.</string>
+    <string name="buzz_stop_to_edit">Для смены сервера автоподбор предложит отключить VPN.</string>
+    <string name="buzz_disconnect_pick_title">Подобрать другой сервер?</string>
+    <string name="buzz_disconnect_pick_text">Сначала отключим текущий VPN, затем проверим серверы. После выбора подключитесь снова.</string>
+    <string name="buzz_disconnect_pick_confirm">Отключить и подобрать</string>
+    <string name="buzz_stopping_vpn">Отключаем VPN…</string>
+    <string name="buzz_stop_failed">Не удалось дождаться отключения VPN. Отключите его и повторите автоподбор.</string>
+    <string name="buzz_no_compatible">В списке нет подходящих для автоподбора серверов. Попробуйте другой источник.</string>
+    <string name="buzz_profile_unsupported">Этот профиль не подходит для подключения в простом режиме. Попробуйте автоподбор или другой сервер.</string>
+    <string name="buzz_profile_insecure">У этого сервера отключена проверка сертификата, что больше не поддерживается. Автоподбор пропустит его и проверит другие.</string>
     <string name="buzz_cancelling">Остановка после текущей проверки…</string>
     <string name="buzz_progress">Проверка сервера %1$d из %2$d</string>
     <string name="buzz_loading">Загружаем списки серверов…</string>
@@ -25,7 +33,7 @@
     <string name="buzz_cancelled">Остановлено. Можно выбрать сервер вручную.</string>
     <string name="buzz_load_failed">Не удалось загрузить список. Проверьте интернет или выберите другой источник.</string>
     <string name="buzz_checking">Проверяем WhatsApp, Telegram и X…</string>
-    <string name="buzz_not_found">Среди проверенных серверов подходящий не найден. Повторите поиск: порядок серверов изменится.</string>
+    <string name="buzz_not_found">Среди проверенных серверов подходящий не найден. Обновите список или попробуйте другой источник.</string>
     <string name="buzz_found">Сервер прошёл все три веб-проверки. Нажмите «Подключить».</string>
     <string name="buzz_loaded">Загружено профилей: %1$d. Можно подключаться или запустить автоподбор.</string>
     <string name="buzz_invalid_url">Введите действительную HTTPS-ссылку на подписку.</string>

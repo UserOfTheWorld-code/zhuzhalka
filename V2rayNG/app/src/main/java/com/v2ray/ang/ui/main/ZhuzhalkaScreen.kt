@@ -42,6 +42,7 @@ fun ZhuzhalkaScreen(
     val servers by viewModel.serversForGroup(state.selectedGroupId).collectAsStateWithLifecycle()
     var showServers by rememberSaveable { mutableStateOf(false) }
     var showSubscription by rememberSaveable { mutableStateOf(false) }
+    var showDisconnectForAutoPick by rememberSaveable { mutableStateOf(false) }
     var subscriptionUrl by rememberSaveable { mutableStateOf("") }
     val selected = servers.firstOrNull { it.guid == state.selectedGuid }
     val groupName = state.groups.firstOrNull { it.id == state.selectedGroupId }?.remarks.orEmpty()
@@ -89,7 +90,10 @@ fun ZhuzhalkaScreen(
                 Text(stringResource(R.string.buzz_services_ok), style = MaterialTheme.typography.labelLarge,
                     textAlign = TextAlign.Center)
             }
-            Button(onClick = { onAction(MainAction.AutoPick) }, enabled = canEdit,
+            Button(onClick = {
+                if (state.isRunning) showDisconnectForAutoPick = true
+                else onAction(MainAction.AutoPick)
+            }, enabled = !work.busy,
                 modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
                 Text(stringResource(R.string.buzz_auto))
             }
@@ -98,7 +102,9 @@ fun ZhuzhalkaScreen(
             if (state.isRunning) Text(stringResource(R.string.buzz_stop_to_edit), style = MaterialTheme.typography.bodySmall)
             if (work.busy) {
                 LinearProgressIndicator(Modifier.fillMaxWidth())
-                Text(stringResource(if (work.cancelling) R.string.buzz_cancelling else if (work.total > 0) R.string.buzz_progress else R.string.buzz_loading,
+                Text(stringResource(if (work.cancelling) R.string.buzz_cancelling
+                    else if (work.waitingForDisconnect) R.string.buzz_stopping_vpn
+                    else if (work.total > 0) R.string.buzz_progress else R.string.buzz_loading,
                     work.attempted, work.total), style = MaterialTheme.typography.bodyMedium)
                 TextButton(onClick = { onAction(MainAction.CancelAutoPick) }, enabled = !work.cancelling) {
                     Text(stringResource(R.string.action_cancel))
@@ -146,6 +152,19 @@ fun ZhuzhalkaScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
+
+    if (showDisconnectForAutoPick) AlertDialog(
+        onDismissRequest = { showDisconnectForAutoPick = false },
+        title = { Text(stringResource(R.string.buzz_disconnect_pick_title)) },
+        text = { Text(stringResource(R.string.buzz_disconnect_pick_text)) },
+        confirmButton = { TextButton(onClick = {
+            showDisconnectForAutoPick = false
+            onAction(MainAction.DisconnectAndAutoPick)
+        }) { Text(stringResource(R.string.buzz_disconnect_pick_confirm)) } },
+        dismissButton = { TextButton(onClick = { showDisconnectForAutoPick = false }) {
+            Text(stringResource(R.string.action_cancel))
+        } }
+    )
 
     if (showSubscription) AlertDialog(
         onDismissRequest = { showSubscription = false },

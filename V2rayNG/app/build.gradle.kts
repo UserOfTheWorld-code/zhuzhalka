@@ -50,8 +50,8 @@ android {
         minSdk = 24
         targetSdk = 37
         // One monotonic code for all ABIs; exceeds every 0.1 Play Store/F-Droid code.
-        versionCode = 5000200
-        versionName = "0.2.0-beta.1"
+        versionCode = 5000201
+        versionName = "0.2.0-beta.2"
 
         val abiFilterList = (properties["ABI_FILTERS"] as? String)?.split(';')
         splits {
