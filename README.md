@@ -1,90 +1,97 @@
-# v2rayNG
+<div align="center">
 
-A V2Ray client for Android, support [Xray core](https://github.com/XTLS/Xray-core) and [v2fly core](https://github.com/v2fly/v2ray-core)
+# 🐝 Жужалка
 
-[![API](https://img.shields.io/badge/API-24%2B-yellow.svg?style=flat)](https://developer.android.com/about/versions/lollipop)
-[![Kotlin Version](https://img.shields.io/badge/Kotlin-2.4.0-blue.svg)](https://kotlinlang.org)
-[![GitHub commit activity](https://img.shields.io/github/commit-activity/m/2dust/v2rayNG)](https://github.com/2dust/v2rayNG/commits/master)
-[![CodeFactor](https://www.codefactor.io/repository/github/2dust/v2rayng/badge)](https://www.codefactor.io/repository/github/2dust/v2rayng)
-[![GitHub Releases](https://img.shields.io/github/downloads/2dust/v2rayNG/latest/total?logo=github)](https://github.com/2dust/v2rayNG/releases)
-[![Chat on Telegram](https://img.shields.io/badge/Chat%20on-Telegram-brightgreen.svg)](https://t.me/v2rayn)
+**Простой VPN-клиент для Android. Для себя и друзей.**
 
----
+Шесть бесплатных списков · свои подписки · автоподбор
 
-## Download / 下载
+[**Скачать APK для Android**](https://github.com/UserOfTheWorld-code/zhuzhalka/releases/tag/v0.1.0-beta.1)
+&nbsp; · &nbsp;
+[Как пользоваться](#как-пользоваться)
+&nbsp; · &nbsp;
+[Исходники и сборка](#для-разработчиков)
 
-Download the latest release here:
+Android 7.0+ · Kotlin / Compose · GPL-3.0 · версия 0.1.0 beta
 
-在这里下载最新版本：
+</div>
 
-[https://github.com/2dust/v2rayNG/releases](https://github.com/2dust/v2rayNG/releases)
+## Установка
 
-> [!TIP]
-> v2rayNG is the mobile version. For the desktop version, please visit the v2rayN \
-> v2rayNG 是手机版，电脑版请访问 v2rayN
->
-> https://github.com/2dust/v2rayN
+1. Откройте [релиз 0.1.0 beta](https://github.com/UserOfTheWorld-code/zhuzhalka/releases/tag/v0.1.0-beta.1).
+2. Скачайте **Zhuzhalka_0.1.0_universal.apk** — он подходит для всех поддерживаемых архитектур.
+   Для большинства современных телефонов также подойдёт меньший `arm64-v8a.apk`.
+3. Откройте APK на телефоне и разрешите установку из выбранного браузера или файлового менеджера.
+4. Запустите «Жужалку». При первом подключении Android попросит разрешение на VPN.
 
----
+Это первая beta-сборка с debug-подписью для личного тестирования. Установка бесплатна,
+регистрация в приложении не нужна. Файлы APK и контрольные суммы находятся в релизе.
 
-### Geoip and Geosite
+## Как пользоваться
 
-- geoip.dat and geosite.dat files are in `Android/data/com.v2ray.ang/files/assets` (path may differ on some Android device)
-- download feature will get enhanced version in this [repo](https://github.com/Loyalsoldier/v2ray-rules-dat) (note: it needs a working proxy)
-- latest official [domain list](https://github.com/Loyalsoldier/v2ray-rules-dat) and [ip list](https://github.com/Loyalsoldier/geoip) can be imported manually
-- possible to use a third-party dat file in the same folder, like [h2y](https://guide.v2fly.org/routing/sitedata.html#%E5%A4%96%E7%BD%AE%E7%9A%84%E5%9F%9F%E5%90%8D%E6%96%87%E4%BB%B6)
+- **Кнопка списка** загружает источник при первом нажатии, затем открывает сохранённые серверы.
+- **Обновить** получает свежий список. У каждого источника и своей подписки есть отдельная кнопка.
+- **Автоподбор** обновляет источники, чередует их серверы и ищет вариант, прошедший три веб-проверки.
+- **Подключить / Отключить** управляет VPN. Для автоподбора сначала отключитесь.
+- **Моя подписка** принимает HTTPS-ссылку совместимого V2Ray-провайдера.
+- **Ещё** открывает расширенные настройки v2rayNG.
 
-More in our [wiki](https://github.com/2dust/v2rayNG/wiki)
+Автоподбор проверяет HTTPS-доступ к `web.whatsapp.com`, `web.telegram.org` и `x.com`
+через каждый проверяемый профиль. Это проверка веб-доступа: она не доказывает работу сообщений,
+входа и звонков. Поиск занимает около трёх минут после обновления списков; текущий запрос
+может завершиться позже. Неудачный поиск можно повторить — порядок серверов изменится.
 
-### Geoip 与 Geosite
+## Бесплатные источники
 
-- geoip.dat 和 geosite.dat 文件位于 `Android/data/com.v2ray.ang/files/assets`（部分设备路径可能不同）
-- 下载功能将获取该 [仓库](https://github.com/Loyalsoldier/v2ray-rules-dat) 中的增强版本（注意：此功能需要一个可用的代理）
-- 最新官方 [域名列表](https://github.com/Loyalsoldier/v2ray-rules-dat) 和 [IP 列表](https://github.com/Loyalsoldier/geoip) 可手动导入
-- 也可在同一文件夹中使用第三方 dat 文件，例如 [h2y](https://guide.v2fly.org/routing/sitedata.html#%E5%A4%96%E7%BD%AE%E7%9A%84%E5%9F%9F%E5%90%8D%E6%96%87%E4%BB%B6)
+| Кнопка | Публикатор |
+|---|---|
+| Au1rxx | [Free VPN Subscriptions](https://github.com/Au1rxx/free-vpn-subscriptions) |
+| Eternity | [V2RayAggregator](https://github.com/mahdibland/V2RayAggregator) |
+| VPNBook | [Официальные Outline / Shadowsocks-конфигурации](https://www.vpnbook.com/freevpn/outline-vpn) |
+| 0xRadikal · Top100 | [Free-v2ray-Configs](https://github.com/0xRadikal/Free-v2ray-Configs) |
+| Matin · Super | [v2ray-configs](https://github.com/MatinGhanbari/v2ray-configs) |
+| NodesRadar | [NodesRadar](https://github.com/nodesradar/nodesradar-en) |
 
-更多内容请见我们的 [wiki](https://github.com/2dust/v2rayNG/wiki)
+В APK хранятся адреса источников. Конфигурации загружаются при обновлении;
+дубли VPNBook, уже присутствующие в других загруженных списках, исключаются из его списка.
+Подробности происхождения, лицензий и проверки — в [SOURCES.md](SOURCES.md).
 
----
+Серверы принадлежат сторонним операторам. Их доступность, скорость и приватность
+не гарантируются. У VPNBook есть журналы соединений. Приложение бесплатно;
+стоимость собственной сторонней подписки определяет её провайдер.
 
-## Development guide / 开发指南
+## Для разработчиков
 
-### Note
+«Жужалка» — открытый форк [v2rayNG](https://github.com/2dust/v2rayNG) на Xray.
+Новый интерфейс и операции разделены по существующим слоям проекта:
 
-- Android project under the V2rayNG folder can be compiled directly in Android Studio, or using the Gradle wrapper. But the v2ray core inside the aar is (probably) outdated.
-- The aar can be compiled from the Golang project [AndroidLibV2rayLite](https://github.com/2dust/AndroidLibV2rayLite) or [AndroidLibXrayLite](https://github.com/2dust/AndroidLibXrayLite). For a quick start, read the guides for [Go Mobile](https://github.com/golang/go/wiki/Mobile) and [Makefiles for Go Developers](https://tutorialedge.net/golang/makefiles-for-go-developers/).
-- v2rayNG can run on Android Emulators. For WSA, VPN permission needs to be granted via `appops set [package name] ACTIVATE_VPN allow`.
+| Часть | Файл / каталог |
+|---|---|
+| Простой экран Compose | `ui/main/ZhuzhalkaScreen.kt` |
+| Состояние и действия | `ui/main/MainViewModel.kt`, `ZhuzhalkaState.kt` |
+| Каталог и импорт | `handler/PublicSourceCatalog.kt` |
+| Официальный адаптер VPNBook | `handler/OfficialVpnBookSource.kt` |
+| Веб-проверки через Xray | `core/ServiceWebProbe.kt` |
+| Хранение | существующие `MmkvManager` и `SettingsManager` |
 
-### 提示
+Пути в таблице относятся к `V2rayNG/app/src/main/java/com/v2ray/ang/`.
+Детерминированная логика проверяется JUnit-тестами. Сетевые операции выполняются вне главного
+потока, результаты сохранения читаются обратно, неудачное обновление сохраняет прежние профили.
 
-- V2rayNG 文件夹下的 Android 项目可直接在 Android Studio 中编译，或使用 Gradle wrapper 编译。但 aar 内置的 v2ray core（可能）已过时。
-- aar 可由 Golang 项目 [AndroidLibV2rayLite](https://github.com/2dust/AndroidLibV2rayLite) 或 [AndroidLibXrayLite](https://github.com/2dust/AndroidLibXrayLite) 编译而成。快速入门可参考 [Go Mobile](https://github.com/golang/go/wiki/Mobile) 指南和 [Makefiles for Go Developers](https://tutorialedge.net/golang/makefiles-for-go-developers/)。
-- v2rayNG 可在 Android 模拟器上运行。对于 WSA，需要通过 `appops set [package name] ACTIVATE_VPN allow` 授予 VPN 权限。
-
----
-
-
-## GPG Verification / GPG 签名校验
-
-Release files are signed with GPG to verify authenticity and integrity, helping prevent mirror, ISP, or CDN hijacking.
-
-发布文件已使用 GPG 签名，可用于校验文件真实性与完整性，预防镜像站、运营商或 CDN 劫持。
-
-### Fingerprint / 公钥指纹
-
-```text
-7694 5E9F 3E9A 168F 8070 F195 805D 661C
-134D FAF6 8903 C199 463C 31E5 AE90 3AE0
+```sh
+git clone --recurse-submodules https://github.com/UserOfTheWorld-code/zhuzhalka.git
+cd zhuzhalka
+bash scripts/build-android.sh
 ```
 
----
+Скрипт требует подготовленные JDK и Android SDK/NDK. Версии и подготовка окружения заданы
+в [workflow](.github/workflows/build.yml). Он проверяет закреплённое native-ядро,
+собирает HEV, запускает тесты и собирает обе debug-версии. Инструкции для Windows,
+ограничения проверок и детали — в [README.zhuzhalka.md](README.zhuzhalka.md).
 
-## Community / 社区
+## Лицензия и благодарности
 
-Telegram Group / Telegram 群组：
-
-[https://t.me/v2rayN](https://t.me/v2rayN)
-
-Telegram Channel / Telegram 频道：
-
-[https://t.me/github_2dust](https://t.me/github_2dust)
+[GNU GPL v3](LICENSE). Сохраняйте лицензию и передавайте соответствующие исходники вместе с APK.
+Спасибо авторам **v2rayNG**, **Xray**, **AndroidLibXrayLite** и **hev-socks5-tunnel**.
+Это самостоятельная модифицированная сборка; она не является официальным релизом v2rayNG.
+Исходное руководство сохранено в [README.upstream.md](README.upstream.md).

@@ -7,7 +7,8 @@ data class SubscriptionUpdateResult(
     val configCount: Int = 0,      // Total configs updated
     val successCount: Int = 0,     // Subscriptions updated successfully
     val failureCount: Int = 0,     // Subscriptions failed to update
-    val skipCount: Int = 0         // Subscriptions skipped (disabled)
+    val skipCount: Int = 0,        // Subscriptions skipped (disabled)
+    val duplicateCount: Int = 0   // Official-provider profiles already present in other groups
 ) {
     /**
      * Combine two results by adding their counts
@@ -17,7 +18,8 @@ data class SubscriptionUpdateResult(
             configCount = this.configCount + other.configCount,
             successCount = this.successCount + other.successCount,
             failureCount = this.failureCount + other.failureCount,
-            skipCount = this.skipCount + other.skipCount
+            skipCount = this.skipCount + other.skipCount,
+            duplicateCount = this.duplicateCount + other.duplicateCount,
         )
     }
 }

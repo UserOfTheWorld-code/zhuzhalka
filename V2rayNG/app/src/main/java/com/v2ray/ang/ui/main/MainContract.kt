@@ -26,13 +26,19 @@ data class MainUiState(
     val locateTarget: LocateTarget? = null,
     val confirmRemove: Boolean = false,
     val doubleColumnDisplay: Boolean = false,
-    val shareQRCodeBitmap: android.graphics.Bitmap? = null
+    val shareQRCodeBitmap: android.graphics.Bitmap? = null,
+    val subscriptionButtons: List<SubscriptionButton> = emptyList()
 )
 
 /**
  * All possible user interaction intents
  */
 sealed interface MainAction {
+    data class LoadPublicSource(val sourceId: String, val selectAfterLoad: Boolean = true) : MainAction
+    data class LoadOwnSubscription(val url: String) : MainAction
+    data class LoadSavedSubscription(val groupId: String) : MainAction
+    data object AutoPick : MainAction
+    data object CancelAutoPick : MainAction
     data object Initialize : MainAction
     data object RefreshGroups : MainAction
     data object ToggleService : MainAction

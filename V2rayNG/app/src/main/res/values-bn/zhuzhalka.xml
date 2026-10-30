@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="buzz_more">More</string>
+    <string name="buzz_connected">Connected</string>
+    <string name="buzz_disconnected">Disconnected</string>
+    <string name="buzz_connect">Connect</string>
+    <string name="buzz_disconnect">Disconnect</string>
+    <string name="buzz_choose_server">Choose server</string>
+    <string name="buzz_services_ok">WhatsApp ✓  Telegram ✓  X ✓ — web checks passed</string>
+    <string name="buzz_auto">Auto select</string>
+    <string name="buzz_auto_hint">Refresh lists and check WhatsApp, Telegram and X. Search lasts about 3 minutes plus the current check.</string>
+    <string name="buzz_stop_to_edit">Disconnect to run Auto select. Lists can be refreshed through the current connection.</string>
+    <string name="buzz_cancelling">Stopping after the current check…</string>
+    <string name="buzz_progress">Checking server %1$d of %2$d</string>
+    <string name="buzz_loading">Downloading server lists…</string>
+    <string name="buzz_public_lists">Free server lists</string>
+    <string name="buzz_refresh">Refresh</string>
+    <string name="buzz_own">My subscription</string>
+    <string name="buzz_manage">Manage subscriptions</string>
+    <string name="buzz_public_note">Public servers are run by third parties. Availability and privacy are not guaranteed. Web checks do not verify messages or calls.</string>
+    <string name="buzz_credit">Free and open source · based on v2rayNG / Xray</string>
+    <string name="buzz_url_hint">Paste an HTTPS subscription URL in V2Ray format. Your subscription stays on this device.</string>
+    <string name="buzz_url">Subscription URL</string>
+    <string name="buzz_add">Add and download</string>
+    <string name="buzz_cancelled">Stopped. You can select a server manually.</string>
+    <string name="buzz_load_failed">Could not load this list. Check your connection or try another source.</string>
+    <string name="buzz_checking">Checking WhatsApp, Telegram and X…</string>
+    <string name="buzz_not_found">No tested server passed all three web checks. Try again to search in a different order.</string>
+    <string name="buzz_found">A server passed all three web checks. Tap Connect.</string>
+    <string name="buzz_loaded">Loaded %1$d profiles. You can connect or run Auto select.</string>
+    <string name="buzz_invalid_url">Enter a valid HTTPS subscription URL.</string>
+    <string name="buzz_disabled_source">This subscription is disabled. Enable it in Manage subscriptions.</string>
+    <string name="buzz_no_unique">All servers from this source already exist in other lists.</string>
+</resources>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="buzz_more">Ещё</string>
+    <string name="buzz_connected">Подключено</string>
+    <string name="buzz_disconnected">Нет подключения</string>
+    <string name="buzz_connect">Подключить</string>
+    <string name="buzz_disconnect">Отключить</string>
+    <string name="buzz_choose_server">Выбрать сервер</string>
+    <string name="buzz_services_ok">WhatsApp ✓  Telegram ✓  X ✓ — веб-проверки пройдены</string>
+    <string name="buzz_auto">Автоподбор</string>
+    <string name="buzz_auto_hint">Обновит списки и проверит WhatsApp, Telegram и X. Поиск — около 3 минут, затем завершится текущая проверка.</string>
+    <string name="buzz_stop_to_edit">Для автоподбора отключитесь. Списки можно обновлять через текущее подключение.</string>
+    <string name="buzz_cancelling">Остановка после текущей проверки…</string>
+    <string name="buzz_progress">Проверка сервера %1$d из %2$d</string>
+    <string name="buzz_loading">Загружаем списки серверов…</string>
+    <string name="buzz_public_lists">Бесплатные списки</string>
+    <string name="buzz_refresh">Обновить</string>
+    <string name="buzz_own">Моя подписка</string>
+    <string name="buzz_manage">Управление подписками</string>
+    <string name="buzz_public_note">Серверами управляют сторонние владельцы. Доступность и приватность не гарантированы. Веб-проверки не проверяют сообщения и звонки.</string>
+    <string name="buzz_credit">Бесплатно · открытый код v2rayNG / Xray</string>
+    <string name="buzz_url_hint">Вставьте HTTPS-ссылку на подписку в формате V2Ray. Подписка хранится на этом устройстве.</string>
+    <string name="buzz_url">Ссылка на подписку</string>
+    <string name="buzz_add">Добавить и загрузить</string>
+    <string name="buzz_cancelled">Остановлено. Можно выбрать сервер вручную.</string>
+    <string name="buzz_load_failed">Не удалось загрузить список. Проверьте интернет или выберите другой источник.</string>
+    <string name="buzz_checking">Проверяем WhatsApp, Telegram и X…</string>
+    <string name="buzz_not_found">Среди проверенных серверов подходящий не найден. Повторите поиск: порядок серверов изменится.</string>
+    <string name="buzz_found">Сервер прошёл все три веб-проверки. Нажмите «Подключить».</string>
+    <string name="buzz_loaded">Загружено профилей: %1$d. Можно подключаться или запустить автоподбор.</string>
+    <string name="buzz_invalid_url">Введите действительную HTTPS-ссылку на подписку.</string>
+    <string name="buzz_disabled_source">Подписка выключена. Включите её в управлении подписками.</string>
+    <string name="buzz_no_unique">Все серверы этого источника уже есть в других списках.</string>
+</resources>

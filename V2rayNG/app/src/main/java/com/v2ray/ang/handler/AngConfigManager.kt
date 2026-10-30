@@ -484,7 +484,7 @@ object AngConfigManager {
                     return SubscriptionUpdateResult(failureCount = 1)
                 }
             }
-            LogUtil.i(AppConfig.TAG, url)
+            LogUtil.i(AppConfig.TAG, "Updating subscription ${it.guid}")
             val userAgent = it.subscription.userAgent
             val requestHeaders = it.subscription.requestHeaders
             val proxyUsername = SettingsManager.getSocksUsername()
@@ -516,7 +516,7 @@ object AngConfigManager {
                     captureUsageInfo
                 )
             } catch (e: Exception) {
-                LogUtil.e(AppConfig.ANG_PACKAGE, "Update subscription: proxy not ready or other error", e)
+                logSubscriptionFailure(it.guid, "proxy download", e)
                 ""
             }
             if (configText.isEmpty()) {
@@ -530,7 +530,7 @@ object AngConfigManager {
                         captureUsageInfo
                     )
                 } catch (e: Exception) {
-                    LogUtil.e(AppConfig.TAG, "Update subscription: Failed to get URL content with user agent", e)
+                    logSubscriptionFailure(it.guid, "direct download", e)
                     ""
                 }
             }
@@ -538,24 +538,97 @@ object AngConfigManager {
                 return SubscriptionUpdateResult(failureCount = 1)
             }
 
-            val count = parseConfigViaSub(configText, it.guid, false)
-            if (count > 0) {
+            var duplicateCount = 0
+            val count = if (OfficialVpnBookSource.matches(url)) {
+                val candidates = OfficialVpnBookSource.extractUris(configText).mapNotNull { link ->
+                    try {
+                        ShadowsocksFmt.parse(link)?.takeIf { profile ->
+                            !profile.method.isNullOrBlank() && !profile.password.isNullOrEmpty()
+                        }?.apply {
+                            remarks = OfficialVpnBookSource.displayName(this)
+                            subscriptionId = it.guid
+                            description = generateDescription(this)
+                        }
+                    } catch (error: Exception) {
+                        logSubscriptionFailure(it.guid, "official provider parsing", error)
+                        null
+                    }
+                }
+                // An unavailable page or changed HTML must never erase the last usable group.
+                if (candidates.isEmpty()) return SubscriptionUpdateResult(failureCount = 1)
+                val otherProfiles = MmkvManager.decodeAllServerList().mapNotNull(MmkvManager::decodeServerConfig)
+                    .filter { profile -> profile.subscriptionId != it.guid }
+                val unique = OfficialVpnBookSource.keepUnique(candidates, otherProfiles)
+                duplicateCount = unique.duplicateCount
+                if (unique.profiles.isEmpty()) {
+                    MmkvManager.clearSubscriptionProfileIndex(it.guid)
+                } else {
+                    commitProfiles(unique.profiles.map(::ParsedProfile), it.guid, append = false)
+                }
+                unique.profiles.size
+            } else {
+                parseConfigViaSub(configText, it.guid, false)
+            }
+            if (count > 0 || duplicateCount > 0) {
                 it.subscription.lastUpdated = System.currentTimeMillis()
                 // Replaced on every successful update so the box disappears if the panel stops sending the headers.
                 it.subscription.usageInfo = usageInfo
                 MmkvManager.encodeSubscription(it.guid, it.subscription)
-                LogUtil.i(AppConfig.TAG, "Subscription updated: ${it.subscription.remarks}, $count configs")
+                if (!OfficialVpnBookSource.matches(url)) reconcileOfficialProviderGroups()
+                LogUtil.i(AppConfig.TAG, "Subscription updated: ${it.guid}, $count configs")
                 return SubscriptionUpdateResult(
                     configCount = count,
-                    successCount = 1
+                    successCount = 1,
+                    duplicateCount = duplicateCount,
                 )
             } else {
                 // Got response but no valid configs parsed
                 return SubscriptionUpdateResult(failureCount = 1)
             }
         } catch (e: Exception) {
-            LogUtil.e(AppConfig.TAG, "Failed to update config via subscription", e)
+            logSubscriptionFailure(it.guid, "update", e)
             return SubscriptionUpdateResult(failureCount = 1)
+        }
+    }
+
+    private fun logSubscriptionFailure(subscriptionId: String, operation: String, error: Exception) {
+        // URL tokens and authentication headers may appear in HTTP exception messages or causes.
+        LogUtil.e(
+            AppConfig.TAG,
+            "Subscription $subscriptionId $operation failed",
+            IllegalStateException(error.javaClass.simpleName),
+        )
+    }
+
+    private fun reconcileOfficialProviderGroups() {
+        val changedGroups = mutableListOf<Pair<String, List<String>>>()
+        try {
+            MmkvManager.decodeSubscriptions()
+                .filter { OfficialVpnBookSource.matches(it.subscription.url) }
+                .forEach { provider ->
+                    val indexedIds = MmkvManager.decodeServerList(provider.guid)
+                    val indexedProfiles = indexedIds.mapNotNull { id ->
+                        MmkvManager.decodeServerConfig(id)?.let { id to it }
+                    }.toMap()
+                    val otherProfiles = MmkvManager.decodeAllServerList().mapNotNull(MmkvManager::decodeServerConfig)
+                        .filter { it.subscriptionId != provider.guid }
+                    val uniqueIds = OfficialVpnBookSource.uniqueProfileIds(indexedProfiles, otherProfiles).toSet()
+                    val retainedIds = indexedIds.filter { it !in indexedProfiles || it in uniqueIds }
+                    if (retainedIds != indexedIds) {
+                        MmkvManager.replaceSubscriptionProfileIndex(provider.guid, retainedIds)
+                        changedGroups.add(provider.guid to indexedIds)
+                    }
+                }
+        } catch (error: Exception) {
+            changedGroups.asReversed().forEach { (id, previousIds) ->
+                try {
+                    MmkvManager.replaceSubscriptionProfileIndex(id, previousIds)
+                } catch (rollbackError: Exception) {
+                    logSubscriptionFailure(id, "provider reconciliation rollback", rollbackError)
+                    error.addSuppressed(rollbackError)
+                }
+            }
+            throw error
         }
     }
 

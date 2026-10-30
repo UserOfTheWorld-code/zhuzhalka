@@ -9,6 +9,10 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.lifecycleScope
 import com.v2ray.ang.AngApplication
 import com.v2ray.ang.AppConfig
@@ -100,7 +104,23 @@ class MainActivity : HelperBaseComponentActivity() {
 
     @Composable
     override fun ScreenContent() {
-        BackHandler { moveTaskToBack(false) }
+        var advanced by rememberSaveable { mutableStateOf(false) }
+        BackHandler { if (advanced) advanced = false else moveTaskToBack(false) }
+        if (!advanced) {
+            ZhuzhalkaScreen(
+                viewModel = mainViewModel,
+                onAction = { action ->
+                    when (action) {
+                        MainAction.ToggleService -> handleSimpleFabAction()
+                        is MainAction.SelectServer -> setSelectServer(action.guid)
+                        else -> mainViewModel.onAction(action)
+                    }
+                },
+                onSubscriptions = { navigateTo(MainDestination.Subscriptions) },
+                onAdvanced = { advanced = true }
+            )
+            return
+        }
         MainScreen(
             mainViewModel = mainViewModel,
             onAction = { action ->
@@ -171,6 +191,16 @@ class MainActivity : HelperBaseComponentActivity() {
             LauncherManager.stopService(this)
         } else {
             requestServiceStart()
+        }
+    }
+
+    private fun handleSimpleFabAction() {
+        if (mainViewModel.uiState.value.isRunning) {
+            LauncherManager.stopService(this)
+            return
+        }
+        lifecycleScope.launch {
+            if (mainViewModel.prepareSimpleVpnStart()) requestServiceStart()
         }
     }
 

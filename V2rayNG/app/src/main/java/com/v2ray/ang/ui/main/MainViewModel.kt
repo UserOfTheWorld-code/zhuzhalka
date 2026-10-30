@@ -1,6 +1,7 @@
 package com.v2ray.ang.ui.main
 
 import android.app.Application
+import android.os.SystemClock
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -19,6 +20,11 @@ import com.v2ray.ang.extension.isComplexType
 import com.v2ray.ang.extension.matchesPattern
 import com.v2ray.ang.extension.moveItem
 import com.v2ray.ang.handler.SubscriptionInfoParser
+import com.v2ray.ang.handler.PublicSourceCatalog
+import com.v2ray.ang.handler.PublicSourceImportResult
+import com.v2ray.ang.handler.PublicSourceImportStatus
+import com.v2ray.ang.handler.SettingsManager
+import com.v2ray.ang.core.ServiceWebProbe
 import com.v2ray.ang.ui.base.BaseViewModel
 import com.v2ray.ang.util.LogUtil
 import kotlinx.coroutines.CancellationException
@@ -86,6 +92,10 @@ class MainViewModel(
         )
     )
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
+
+    private val _zhuzhalkaState = MutableStateFlow(ZhuzhalkaState())
+    val zhuzhalkaState = _zhuzhalkaState.asStateFlow()
+    private var sourceJob: Job? = null
 
     // ---------- Keyword filtering ----------
     @Volatile
@@ -275,6 +285,16 @@ class MainViewModel(
     // ---------- Action handler ----------
     fun onAction(action: MainAction) {
         when (action) {
+            is MainAction.LoadPublicSource -> loadZhuzhalkaSource(action.sourceId, null, selectAfterLoad = action.selectAfterLoad)
+            is MainAction.LoadOwnSubscription -> loadZhuzhalkaSource(null, action.url)
+            is MainAction.LoadSavedSubscription -> loadZhuzhalkaSource(null, null, action.groupId, selectAfterLoad = false)
+            MainAction.AutoPick -> autoPickZhuzhalka()
+            MainAction.CancelAutoPick -> {
+                if (sourceJob?.isActive == true) {
+                    _zhuzhalkaState.update { it.copy(cancelling = true) }
+                    sourceJob?.cancel()
+                }
+            }
             MainAction.Initialize -> initialize()
             MainAction.RefreshGroups -> setupGroupTab(forceRefresh = true)
             MainAction.TestAllServers -> testAllRealPing(true)
@@ -475,6 +495,11 @@ class MainViewModel(
                         groups = groups,
                         selectedGroupId = selectedGroup,
                         selectedGuid = dataSource.getSelectServer(),
+                        subscriptionButtons = dataSource.getSubscriptions().filter { it.guid.isNotEmpty() && it.subscription.url.isNotBlank() }.map { sub ->
+                            SubscriptionButton(sub.guid, sub.subscription.remarks,
+                                PublicSourceCatalog.sources.firstOrNull { it.subscriptionUrl == sub.subscription.url }?.id,
+                                sub.subscription.lastUpdated)
+                        },
                     )
                 }
                 groups.forEach { mutableServerGroupState(it.id) }
@@ -515,6 +540,112 @@ class MainViewModel(
     }
 
     // ---------- Business actions (coroutine-based) ----------
+    suspend fun prepareSimpleVpnStart(): Boolean {
+        if (_zhuzhalkaState.value.busy || uiState.value.isRunning) return false
+        _zhuzhalkaState.update { it.copy(busy = true, messageRes = null) }
+        return try {
+            withContext(ioDispatcher) { SettingsManager.prepareSimpleVpnMode() }
+            !uiState.value.isRunning
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (error: Exception) {
+            LogUtil.e(AppConfig.TAG, "Simple VPN mode preparation failed", IllegalStateException(error.javaClass.simpleName))
+            _zhuzhalkaState.update { it.copy(messageRes = R.string.toast_services_failure) }
+            false
+        } finally {
+            _zhuzhalkaState.update { it.copy(busy = false) }
+        }
+    }
+
+    private fun loadZhuzhalkaSource(sourceId: String?, url: String?, groupId: String? = null, selectAfterLoad: Boolean = true) {
+        if (_zhuzhalkaState.value.busy) return
+        sourceJob = viewModelScope.launch {
+            _zhuzhalkaState.value = ZhuzhalkaState(busy = true, operationSource = sourceId)
+            try {
+                val saved = groupId?.let { withContext(ioDispatcher) { dataSource.getSubscriptionItem(it) } }
+                val result = if (sourceId != null) PublicSourceCatalog.addAndRefresh(sourceId)
+                    else PublicSourceCatalog.addCustomAndRefresh(saved?.remarks ?: getString(R.string.buzz_own), saved?.url ?: url.orEmpty())
+                _zhuzhalkaState.update { it.copy(messageRes = importResultMessage(result), importedCount = result.configCount) }
+                if ((result.status == PublicSourceImportStatus.SUCCESS || result.status == PublicSourceImportStatus.NO_UNIQUE_SERVERS) && result.subscriptionId != null) {
+                    if (selectAfterLoad && result.configCount > 0 && !uiState.value.isRunning) withContext(ioDispatcher) {
+                        val first = dataSource.getServerGuidList(result.subscriptionId).firstOrNull()
+                        if (first != null && !uiState.value.isRunning) {
+                            applyZhuzhalkaSelection(dataSource, result.subscriptionId, first) { group, guid ->
+                                _uiState.update { it.copy(selectedGroupId = group, selectedGuid = guid) }
+                            }
+                        }
+                    }
+                    setupGroupTab(forceRefresh = true).join()
+                }
+            } catch (cancelled: CancellationException) {
+                _zhuzhalkaState.update { it.copy(messageRes = R.string.buzz_cancelled) }
+                setupGroupTab(forceRefresh = true)
+                throw cancelled
+            } catch (error: Exception) {
+                LogUtil.e(AppConfig.TAG, "Catalog operation failed", IllegalStateException(error.javaClass.simpleName))
+                _zhuzhalkaState.update { it.copy(messageRes = R.string.buzz_load_failed) }
+            } finally {
+                _zhuzhalkaState.update { it.copy(busy = false, cancelling = false) }
+            }
+        }
+    }
+
+    private fun autoPickZhuzhalka() {
+        if (_zhuzhalkaState.value.busy || uiState.value.isRunning) return
+        sourceJob = viewModelScope.launch {
+            _zhuzhalkaState.value = ZhuzhalkaState(busy = true, autoPicking = true, messageRes = R.string.buzz_loading)
+            try {
+                // Refresh each free catalog independently. A failed source does not block the others.
+                for (source in PublicSourceCatalog.sources) {
+                    currentCoroutineContext().ensureActive()
+                    _zhuzhalkaState.update { it.copy(operationSource = source.id) }
+                    PublicSourceCatalog.addAndRefresh(source.id)
+                }
+                setupGroupTab(forceRefresh = true).join()
+                val candidates = withContext(ioDispatcher) {
+                    interleaveCandidates(dataSource.getSubscriptions()
+                        .filter { it.guid.isNotEmpty() && it.subscription.enabled }
+                        .map { it.guid to dataSource.getServerGuidList(it.guid).shuffled() })
+                }
+                val deadline = SystemClock.elapsedRealtime() + 180_000L
+                _zhuzhalkaState.update { it.copy(total = candidates.size, messageRes = R.string.buzz_checking, operationSource = null) }
+                for ((index, candidate) in candidates.withIndex()) {
+                    currentCoroutineContext().ensureActive()
+                    if (uiState.value.isRunning || SystemClock.elapsedRealtime() >= deadline) break
+                    _zhuzhalkaState.update { it.copy(attempted = index + 1, testedGuid = null, probe = null) }
+                    val result = ServiceWebProbe.check(app, candidate.guid, deadline)
+                    currentCoroutineContext().ensureActive()
+                    _zhuzhalkaState.update { it.copy(testedGuid = candidate.guid, probe = result) }
+                    if (result.passed) {
+                        withContext(ioDispatcher) {
+                            // Profiles may have been replaced by a background subscription refresh.
+                            if (!uiState.value.isRunning) {
+                                applyZhuzhalkaSelection(dataSource, candidate.groupId, candidate.guid) { group, guid ->
+                                    _uiState.update { it.copy(selectedGroupId = group, selectedGuid = guid) }
+                                }
+                            }
+                        }
+                        setupGroupTab(forceRefresh = true).join()
+                        if (uiState.value.selectedGuid == candidate.guid) {
+                            _zhuzhalkaState.update { it.copy(messageRes = R.string.buzz_found) }
+                            return@launch
+                        }
+                    }
+                }
+                _zhuzhalkaState.update { it.copy(messageRes = R.string.buzz_not_found) }
+            } catch (cancelled: CancellationException) {
+                _zhuzhalkaState.update { it.copy(messageRes = R.string.buzz_cancelled) }
+                setupGroupTab(forceRefresh = true)
+                throw cancelled
+            } catch (error: Exception) {
+                LogUtil.e(AppConfig.TAG, "Auto selection failed", IllegalStateException(error.javaClass.simpleName))
+                _zhuzhalkaState.update { it.copy(messageRes = R.string.buzz_load_failed) }
+            } finally {
+                _zhuzhalkaState.update { it.copy(busy = false, cancelling = false) }
+            }
+        }
+    }
+
     private fun importBatchConfig(configText: String) {
         launchLoading {
             withContext(ioDispatcher) {
@@ -930,6 +1061,7 @@ class MainViewModel(
 
     // ---------- Running state ----------
     private fun updateRunningState(running: Boolean, clearTestingText: Boolean = true) {
+        if (running && _zhuzhalkaState.value.autoPicking) sourceJob?.cancel()
         if (!running || clearTestingText) testRequests.invalidateCurrent()
         _uiState.update { state ->
             state.copy(

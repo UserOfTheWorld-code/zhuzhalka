@@ -430,6 +430,46 @@ object SettingsManager {
         return MmkvManager.decodeSettingsBool(AppConfig.PREF_ROOT_MODE_ENABLE, false)
     }
 
+    /** The simple client starts Android VPN; advanced screens retain their existing mode selection. */
+    fun prepareSimpleVpnMode() = prepareSimpleVpnMode(
+        readMode = { MmkvManager.decodeSettingsString(AppConfig.PREF_MODE) },
+        readRoot = { MmkvManager.decodeSettingsBool(AppConfig.PREF_ROOT_MODE_ENABLE, false) },
+        writeMode = { MmkvManager.encodeSettings(AppConfig.PREF_MODE, it) },
+        writeRoot = { MmkvManager.encodeSettings(AppConfig.PREF_ROOT_MODE_ENABLE, it) },
+    )
+
+    /** Injectable storage boundary verifies both settings and restores partial writes on failure. */
+    internal fun prepareSimpleVpnMode(
+        readMode: () -> String?,
+        readRoot: () -> Boolean,
+        writeMode: (String?) -> Boolean,
+        writeRoot: (Boolean) -> Boolean,
+    ) {
+        val previousMode = readMode()
+        val previousRoot = readRoot()
+        if (previousMode == VPN && !previousRoot) return
+        try {
+            check(writeMode(VPN)) { "VPN mode write failed" }
+            check(writeRoot(false)) { "Root mode disable failed" }
+            check(readMode() == VPN && !readRoot()) { "VPN mode write could not be verified" }
+        } catch (error: Exception) {
+            try {
+                check(writeMode(previousMode)) { "VPN mode rollback failed" }
+            } catch (rollbackError: Exception) {
+                error.addSuppressed(rollbackError)
+            }
+            try {
+                check(writeRoot(previousRoot)) { "Root mode rollback failed" }
+            } catch (rollbackError: Exception) {
+                error.addSuppressed(rollbackError)
+            }
+            if (readMode() != previousMode || readRoot() != previousRoot) {
+                error.addSuppressed(IllegalStateException("VPN mode rollback could not be verified"))
+            }
+            throw error
+        }
+    }
+
     /**
      *  Check if process routing can be used.
      */

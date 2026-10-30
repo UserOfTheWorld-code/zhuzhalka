@@ -2,14 +2,24 @@ package com.v2ray.ang.handler
 
 import android.util.Log
 import com.tencent.mmkv.MMKV
+import com.v2ray.ang.AppConfig
+import com.v2ray.ang.dto.entities.ProfileItem
 import com.v2ray.ang.dto.entities.SubscriptionItem
+import com.v2ray.ang.enums.EConfigType
 import com.v2ray.ang.util.JsonUtil
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mockStatic
+import org.mockito.MockedStatic
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.doNothing
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.reset
@@ -19,10 +29,21 @@ import org.mockito.kotlin.whenever
 class SubscriptionIndexTest {
     private val mainValues = mutableMapOf<String, String>()
     private val subValues = mutableMapOf<String, String>()
+    private val profileValues = mutableMapOf<String, String>()
+    private val rawValues = mutableMapOf<String, String>()
+    private val affiliationValues = mutableMapOf<String, String>()
+    private lateinit var nativeLock: MockedStatic<MmkvProfileIndexLock>
 
     @BeforeEach
     fun prepareStorage() {
-        for ((storage, values) in listOf(main to mainValues, subs to subValues)) {
+        nativeLock = mockStatic(MmkvProfileIndexLock::class.java)
+        for ((storage, values) in listOf(
+            main to mainValues,
+            subs to subValues,
+            profiles to profileValues,
+            raw to rawValues,
+            affiliations to affiliationValues,
+        )) {
             reset(storage)
             whenever(storage.decodeString(any())).thenAnswer { values[it.getArgument<String>(0)] }
             whenever(storage.encode(any<String>(), any<String>())).thenAnswer {
@@ -30,7 +51,20 @@ class SubscriptionIndexTest {
                 true
             }
             whenever(storage.allKeys()).thenAnswer { values.keys.toTypedArray() }
+            doAnswer {
+                values.remove(it.getArgument<String>(0))
+                storage
+            }.whenever(storage).remove(any())
+            doAnswer {
+                values.remove(it.getArgument<String>(0))
+                null
+            }.whenever(storage).removeValueForKey(any())
         }
+    }
+
+    @AfterEach
+    fun closeNativeLockBoundary() {
+        nativeLock.close()
     }
 
     @Test
@@ -94,10 +128,91 @@ class SubscriptionIndexTest {
         }
     }
 
+    @Test
+    fun newSubscriptionRollbackRemovesIndexedAndUnindexedPayloadsOnlyForThatSubscription() {
+        mainValues["SUB_IDS"] = """["user","new"]"""
+        mainValues["SUB_SERVERS_new"] = """["indexed","missing-profile"]"""
+        mainValues["SUB_SERVERS_user"] = """["user-profile"]"""
+        mainValues["SELECTED_SERVER"] = "indexed"
+        subValues["user"] = JsonUtil.toJson(SubscriptionItem(remarks = "Keep"))
+        subValues["new"] = JsonUtil.toJson(SubscriptionItem(remarks = "Failed import"))
+        mapOf("indexed" to "new", "orphan" to "new", "user-profile" to "user").forEach { (id, subId) ->
+            profileValues[id] = JsonUtil.toJson(ProfileItem(configType = EConfigType.VLESS, subscriptionId = subId))
+            rawValues[id] = "raw-$id"
+            affiliationValues[id] = "aff-$id"
+        }
+        rawValues["missing-profile"] = "partially removed raw profile"
+
+        MmkvManager.removeNewSubscription("new")
+
+        assertEquals(listOf("user"), MmkvManager.decodeSubsList())
+        assertEquals(listOf("user-profile"), MmkvManager.decodeServerList("user"))
+        assertEquals(setOf("user-profile"), profileValues.keys)
+        assertEquals(mapOf("user-profile" to "raw-user-profile"), rawValues)
+        assertEquals(mapOf("user-profile" to "aff-user-profile"), affiliationValues)
+        assertEquals(setOf("user"), subValues.keys)
+        assertNull(mainValues["SUB_SERVERS_new"])
+        assertNull(MmkvManager.getSelectServer())
+        nativeLock.verify { MmkvProfileIndexLock.lock(main) }
+        nativeLock.verify { MmkvProfileIndexLock.unlock(main) }
+    }
+
+    @Test
+    fun failedAuxiliaryRollbackKeepsIdentifyingPayloadAndSubscriptionForRetry() {
+        mainValues["SUB_IDS"] = """["new"]"""
+        subValues["new"] = JsonUtil.toJson(SubscriptionItem(remarks = "Failed import"))
+        profileValues["orphan"] = JsonUtil.toJson(ProfileItem(configType = EConfigType.VLESS, subscriptionId = "new"))
+        rawValues["orphan"] = "raw"
+        doNothing().whenever(raw).removeValueForKey(any())
+
+        assertThrows(IllegalStateException::class.java) { MmkvManager.removeNewSubscription("new") }
+
+        assertEquals(setOf("orphan"), profileValues.keys)
+        assertEquals(setOf("new"), subValues.keys)
+        assertEquals(listOf("new"), MmkvManager.decodeSubsList())
+        nativeLock.verify { MmkvProfileIndexLock.lock(main) }
+        nativeLock.verify { MmkvProfileIndexLock.unlock(main) }
+    }
+
+    @Test
+    fun rollbackCannotRemoveTheDefaultSubscription() {
+        assertThrows(IllegalArgumentException::class.java) { MmkvManager.removeNewSubscription(AppConfig.DEFAULT_SUBSCRIPTION_ID) }
+        assertThrows(IllegalArgumentException::class.java) { MmkvManager.removeNewSubscription("") }
+        verify(subs, never()).remove(any())
+    }
+
+    @Test
+    fun duplicateOnlySourceClearsItsVisibleIndexAndPreservesActivePayload() {
+        mainValues["SUB_SERVERS_provider"] = """["active"]"""
+        mainValues["SUB_SERVERS_other"] = """["other"]"""
+        mainValues["SELECTED_SERVER"] = "active"
+        profileValues["active"] = "active-payload"
+
+        MmkvManager.clearSubscriptionProfileIndex("provider")
+
+        assertEquals(emptyList<String>(), MmkvManager.decodeServerList("provider"))
+        assertEquals(listOf("other"), MmkvManager.decodeServerList("other"))
+        assertEquals("active", MmkvManager.getSelectServer())
+        assertEquals("active-payload", profileValues["active"])
+    }
+
+    @Test
+    fun failedEmptyIndexWriteRestoresPreviousGroup() {
+        mainValues["SUB_SERVERS_provider"] = """["keep"]"""
+        doReturn(false).whenever(main).encode("SUB_SERVERS_provider", "[]")
+
+        assertThrows(IllegalStateException::class.java) { MmkvManager.clearSubscriptionProfileIndex("provider") }
+
+        assertEquals(listOf("keep"), MmkvManager.decodeServerList("provider"))
+    }
+
     companion object {
         private val main: MMKV = mock()
         private val subs: MMKV = mock()
         private val settings: MMKV = mock()
+        private val profiles: MMKV = mock()
+        private val raw: MMKV = mock()
+        private val affiliations: MMKV = mock()
 
         @BeforeAll
         @JvmStatic
@@ -106,8 +221,14 @@ class SubscriptionIndexTest {
                 it.`when`<MMKV> { MMKV.mmkvWithID("MAIN", MMKV.MULTI_PROCESS_MODE) }.thenReturn(main)
                 it.`when`<MMKV> { MMKV.mmkvWithID("SUB", MMKV.MULTI_PROCESS_MODE) }.thenReturn(subs)
                 it.`when`<MMKV> { MMKV.mmkvWithID("SETTING", MMKV.MULTI_PROCESS_MODE) }.thenReturn(settings)
+                it.`when`<MMKV> { MMKV.mmkvWithID("PROFILE_FULL_CONFIG", MMKV.MULTI_PROCESS_MODE) }.thenReturn(profiles)
+                it.`when`<MMKV> { MMKV.mmkvWithID("SERVER_RAW", MMKV.MULTI_PROCESS_MODE) }.thenReturn(raw)
+                it.`when`<MMKV> { MMKV.mmkvWithID("SERVER_AFF", MMKV.MULTI_PROCESS_MODE) }.thenReturn(affiliations)
                 MmkvManager.decodeSubscriptions()
                 MmkvManager.decodeSettingsString("test-initialize")
+                MmkvManager.decodeServerConfig("test-initialize")
+                MmkvManager.decodeServerRaw("test-initialize")
+                MmkvManager.decodeServerAffiliationInfo("test-initialize")
             }
         }
     }

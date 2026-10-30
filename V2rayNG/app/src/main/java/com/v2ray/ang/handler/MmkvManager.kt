@@ -79,11 +79,11 @@ object MmkvManager {
 
     private inline fun <T> withProfileIndexLock(block: () -> T): T {
         return synchronized(mainStorage) {
-            mainStorage.lock()
+            MmkvProfileIndexLock.lock(mainStorage)
             try {
                 block()
             } finally {
-                mainStorage.unlock()
+                MmkvProfileIndexLock.unlock(mainStorage)
             }
         }
     }
@@ -385,6 +385,37 @@ object MmkvManager {
     }
 
     /**
+     * Publishes a verified empty group when a valid official source contains only duplicates.
+     * Payloads stay available to an already running connection; normal orphan cleanup can reclaim
+     * unselected payloads later. An empty or unparseable download must not call this operation.
+     */
+    internal fun clearSubscriptionProfileIndex(subscriptionId: String) {
+        replaceSubscriptionProfileIndex(subscriptionId, emptyList())
+    }
+
+    /** Changes only the visible group index; active connection payloads and other groups stay intact. */
+    internal fun replaceSubscriptionProfileIndex(subscriptionId: String, profileIds: List<String>) {
+        require(subscriptionId.isNotBlank() && subscriptionId != DEFAULT_SUBSCRIPTION_ID)
+        withProfileIndexLock {
+            val key = serverListKey(subscriptionId)
+            val previous = mainStorage.decodeString(key)
+            val replacement = JsonUtil.toJson(profileIds.distinct())
+            try {
+                requireStorageWrite(mainStorage.encode(key, replacement), "Failed to publish source index")
+                check(mainStorage.decodeString(key) == replacement) { "Source index could not be verified" }
+            } catch (error: Exception) {
+                if (previous == null) {
+                    mainStorage.remove(key)
+                } else {
+                    requireStorageWrite(mainStorage.encode(key, previous), "Failed to restore source index")
+                }
+                check(mainStorage.decodeString(key) == previous) { "Source index rollback could not be verified" }
+                throw error
+            }
+        }
+    }
+
+    /**
      * Removes the server configuration.
      *
      * @param guid The server GUID.
@@ -672,6 +703,44 @@ object MmkvManager {
         encodeSubsList(subsList)
 
         removeServerViaSubid(subid)
+    }
+
+    /**
+     * Rolls back only a newly allocated subscription after an unsuccessful explicit import.
+     * Includes payloads written before a failed profile-index publication; ordinary deletion
+     * intentionally keeps its existing behavior for user-managed subscriptions.
+     */
+    internal fun removeNewSubscription(subid: String) {
+        require(subid.isNotBlank() && subid != DEFAULT_SUBSCRIPTION_ID)
+        withProfileIndexLock {
+            val unindexedProfiles = profileFullStorage.allKeys()?.filter {
+                decodeServerConfig(it)?.subscriptionId == subid
+            }.orEmpty()
+            val profileIds = (decodeServerList(subid) + unindexedProfiles).distinct()
+            if (profileIds.isNotEmpty()) {
+                // Keep identifying profile payloads until their auxiliary records are removed.
+                profileIds.forEach(serverRawStorage::removeValueForKey)
+                profileIds.forEach(serverAffStorage::removeValueForKey)
+                check(profileIds.all { serverRawStorage.decodeString(it) == null && serverAffStorage.decodeString(it) == null }) {
+                    "New subscription auxiliary rollback failed"
+                }
+                profileIds.forEach(profileFullStorage::removeValueForKey)
+                check(profileIds.all { profileFullStorage.decodeString(it) == null }) {
+                    "New subscription profile rollback failed"
+                }
+            }
+            if (getSelectServer() in profileIds) {
+                mainStorage.remove(KEY_SELECTED_SERVER)
+                check(getSelectServer() !in profileIds) { "New subscription selection rollback failed" }
+            }
+            mainStorage.remove(serverListKey(subid))
+            subStorage.remove(subid)
+            val remainingIds = decodeSubsList().apply { removeAll { it == subid } }
+            requireStorageWrite(mainStorage.encode(KEY_SUB_IDS, JsonUtil.toJson(remainingIds)), "New subscription index rollback failed")
+            check(decodeSubscription(subid) == null && subid !in decodeSubsList() && decodeServerList(subid).isEmpty()) {
+                "New subscription rollback could not be verified"
+            }
+        }
     }
 
     /**
