@@ -16,6 +16,12 @@ Android 7.0+ · Kotlin / Compose · GPL-3.0 · версия 0.1.0 beta
 
 </div>
 
+<p align="center">
+  <img src="docs/main.png" width="280" alt="Главный экран Жужалки: подключение и автоподбор" />
+  &nbsp;
+  <img src="docs/sources.png" width="280" alt="Шесть бесплатных источников и собственная подписка" />
+</p>
+
 ## Установка
 
 1. Откройте [релиз 0.1.0 beta](https://github.com/UserOfTheWorld-code/zhuzhalka/releases/tag/v0.1.0-beta.1).
