@@ -20,12 +20,14 @@ internal data class VerifiedCommunityEvent(
     val createdAtSeconds: Long,
     val bundle: CommunityBundle,
     val json: String,
+    val version: Int = 2,
 )
 
 /** NIP-01 adapter. Experimental addressable kind is isolated here, not a persisted domain contract. */
 internal object CommunityProtocol {
     const val KIND = 39799
-    const val NAMESPACE = "zhuzhalka-community-v1"
+    const val LEGACY_NAMESPACE = "zhuzhalka-community-v1"
+    const val NAMESPACE = "zhuzhalka-community-v2"
     const val MAX_EVENT_CHARS = 32_768
     const val MAX_VOTES = 32
     const val MAX_OFFERS = 8
@@ -47,11 +49,13 @@ internal object CommunityProtocol {
             nowMillis - offer.sharedAtMillis <= TTL_MILLIS
     }.getOrDefault(false)
 
-    fun sign(bundle: CommunityBundle, signer: CommunitySigner, nowMillis: Long): String {
-        val content = encodeBundle(bundle, signer.publicKeyHex(), nowMillis)
+    fun sign(bundle: CommunityBundle, signer: CommunitySigner, nowMillis: Long, version: Int = 2): String {
+        require(version in 1..2)
+        val namespace = if (version == 1) LEGACY_NAMESPACE else NAMESPACE
+        val content = encodeBundle(bundle, signer.publicKeyHex(), nowMillis, version)
         val tags = JsonArray().apply {
-            add(JsonArray().apply { add("d"); add(NAMESPACE) })
-            add(JsonArray().apply { add("t"); add(NAMESPACE) })
+            add(JsonArray().apply { add("d"); add(namespace) })
+            add(JsonArray().apply { add("t"); add(namespace) })
         }
         val seconds = nowMillis / 1000
         val publicKey = signer.publicKeyHex()
@@ -82,15 +86,17 @@ internal object CommunityProtocol {
         require(createdAt > 0 && createdAt <= nowMillis / 1000 && nowMillis / 1000 - createdAt <= TTL_MILLIS / 1000)
         val tags = event.getAsJsonArray("tags")
         require(tags.size() == 2)
-        require(tags[0].asJsonArray.toList().map { it.asString } == listOf("d", NAMESPACE))
-        require(tags[1].asJsonArray.toList().map { it.asString } == listOf("t", NAMESPACE))
+        val namespace = tags[0].asJsonArray.get(1).asString
+        val version = when (namespace) { LEGACY_NAMESPACE -> 1; NAMESPACE -> 2; else -> error("Unsupported community namespace") }
+        require(tags[0].asJsonArray.toList().map { it.asString } == listOf("d", namespace))
+        require(tags[1].asJsonArray.toList().map { it.asString } == listOf("t", namespace))
         val content = event.string("content")
         require(content.length <= 24_000)
         val digest = digest(author, createdAt, tags, content)
         require(digest.toHex() == id)
         require(CommunityCrypto.verifySignature(digest, author.fromHex(), signature.fromHex()))
-        val bundle = decodeBundle(content, author, nowMillis)
-        VerifiedCommunityEvent(id, author, createdAt, bundle, json)
+        val bundle = decodeBundle(content, author, nowMillis, version)
+        VerifiedCommunityEvent(id, author, createdAt, bundle, json, version)
     }.getOrNull()
 
     private fun digest(author: String, seconds: Long, tags: JsonArray, content: String): ByteArray =
@@ -98,13 +104,14 @@ internal object CommunityProtocol {
             add(0); add(author); add(seconds); add(KIND); add(tags); add(content)
         }).toByteArray(Charsets.UTF_8))
 
-    private fun encodeBundle(bundle: CommunityBundle, author: String, nowMillis: Long): String {
+    private fun encodeBundle(bundle: CommunityBundle, author: String, nowMillis: Long, version: Int): String {
         require(bundle.votes.size <= MAX_VOTES && bundle.offers.size <= MAX_OFFERS)
         require(bundle.offers.distinctBy { it.url }.size == bundle.offers.size)
         require(CommunityRanking.retainVotes(bundle.votes, nowMillis).size == bundle.votes.size)
+        require(bundle.votes.all { CommunityRanking.validSourceId(it.key.sourceId, version >= 2) })
         require(bundle.votes.all { it.authorId == author } && bundle.offers.all { validOffer(it, nowMillis) })
         return gson.toJson(JsonObject().apply {
-            addProperty("version", 1)
+            addProperty("version", version)
             add("votes", JsonArray().apply { bundle.votes.forEach { vote ->
                 add(JsonObject().apply {
                     addProperty("source", vote.key.sourceId); addProperty("endpoint", vote.key.endpointHash)
@@ -120,9 +127,9 @@ internal object CommunityProtocol {
         })
     }
 
-    private fun decodeBundle(content: String, author: String, nowMillis: Long): CommunityBundle {
+    private fun decodeBundle(content: String, author: String, nowMillis: Long, version: Int): CommunityBundle {
         val root = requireNotNull(CommunityJson.parse(content, 24_000)).asJsonObject
-        require(root.keySet() == setOf("version", "votes", "lists") && root.integer("version") == 1L)
+        require(root.keySet() == setOf("version", "votes", "lists") && root.integer("version") == version.toLong())
         val votes = root.getAsJsonArray("votes")
         val offers = root.getAsJsonArray("lists")
         require(votes.size() <= MAX_VOTES && offers.size() <= MAX_OFFERS)
@@ -140,7 +147,7 @@ internal object CommunityProtocol {
         }
         // Validate every signed entry before pruning time-expired hints. One old vote must not
         // discard newer votes in the same still-current event, but malformed/future data is invalid.
-        require(decodedVotes.all { vote -> vote.observedAtMillis <= nowMillis &&
+        require(decodedVotes.all { vote -> CommunityRanking.validSourceId(vote.key.sourceId, version >= 2) && vote.observedAtMillis <= nowMillis &&
             CommunityRanking.retainVotes(listOf(vote), vote.observedAtMillis).size == 1 })
         require(decodedVotes.distinctBy { it.key.sourceId to it.key.endpointHash.lowercase(java.util.Locale.ROOT) }.size == decodedVotes.size)
         val decodedOffers = offers.map {

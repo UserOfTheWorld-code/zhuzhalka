@@ -157,6 +157,9 @@ class MainRepository(
     override fun decodeServerConfig(guid: String): ProfileItem? =
         MmkvManager.decodeServerConfig(guid)
 
+    override fun acceptStrictProbe(guid: String, original: ProfileItem): Boolean =
+        MmkvManager.acceptStrictProbe(guid, original)
+
     override fun decodeAffiliationInfo(guid: String): ServerAffiliationInfo? =
         MmkvManager.decodeServerAffiliationInfo(guid)
 

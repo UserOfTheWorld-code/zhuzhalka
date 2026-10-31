@@ -1,6 +1,8 @@
 package com.v2ray.ang.ui.main
 
 import com.v2ray.ang.R
+import com.v2ray.ang.core.ProbeService
+import com.v2ray.ang.core.ServiceProbeResult
 import com.v2ray.ang.dto.entities.ProfileItem
 import com.v2ray.ang.dto.entities.SubscriptionItem
 import com.v2ray.ang.enums.EConfigType
@@ -11,12 +13,64 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.yield
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.CancellationException
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.never
+import org.mockito.kotlin.any
 
 class ZhuzhalkaConnectionTest {
+    @Test fun failedOrIncompleteProbeDoesNotChangeImportedTlsFlags() = runBlocking {
+        val original = ProfileItem(configType = EConfigType.VLESS, subscriptionId = "group", insecure = true)
+        val source = source(original)
+        for (result in listOf(ServiceProbeResult(emptyMap()), ServiceProbeResult(mapOf(ProbeService.X to 20L)),
+            ServiceProbeResult(ProbeService.entries.associateWith { if (it == ProbeService.X) -1L else 20L }))) {
+            assertNull(acceptTestedAutoCandidate(source, "server", original, result))
+        }
+        verify(source, never()).acceptStrictProbe(any(), any())
+        assertEquals(true, original.insecure)
+    }
+
+    @Test fun completeProbeAcceptsOnlyTheStrictConfigurationReadBackFromStorage() = runBlocking {
+        val original = ProfileItem(configType = EConfigType.VLESS, subscriptionId = "group", insecure = true)
+        val source = source(original)
+        whenever(source.acceptStrictProbe("server", original)).thenAnswer {
+            whenever(source.decodeServerConfig("server")).thenReturn(original.copy(insecure = false))
+            true
+        }
+        assertEquals(AutoCandidate("group", "server"), acceptTestedAutoCandidate(source, "server", original,
+            ServiceProbeResult(ProbeService.entries.associateWith { 20L })))
+        verify(source).acceptStrictProbe("server", original)
+        assertEquals(true, original.insecure)
+    }
+
+    @Test fun changedProfileAndRejectedWriteCannotBeAcceptedAfterSuccessfulProbe() = runBlocking {
+        val original = ProfileItem(configType = EConfigType.VLESS, subscriptionId = "group", insecure = true)
+        val result = ServiceProbeResult(ProbeService.entries.associateWith { 20L })
+        val changed = source(original.copy(password = "changed"))
+        assertNull(acceptTestedAutoCandidate(changed, "server", original, result))
+        verify(changed, never()).acceptStrictProbe(any(), any())
+        val rejected = source(original)
+        whenever(rejected.acceptStrictProbe("server", original)).thenReturn(false)
+        assertNull(acceptTestedAutoCandidate(rejected, "server", original, result))
+    }
+
+    @Test fun cancelledProbeOwnerCannotCommitEvenACompleteResult() = runBlocking<Unit> {
+        val original = ProfileItem(configType = EConfigType.VLESS, subscriptionId = "group", insecure = true)
+        val source = source(original)
+        val job = async {
+            currentCoroutineContext().cancel()
+            acceptTestedAutoCandidate(source, "server", original, ServiceProbeResult(ProbeService.entries.associateWith { 20L }))
+        }
+        try { job.await(); fail("Cancelled owner must not accept") } catch (_: CancellationException) { }
+        verify(source, never()).acceptStrictProbe(any(), any())
+    }
+
     @Test fun stoppedVpnDoesNotSendAnUnnecessaryStop() = runBlocking {
         assertTrue(awaitAutoPickDisconnect(false, false, MutableStateFlow(false),
             hasVpnRoute = { false }, requestStop = { fail("A stopped VPN needs no command") }))

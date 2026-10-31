@@ -17,7 +17,7 @@
     <string name="buzz_stop_failed">Không xác nhận được VPN đã ngắt. Hãy ngắt VPN rồi thử tự động chọn lại.</string>
     <string name="buzz_no_compatible">Danh sách này không có máy chủ phù hợp để tự động chọn. Hãy thử nguồn khác.</string>
     <string name="buzz_profile_unsupported">Hồ sơ này không phù hợp để kết nối ở chế độ đơn giản. Hãy thử tự động chọn hoặc máy chủ khác.</string>
-    <string name="buzz_profile_insecure">Máy chủ này tắt xác minh chứng chỉ, tính năng không còn được hỗ trợ. Tự động chọn sẽ bỏ qua và kiểm tra các máy chủ khác.</string>
+    <string name="buzz_profile_insecure">Cấu hình này cho phép tắt bảo vệ kết nối. Tự động chọn sẽ kiểm tra lại mà vẫn bật bảo vệ kết nối.</string>
     <string name="buzz_cancelling">Stopping after the current check…</string>
     <string name="buzz_progress">Checking server %1$d of %2$d</string>
     <string name="buzz_loading">Downloading server lists…</string>
@@ -27,7 +27,7 @@
     <string name="buzz_manage">Manage subscriptions</string>
     <string name="buzz_public_note">Public servers are run by third parties. Availability and privacy are not guaranteed. Web checks do not verify messages or calls.</string>
     <string name="buzz_credit">Free and open source · based on v2rayNG / Xray</string>
-    <string name="buzz_url_hint">Paste an HTTPS subscription URL in V2Ray format. Your subscription stays on this device.</string>
+    <string name="buzz_url_hint">Dán URL đăng ký HTTPS theo định dạng V2Ray. Theo mặc định, đăng ký chỉ được lưu trên thiết bị này.</string>
     <string name="buzz_url">Subscription URL</string>
     <string name="buzz_add">Add and download</string>
     <string name="buzz_cancelled">Stopped. You can select a server manually.</string>
@@ -54,4 +54,6 @@
     <string name="buzz_share_app_qr_failed">Không thể tạo mã QR.</string>
     <string name="buzz_share_app_qr_description">Mã QR: trang tải Zhuzhalka</string>
     <string name="buzz_share_app_retry">Thử lại</string>
+    <string name="buzz_share_on_add">Mọi người trong mạng Zhuzhalka đều có thể truy cập</string>
+    <string name="buzz_share_on_add_disabled">Hãy bật mạng Zhuzhalka và chờ đồng bộ trước.</string>
 </resources>

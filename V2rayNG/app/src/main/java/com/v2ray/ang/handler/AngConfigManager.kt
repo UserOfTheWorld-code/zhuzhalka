@@ -460,7 +460,13 @@ object AngConfigManager {
      * @param it The subscription item.
      * @return Subscription update result.
      */
-    fun updateConfigViaSub(it: SubscriptionCache): SubscriptionUpdateResult {
+    fun updateConfigViaSub(it: SubscriptionCache): SubscriptionUpdateResult = updateConfigViaSubInternal(it, null)
+
+    /** Reuses the normal parser/transaction after an auto-pick direct download; never fetches a second time. */
+    internal fun updateConfigViaSub(it: SubscriptionCache, downloaded: HttpUtil.SubscriptionContent): SubscriptionUpdateResult =
+        updateConfigViaSubInternal(it, downloaded)
+
+    private fun updateConfigViaSubInternal(it: SubscriptionCache, downloaded: HttpUtil.SubscriptionContent?): SubscriptionUpdateResult {
         try {
             // Check if disabled
             if (!it.subscription.enabled) {
@@ -501,7 +507,10 @@ object AngConfigManager {
                 )
             }
 
-            var configText = try {
+            var configText = if (downloaded != null) {
+                captureUsageInfo(downloaded.headers)
+                downloaded.body
+            } else try {
                 val httpPort = SettingsManager.getHttpPort()
                 HttpUtil.getUrlContentWithUserAgent(
                     UrlContentRequest(
@@ -519,7 +528,7 @@ object AngConfigManager {
                 logSubscriptionFailure(it.guid, "proxy download", e)
                 ""
             }
-            if (configText.isEmpty()) {
+            if (configText.isEmpty() && downloaded == null) {
                 configText = try {
                     HttpUtil.getUrlContentWithUserAgent(
                         UrlContentRequest(

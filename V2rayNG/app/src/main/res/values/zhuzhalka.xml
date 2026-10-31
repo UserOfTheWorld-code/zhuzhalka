@@ -17,7 +17,7 @@
     <string name="buzz_stop_failed">Could not confirm that the VPN disconnected. Disconnect it and try Auto select again.</string>
     <string name="buzz_no_compatible">This list has no servers suitable for Auto select. Try another source.</string>
     <string name="buzz_profile_unsupported">This profile cannot connect in simple mode. Try Auto select or another server.</string>
-    <string name="buzz_profile_insecure">This server disables certificate verification, which is no longer supported. Auto select will skip it and check other servers.</string>
+    <string name="buzz_profile_insecure">This profile allows connection protection to be disabled. Auto select will retry it without disabling connection protection.</string>
     <string name="buzz_cancelling">Stopping after the current check…</string>
     <string name="buzz_progress">Checking server %1$d of %2$d</string>
     <string name="buzz_loading">Downloading server lists…</string>
@@ -27,7 +27,7 @@
     <string name="buzz_manage">Manage subscriptions</string>
     <string name="buzz_public_note">Public servers are run by third parties. Availability and privacy are not guaranteed. Web checks do not verify messages or calls.</string>
     <string name="buzz_credit">Free and open source · based on v2rayNG / Xray</string>
-    <string name="buzz_url_hint">Paste an HTTPS subscription URL in V2Ray format. Your subscription stays on this device.</string>
+    <string name="buzz_url_hint">Paste an HTTPS subscription URL in V2Ray format. By default, your subscription stays on this device.</string>
     <string name="buzz_url">Subscription URL</string>
     <string name="buzz_add">Add and download</string>
     <string name="buzz_cancelled">Stopped. You can select a server manually.</string>
@@ -54,4 +54,6 @@
     <string name="buzz_share_app_qr_failed">Could not create the QR code.</string>
     <string name="buzz_share_app_qr_description">QR code: Zhuzhalka download page</string>
     <string name="buzz_share_app_retry">Retry</string>
+    <string name="buzz_share_on_add">Available to everyone in the Zhuzhalka network</string>
+    <string name="buzz_share_on_add_disabled">Enable the Zhuzhalka network and wait for synchronization first.</string>
 </resources>

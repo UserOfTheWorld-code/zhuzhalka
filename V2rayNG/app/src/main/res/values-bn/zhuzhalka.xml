@@ -17,7 +17,7 @@
     <string name="buzz_stop_failed">VPN সংযোগ বিচ্ছিন্ন হয়েছে কি না নিশ্চিত করা যায়নি। সংযোগ বিচ্ছিন্ন করে আবার স্বয়ংক্রিয় নির্বাচন চালান।</string>
     <string name="buzz_no_compatible">এই তালিকায় স্বয়ংক্রিয় নির্বাচনের উপযুক্ত সার্ভার নেই। অন্য উৎস চেষ্টা করুন।</string>
     <string name="buzz_profile_unsupported">এই প্রোফাইলটি সরল মোডে সংযোগের উপযুক্ত নয়। স্বয়ংক্রিয় নির্বাচন বা অন্য সার্ভার চেষ্টা করুন।</string>
-    <string name="buzz_profile_insecure">এই সার্ভারে সার্টিফিকেট যাচাই বন্ধ আছে, যা আর সমর্থিত নয়। স্বয়ংক্রিয় নির্বাচন এটিকে বাদ দিয়ে অন্য সার্ভার পরীক্ষা করবে।</string>
+    <string name="buzz_profile_insecure">এই প্রোফাইলে সংযোগের সুরক্ষা বন্ধ করার অনুমতি রয়েছে। স্বয়ংক্রিয় নির্বাচন সংযোগের সুরক্ষা বন্ধ না করে এটি আবার পরীক্ষা করবে।</string>
     <string name="buzz_cancelling">Stopping after the current check…</string>
     <string name="buzz_progress">Checking server %1$d of %2$d</string>
     <string name="buzz_loading">Downloading server lists…</string>
@@ -27,7 +27,7 @@
     <string name="buzz_manage">Manage subscriptions</string>
     <string name="buzz_public_note">Public servers are run by third parties. Availability and privacy are not guaranteed. Web checks do not verify messages or calls.</string>
     <string name="buzz_credit">Free and open source · based on v2rayNG / Xray</string>
-    <string name="buzz_url_hint">Paste an HTTPS subscription URL in V2Ray format. Your subscription stays on this device.</string>
+    <string name="buzz_url_hint">V2Ray ফরম্যাটের HTTPS সাবস্ক্রিপশন লিংক পেস্ট করুন। ডিফল্টভাবে সাবস্ক্রিপশন শুধু এই ডিভাইসেই থাকে।</string>
     <string name="buzz_url">Subscription URL</string>
     <string name="buzz_add">Add and download</string>
     <string name="buzz_cancelled">Stopped. You can select a server manually.</string>
@@ -54,4 +54,6 @@
     <string name="buzz_share_app_qr_failed">QR কোড তৈরি করা যায়নি।</string>
     <string name="buzz_share_app_qr_description">QR কোড: Zhuzhalka ডাউনলোড পৃষ্ঠা</string>
     <string name="buzz_share_app_retry">আবার চেষ্টা করুন</string>
+    <string name="buzz_share_on_add">ঝুঝালকা নেটওয়ার্কে সবার জন্য উন্মুক্ত</string>
+    <string name="buzz_share_on_add_disabled">প্রথমে ঝুঝালকা নেটওয়ার্ক চালু করুন এবং সিঙ্ক হওয়া পর্যন্ত অপেক্ষা করুন।</string>
 </resources>

@@ -5,11 +5,16 @@ import com.v2ray.ang.dto.SubscriptionUpdateResult
 import com.v2ray.ang.dto.entities.SubscriptionCache
 import com.v2ray.ang.dto.entities.SubscriptionItem
 import com.v2ray.ang.util.LogUtil
+import com.v2ray.ang.util.HttpUtil
+import com.v2ray.ang.dto.UrlContentRequest
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import android.os.SystemClock
 import java.net.URI
 import java.util.UUID
 
@@ -95,6 +100,21 @@ object PublicSourceCatalog {
     suspend fun addCustomAndRefresh(name: String, url: String): PublicSourceImportResult = withContext(Dispatchers.IO) {
         importMutex.withLock { importer.addCustomAndRefresh(name, url) }
     }
+
+    suspend fun addAndRefreshForAuto(sourceId: String, deadlineMillis: Long): PublicSourceImportResult {
+        val source = sources.firstOrNull { it.id == sourceId }
+            ?: return PublicSourceImportResult(PublicSourceImportStatus.UNKNOWN_SOURCE)
+        return addCustomAndRefreshForAuto(source.displayName, source.subscriptionUrl, deadlineMillis)
+    }
+
+    suspend fun addCustomAndRefreshForAuto(name: String, url: String, deadlineMillis: Long): PublicSourceImportResult = withContext(Dispatchers.IO) {
+        importMutex.withLock {
+            importer.addCustomAndRefreshForAuto(name, url, deadlineMillis, SystemClock::elapsedRealtime,
+                download = { item, deadline -> HttpUtil.getSubscriptionDirect(UrlContentRequest(
+                    url = item.url, userAgent = item.userAgent, requestHeaders = item.requestHeaders), deadline) },
+                importDownloaded = AngConfigManager::updateConfigViaSub)
+        }
+    }
 }
 
 internal interface PublicSourceStorage {
@@ -124,6 +144,47 @@ internal class PublicSourceImporter(
     private val newId: () -> String = { UUID.randomUUID().toString().replace("-", "") },
     private val reportFailure: (String, String?, Exception) -> Unit = { _, _, _ -> },
 ) {
+    /** Download before creating a group; failed/cancelled downloads cannot leave an empty new subscription. */
+    suspend fun addCustomAndRefreshForAuto(
+        name: String,
+        url: String,
+        deadlineMillis: Long,
+        nowMillis: () -> Long,
+        download: suspend (SubscriptionItem, Long) -> HttpUtil.SubscriptionContent,
+        importDownloaded: (SubscriptionCache, HttpUtil.SubscriptionContent) -> SubscriptionUpdateResult,
+    ): PublicSourceImportResult {
+        val normalized = url.trim()
+        if (!isHttpsSubscription(normalized)) return PublicSourceImportResult(PublicSourceImportStatus.INVALID_URL)
+        var targetId: String? = null
+        try {
+            currentCoroutineContext().ensureActive()
+            if (nowMillis() >= deadlineMillis) return PublicSourceImportResult(PublicSourceImportStatus.REFRESH_FAILED)
+            val existing = storage.subscriptions().firstOrNull { it.subscription.url == normalized }
+            targetId = existing?.guid
+            val snapshot = existing?.subscription?.copy()
+                ?: SubscriptionItem(remarks = name.trim().ifBlank { URI(normalized).host }, url = normalized)
+            if (!snapshot.enabled) return PublicSourceImportResult(PublicSourceImportStatus.DISABLED, targetId)
+            val downloaded = download(snapshot.copy(), deadlineMillis)
+            currentCoroutineContext().ensureActive()
+            if (nowMillis() >= deadlineMillis) return PublicSourceImportResult(PublicSourceImportStatus.REFRESH_FAILED, targetId)
+            // A changed URL/auth/filter must not receive a response fetched using the previous settings.
+            if (existing != null && storage.subscription(existing.guid) != snapshot) {
+                return PublicSourceImportResult(PublicSourceImportStatus.REFRESH_FAILED, targetId)
+            }
+            return PublicSourceImporter(sources, storage, refresh = { target ->
+                if ((existing != null && target.guid != existing.guid) ||
+                    target.subscription.copy(addedTime = snapshot.addedTime) != snapshot) {
+                    SubscriptionUpdateResult(failureCount = 1)
+                } else importDownloaded(target, downloaded)
+            }, newId = newId, reportFailure = reportFailure).addCustomAndRefresh(name, normalized)
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (error: Exception) {
+            reportFailure("auto download", targetId, error)
+            return PublicSourceImportResult(PublicSourceImportStatus.REFRESH_FAILED, targetId)
+        }
+    }
+
     fun addAndRefresh(sourceId: String): PublicSourceImportResult {
         val source = sources.firstOrNull { it.id == sourceId }
             ?: return PublicSourceImportResult(PublicSourceImportStatus.UNKNOWN_SOURCE)

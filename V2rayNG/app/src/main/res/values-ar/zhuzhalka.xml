@@ -17,7 +17,7 @@
     <string name="buzz_stop_failed">تعذّر تأكيد فصل VPN. افصله ثم أعد محاولة الاختيار التلقائي.</string>
     <string name="buzz_no_compatible">لا تحتوي هذه القائمة على خوادم مناسبة للاختيار التلقائي. جرّب مصدراً آخر.</string>
     <string name="buzz_profile_unsupported">لا يناسب هذا الملف الاتصال في الوضع البسيط. جرّب الاختيار التلقائي أو خادماً آخر.</string>
-    <string name="buzz_profile_insecure">يعطّل هذا الخادم التحقق من الشهادة، وهو أمر لم يعد مدعوماً. سيتخطاه الاختيار التلقائي ويفحص خوادم أخرى.</string>
+    <string name="buzz_profile_insecure">يسمح هذا الإعداد بتعطيل حماية الاتصال. سيعيد الاختيار التلقائي اختباره دون تعطيل حماية الاتصال.</string>
     <string name="buzz_cancelling">Stopping after the current check…</string>
     <string name="buzz_progress">Checking server %1$d of %2$d</string>
     <string name="buzz_loading">Downloading server lists…</string>
@@ -27,7 +27,7 @@
     <string name="buzz_manage">Manage subscriptions</string>
     <string name="buzz_public_note">Public servers are run by third parties. Availability and privacy are not guaranteed. Web checks do not verify messages or calls.</string>
     <string name="buzz_credit">Free and open source · based on v2rayNG / Xray</string>
-    <string name="buzz_url_hint">Paste an HTTPS subscription URL in V2Ray format. Your subscription stays on this device.</string>
+    <string name="buzz_url_hint">ألصق رابط اشتراك HTTPS بتنسيق V2Ray. افتراضيًا، يبقى الاشتراك على هذا الجهاز فقط.</string>
     <string name="buzz_url">Subscription URL</string>
     <string name="buzz_add">Add and download</string>
     <string name="buzz_cancelled">Stopped. You can select a server manually.</string>
@@ -54,4 +54,6 @@
     <string name="buzz_share_app_qr_failed">تعذر إنشاء رمز QR.</string>
     <string name="buzz_share_app_qr_description">رمز QR: صفحة تنزيل Zhuzhalka</string>
     <string name="buzz_share_app_retry">إعادة المحاولة</string>
+    <string name="buzz_share_on_add">متاح للجميع في شبكة جوجالكا</string>
+    <string name="buzz_share_on_add_disabled">فعّل شبكة جوجالكا أولًا وانتظر اكتمال المزامنة.</string>
 </resources>

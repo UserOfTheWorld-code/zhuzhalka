@@ -83,7 +83,7 @@ class CommunityProtocolTest {
         assertNull(CommunityProtocol.verify(rewrite { it.addProperty("kind", 1) }, now))
         assertNull(CommunityProtocol.verify(rewrite { it["tags"].asJsonArray[0].asJsonArray.set(1, gson.toJsonTree("other")) }, now))
         assertNull(CommunityProtocol.verify(rewrite { it["tags"].asJsonArray.add(JsonArray()) }, now))
-        assertNull(CommunityProtocol.verify(rewriteContent { it.addProperty("version", 2) }, now))
+        assertNull(CommunityProtocol.verify(rewriteContent { it.addProperty("version", 1) }, now))
     }
 
     @Test fun integerAndBooleanFieldsMustHaveCanonicalTypes() {
@@ -171,6 +171,41 @@ class CommunityProtocolTest {
     @Test fun urlSyntaxCannotInferWhetherAPathOrQueryContainsAPrivateToken() {
         // Validity is not disclosure consent: the UI must show the whole URL before explicit sharing.
         assertTrue(CommunityProtocol.validOffer(offer().copy(url = "https://catalog.example.net/private-token?key=secret"), now))
+    }
+
+    @Test fun legacySignedV1EventsRemainReadableWithoutChangingTheirPayload() {
+        val bundle = CommunityBundle(listOf(vote()), listOf(offer()))
+        val legacy = CommunityProtocol.sign(bundle, signer, now, version = 1)
+        val verified = checkNotNull(CommunityProtocol.verify(legacy, now))
+        assertEquals(1, verified.version)
+        assertEquals(bundle, verified.bundle)
+        assertTrue(legacy.contains(CommunityProtocol.LEGACY_NAMESPACE))
+        assertFalse(legacy.contains(CommunityProtocol.NAMESPACE))
+    }
+
+    @Test fun explicitlyPublicCustomSourceRatingsUseV2AndNeverExposeTheUrlOrCredentials() {
+        val url = "https://catalog.example.net/explicitly-shared?token=already-public"
+        val sourceId = CommunityRanking.sourceIdForUrl(url, setOf(url))!!
+        val bundle = CommunityBundle(votes = listOf(vote().copy(key = CommunityEndpointKey(sourceId, "a".repeat(64)))))
+        val event = CommunityProtocol.sign(bundle, signer, now)
+        assertEquals(2, CommunityProtocol.verify(event, now)?.version)
+        assertEquals(bundle, CommunityProtocol.verify(event, now)?.bundle)
+        assertTrue(event.contains(CommunityProtocol.NAMESPACE))
+        assertFalse(event.contains(url))
+        assertFalse(event.contains("already-public"))
+        assertThrows(IllegalArgumentException::class.java) { CommunityProtocol.sign(bundle, signer, now, version = 1) }
+    }
+
+    @Test fun v1NamespaceRejectsDynamicRatingsEvenWithAnAuthenticSignature() {
+        val sourceId = CommunityRanking.sourceIdForUrl(offer().url, setOf(offer().url))!!
+        val forgedSchema = rewrite { event ->
+            event["tags"].asJsonArray.forEach { it.asJsonArray.set(1, gson.toJsonTree(CommunityProtocol.LEGACY_NAMESPACE)) }
+            val content = JsonParser.parseString(event["content"].asString).asJsonObject
+            content.addProperty("version", 1)
+            content["votes"].asJsonArray[0].asJsonObject.addProperty("source", sourceId)
+            event.addProperty("content", gson.toJson(content))
+        }
+        assertNull(CommunityProtocol.verify(forgedSchema, now))
     }
 
     private fun rewriteContent(change: (JsonObject) -> Unit): String = rewrite { event ->

@@ -16,6 +16,26 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 class ZhuzhalkaAutoPickerTest {
+    @Test fun subscriptionChainsAreExcludedFromBothResolutionAndSnapshots() {
+        val source = source()
+        for (subscription in listOf(SubscriptionItem(prevProfile = "before"), SubscriptionItem(nextProfile = "after"))) {
+            whenever(source.getSubscriptionItem("catalog")).thenReturn(subscription)
+            whenever(source.getSubscriptions()).thenReturn(listOf(SubscriptionCache("catalog", subscription)))
+            assertNull(resolveAutoCandidate(source, "known"))
+            assertTrue(loadEligibleAutoCandidates(source).isEmpty())
+        }
+    }
+
+    @Test fun strictAndLegacyFlagsForSameEndpointAreNotProbedTwice() = runBlocking {
+        val scenario = Scenario()
+        val strict = scenario.add("strict")
+        val legacy = scenario.add("legacy")
+        scenario.profiles[legacy.guid] = scenario.profiles.getValue(strict.guid).copy(insecure = true)
+        scenario.saved = listOf(strict, legacy)
+        assertFalse(scenario.run())
+        assertEquals(listOf("saved", "probe:strict"), scenario.events)
+    }
+
     @Test fun successfulRecentCandidateAvoidsAllCatalogDownloads() = runBlocking {
         val scenario = Scenario()
         scenario.recent = listOf(scenario.add("known"), scenario.add("spare"))
@@ -87,7 +107,7 @@ class ZhuzhalkaAutoPickerTest {
         assertEquals(listOf("probe:same", "saved", "refresh:one", "probe:same"), scenario.events)
     }
 
-    @Test fun missingUnsupportedInsecureAndMovedProfilesDoNotReachNativeProbe() = runBlocking {
+    @Test fun missingUnsupportedAndMovedProfilesSkipWhileLegacyFlagReceivesStrictRetry() = runBlocking {
         val scenario = Scenario()
         val missing = scenario.add("missing")
         scenario.profiles.remove(missing.guid)
@@ -101,7 +121,7 @@ class ZhuzhalkaAutoPickerTest {
         scenario.saved = listOf(scenario.add("good"))
         scenario.success = "good"
         assertTrue(scenario.run())
-        assertEquals(listOf("saved", "probe:good"), scenario.events)
+        assertEquals(listOf("probe:insecure", "saved", "probe:good"), scenario.events)
     }
 
     @Test fun emptySourcesAndAllFailedCandidatesNeverInventSuccess() = runBlocking {
@@ -270,13 +290,13 @@ class ZhuzhalkaAutoPickerTest {
         assertNull(resolveAutoCandidate(source, "known"))
     }
 
-    @Test fun profileChangedToUnsupportedOrInsecureCannotReuseOldSuccess() {
+    @Test fun unsupportedProfileIsRejectedButInsecureProfileCanBeStrictlyRetested() {
         val source = source()
         whenever(source.decodeServerConfig("known")).thenReturn(ProfileItem(configType = EConfigType.CUSTOM, subscriptionId = "catalog"))
         assertNull(resolveAutoCandidate(source, "known"))
         whenever(source.decodeServerConfig("known")).thenReturn(ProfileItem(configType = EConfigType.VLESS,
             subscriptionId = "catalog", insecure = true))
-        assertNull(resolveAutoCandidate(source, "known"))
+        assertEquals(AutoCandidate("catalog", "known"), resolveAutoCandidate(source, "known"))
     }
 
     @Test fun ungroupedProfilesResolveThroughDefaultSubscription() {
@@ -301,7 +321,7 @@ class ZhuzhalkaAutoPickerTest {
         whenever(source.decodeServerConfig("custom")).thenReturn(profile("custom", "a").copy(configType = EConfigType.CUSTOM))
         whenever(source.decodeServerConfig("insecure")).thenReturn(profile("insecure", "a").copy(insecure = true))
         whenever(source.decodeServerConfig("moved")).thenReturn(profile("moved", "elsewhere"))
-        assertEquals(listOf(AutoCandidate("b", "b1"), AutoCandidate("a", "a1"), AutoCandidate("a", "a2")),
+        assertEquals(listOf(AutoCandidate("b", "b1"), AutoCandidate("a", "a1"), AutoCandidate("a", "a2"), AutoCandidate("a", "insecure")),
             loadEligibleAutoCandidates(source, selectedGuid = "b1"))
         verify(source, times(1)).getServerGuidList("a")
         verify(source, times(1)).getServerGuidList("b")

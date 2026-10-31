@@ -1,0 +1,77 @@
+name: Publish verified local APKs
+
+on:
+  workflow_dispatch:
+    inputs:
+      bundle_commit:
+        description: Exact 40-character commit SHA of the verified public artifact bundle
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: zhuzhalka-prebuilt-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: ${{ github.ref == 'refs/heads/master' && github.repository == 'UserOfTheWorld-code/zhuzhalka' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    permissions:
+      contents: write
+    env:
+      ANDROID_BUILD_TOOLS: 37.0.0
+    steps:
+      - name: Check out the exact source commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Set up JDK 21 for APK verification
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Ensure the exact Android verification tools are available
+        run: |
+          set -euo pipefail
+          export ANDROID_HOME="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+          test -n "$ANDROID_HOME"
+          if [[ ! -x "$ANDROID_HOME/build-tools/$ANDROID_BUILD_TOOLS/apksigner" || ! -x "$ANDROID_HOME/build-tools/$ANDROID_BUILD_TOOLS/aapt2" ]]; then
+            sdkmanager="$(command -v sdkmanager || true)"
+            if [[ -z "$sdkmanager" ]]; then sdkmanager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"; fi
+            test -x "$sdkmanager"
+            # Hosted SDK licenses are already accepted; never accept new terms automatically.
+            "$sdkmanager" --sdk_root="$ANDROID_HOME" --channel=0 --install "build-tools;$ANDROID_BUILD_TOOLS" </dev/null
+          fi
+          test -x "$ANDROID_HOME/build-tools/$ANDROID_BUILD_TOOLS/apksigner"
+          test -x "$ANDROID_HOME/build-tools/$ANDROID_BUILD_TOOLS/aapt2"
+          printf 'ANDROID_HOME=%s\n' "$ANDROID_HOME" >> "$GITHUB_ENV"
+
+      - name: Fetch and verify the signed artifacts without a signing key
+        env:
+          BUNDLE_COMMIT: ${{ inputs.bundle_commit }}
+        run: python3 scripts/fetch-release-bundle.py --bundle-commit "$BUNDLE_COMMIT" --output release-dist
+
+      - name: Upload, read back and publish the existing alpha draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREBUILT_RELEASE: 'true'
+        run: bash scripts/publish-release.sh release-dist
+
+      - name: Remove only this exact temporary artifact branch after publication
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUNDLE_COMMIT: ${{ inputs.bundle_commit }}
+        run: |
+          set -euo pipefail
+          [[ "$BUNDLE_COMMIT" =~ ^[0-9a-f]{40}$ ]]
+          ref="heads/release-bundle/alpha4-$BUNDLE_COMMIT"
+          actual="$(gh api "repos/UserOfTheWorld-code/zhuzhalka/git/ref/$ref" --jq '.object.sha')"
+          [[ "$actual" == "$BUNDLE_COMMIT" ]]
+          gh api --method DELETE "repos/UserOfTheWorld-code/zhuzhalka/git/refs/$ref"

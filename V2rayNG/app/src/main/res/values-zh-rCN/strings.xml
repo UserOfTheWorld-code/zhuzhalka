@@ -564,13 +564,13 @@
 
     <string name="buzz_community_title">Жужалка 网络</string>
     <string name="buzz_community_enable">启用参与</string>
-    <string name="buzz_community_consent">应用将公开分享内置公共目录中服务器的哈希标识、网页检查结果、取整的延迟、检查时间和本次安装的公钥。中继服务器也能看到您的 IP 地址。个人订阅和连接凭据不会自动分享。其他人可能复制公开数据；退出参与无法收回这些副本。</string>
+    <string name="buzz_community_consent">应用将公开分享内置公开目录以及您明确分享或接受的列表中服务器的哈希标识、网页检查结果、取整后的延迟、检查时间和本次安装的公钥。中继服务器也能看到您的 IP 地址。私人订阅和连接凭据不会自动分享。其他人可以复制公开数据；停止参与无法收回这些副本。</string>
     <string name="buzz_community_share_named">分享：%1$s</string>
     <string name="buzz_community_share_title">公开订阅？</string>
-    <string name="buzz_community_share_warning">完整订阅链接（包括访问令牌）将向所有参与者和中继运营者公开。他们可以使用订阅并复制链接。仅分享您自己的订阅，且必须得到服务商允许公开分享。副本无法收回。个人订阅绝不会自动公开。</string>
+    <string name="buzz_community_share_warning">完整订阅链接（包括访问令牌）将向所有参与者和中继运营者公开。他们可以使用订阅并复制链接。仅分享您自己的订阅，且必须得到服务商允许公开分享。副本无法收回。参与开启期间，您确认的发布会在后续交换中自动续期；其他订阅保持私密。</string>
     <string name="buzz_community_publish">向所有人公开</string>
     <string name="buzz_community_load_title">加载推荐列表？</string>
-    <string name="buzz_community_load_warning">此地址由另一位参与者分享。其内容未经信任，且可能改变。加载时会向该网站发送请求，网站能够看到您的 IP 地址。只有点击加载后才会下载列表；服务器仍需通过本地检查。</string>
+    <string name="buzz_community_load_warning">此地址由其他参与者分享。其内容不可信且可能变化。下载时会访问该网站，网站可以看到您的 IP 地址。确认后，接受的列表可能在自动选择时自动刷新。参与开启时会分享本地检查的评分，但不会自动再次发布此链接。服务器仍需通过本地检查。</string>
     <string name="buzz_community_load">加载列表</string>
     <string name="buzz_community_stop_sharing">停止分享我的列表</string>
     <string name="buzz_community_stop_warning">您当前分享的列表将不再出现在后续交换中。参与者或中继已保存的副本无法收回。本地订阅不会被删除。</string>

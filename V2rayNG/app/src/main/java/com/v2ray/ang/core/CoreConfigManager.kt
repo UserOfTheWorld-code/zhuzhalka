@@ -83,6 +83,25 @@ object CoreConfigManager {
         }
     }
 
+    /** Isolated simple-client probe: no GUID reread, subscription chains or user routing targets. */
+    internal fun getV2rayConfig4Probe(context: Context, guid: String, profile: ProfileItem): ConfigResult {
+        try {
+            val configContext = CoreConfigContextBuilder.buildProbe(context, guid, profile)
+                ?: return ConfigResult(status = false, guid = guid)
+            val config = buildUnifiedConfig(configContext)
+            // A failed conversion must never leave a direct outbound as the apparent winning proxy.
+            if (config.outbounds.firstOrNull()?.tag != AppConfig.TAG_PROXY) {
+                return ConfigResult(status = false, guid = guid)
+            }
+            postProcessForSpeedtest(config)
+            return toConfigResult(configContext, config)
+        } catch (error: Exception) {
+            // Parser/native errors can include authentication fields from the profile.
+            LogUtil.e(AppConfig.TAG, "Strict probe configuration failed for $guid", IllegalStateException(error.javaClass.simpleName))
+            return ConfigResult(status = false, guid = guid)
+        }
+    }
+
     /**
      * Build configuration for custom profiles.
      */

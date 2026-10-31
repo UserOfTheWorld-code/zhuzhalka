@@ -185,13 +185,33 @@ class ServiceWebProbeTest {
         }
     }
 
-    @Test fun unsupportedOrUnverifiedTlsProfilesRemainIneligible() {
+    @Test fun legacyInsecureProfilesAreEligibleOnlyAsSeparateStrictCopies() {
         val profile = ProfileItem(configType = EConfigType.VLESS, insecure = true)
-        assertFalse(ServiceWebProbe.canProbeProfile(profile))
+        assertTrue(ServiceWebProbe.canProbeProfile(profile))
+        assertEquals(false, ServiceWebProbe.strictProfile(profile)?.insecure)
+        assertEquals(true, profile.insecure)
         assertTrue(ServiceWebProbe.canProbeProfile(profile.copy(insecure = false)))
         assertTrue(ServiceWebProbe.canProbeProfile(profile.copy(pinnedCA256 = "ab".repeat(32))))
         for (type in listOf(EConfigType.CUSTOM, EConfigType.POLICYGROUP, EConfigType.PROXYCHAIN)) {
             assertFalse(ServiceWebProbe.canProbeProfile(profile.copy(configType = type, insecure = false)))
+        }
+    }
+
+    @Test fun strictRetryPreservesProviderAuthenticationPinSniAndReality() {
+        val original = ProfileItem(configType = EConfigType.VLESS, insecure = true,
+            password = "test-auth", security = "reality", sni = "name.example", publicKey = "test-key",
+            shortId = "test-id", pinnedCA256 = "ab".repeat(32), verifyPeerCertByName = "name.example")
+        val strict = ServiceWebProbe.strictProfile(original)
+        assertEquals(original.copy(insecure = false), strict)
+        assertNotSame(original, strict)
+        strict!!.sni = "changed.example"
+        assertEquals("name.example", original.sni)
+        assertNull(ServiceWebProbe.strictProfile(original.copy(proxyChainProfiles = "other")))
+    }
+
+    @Test fun irrelevantLegacyFlagDoesNotDiscardWireguardOrShadowsocks() {
+        for (type in listOf(EConfigType.WIREGUARD, EConfigType.SHADOWSOCKS)) {
+            assertEquals(false, ServiceWebProbe.strictProfile(ProfileItem(configType = type, insecure = true))?.insecure)
         }
     }
 }

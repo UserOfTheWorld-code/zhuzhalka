@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -47,6 +46,7 @@ fun ZhuzhalkaScreen(
     var showSubscription by rememberSaveable { mutableStateOf(false) }
     var showDisconnectForAutoPick by rememberSaveable { mutableStateOf(false) }
     var subscriptionUrl by rememberSaveable { mutableStateOf("") }
+    var shareNewSubscription by rememberSaveable { mutableStateOf(false) }
     var showCommunity by rememberSaveable { mutableStateOf(false) }
     var showCommunityConsent by rememberSaveable { mutableStateOf(false) }
     var communityShareGroupId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -85,15 +85,16 @@ fun ZhuzhalkaScreen(
             Button(
                 onClick = { onAction(MainAction.ToggleService) },
                 enabled = state.isRunning || (!work.busy && selected != null),
-                shape = CircleShape,
+                shape = RoundedCornerShape(20.dp),
                 contentPadding = PaddingValues(horizontal = 12.dp),
                 colors = ButtonDefaults.buttonColors(),
-                modifier = Modifier.width(176.dp).heightIn(min = 176.dp)
+                modifier = Modifier.fillMaxWidth().heightIn(min = 72.dp)
             ) {
-                Column(Modifier.padding(vertical = 20.dp), horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(Modifier.padding(vertical = 16.dp), verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Icon(painterResource(R.drawable.ic_buzz_power), null, Modifier.size(32.dp))
                     Text(stringResource(if (state.isRunning) R.string.buzz_disconnect else R.string.buzz_connect),
+                        modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center,
                         fontWeight = FontWeight.SemiBold)
                 }
@@ -144,26 +145,27 @@ fun ZhuzhalkaScreen(
             PublicSourceCatalog.sources.forEach { source ->
                 val cached = state.subscriptionButtons.firstOrNull { it.publicSourceId == source.id }
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    OutlinedButton(onClick = {
+                    TextButton(onClick = {
                         if (cached == null) onAction(MainAction.LoadPublicSource(source.id))
                         else { onAction(MainAction.SelectGroup(cached.groupId)); showServers = true }
                     }, enabled = canEdit,
                         modifier = Modifier.weight(1f).heightIn(min = 48.dp), shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)) {
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)) {
                         Text(source.displayName, Modifier.fillMaxWidth(), maxLines = 2, overflow = TextOverflow.Ellipsis)
                     }
                     TextButton(onClick = { onAction(MainAction.LoadPublicSource(source.id, selectAfterLoad = false)) }, enabled = !work.busy) {
                         Text(stringResource(R.string.buzz_refresh))
                     }
                 }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
             state.subscriptionButtons.filter { it.publicSourceId == null }.forEach { subscription ->
                 key(subscription.groupId) {
                     Column(Modifier.fillMaxWidth()) {
                         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                            OutlinedButton(onClick = { onAction(MainAction.SelectGroup(subscription.groupId)); showServers = true },
+                            TextButton(onClick = { onAction(MainAction.SelectGroup(subscription.groupId)); showServers = true },
                                 enabled = canEdit, modifier = Modifier.weight(1f).heightIn(min = 48.dp), shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)) {
+                                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)) {
                                 Text(subscription.name, Modifier.fillMaxWidth(), maxLines = 2, overflow = TextOverflow.Ellipsis)
                             }
                             TextButton(onClick = { onAction(MainAction.LoadSavedSubscription(subscription.groupId)) }, enabled = !work.busy) {
@@ -185,11 +187,11 @@ fun ZhuzhalkaScreen(
                 Text(stringResource(R.string.buzz_own))
             }
             TextButton(onClick = onSubscriptions, enabled = !work.busy) { Text(stringResource(R.string.buzz_manage)) }
-            OutlinedButton(onClick = { showCommunity = true },
+            TextButton(onClick = { showCommunity = true },
                 modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp), shape = RoundedCornerShape(12.dp)) {
                 Text(stringResource(R.string.buzz_community_title))
             }
-            OutlinedButton(onClick = { onAction(MainAction.OpenAppShare) },
+            TextButton(onClick = { onAction(MainAction.OpenAppShare) },
                 modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp), shape = RoundedCornerShape(12.dp)) {
                 Text(stringResource(R.string.buzz_share_app))
             }
@@ -308,11 +310,15 @@ fun ZhuzhalkaScreen(
 
     if (showSubscription) ZhuzhalkaSubscriptionDialog(
         url = subscriptionUrl,
-        onUrlChange = { subscriptionUrl = it },
-        onDismiss = { showSubscription = false },
+        onUrlChange = { subscriptionUrl = it; shareNewSubscription = false },
+        sharePublicly = shareNewSubscription,
+        sharingAvailable = community.ready && community.enabled && !community.syncing,
+        onSharePubliclyChange = { shareNewSubscription = it },
+        onDismiss = { showSubscription = false; shareNewSubscription = false },
         onConfirm = {
-            onAction(MainAction.LoadOwnSubscription(subscriptionUrl.trim()))
+            onAction(MainAction.LoadOwnSubscription(subscriptionUrl.trim(), shareNewSubscription))
             subscriptionUrl = ""
+            shareNewSubscription = false
             showSubscription = false
         }
     )

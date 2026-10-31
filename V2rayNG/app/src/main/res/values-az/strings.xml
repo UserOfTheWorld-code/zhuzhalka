@@ -567,13 +567,13 @@
 
     <string name="buzz_community_title">Жужалка şəbəkəsi</string>
     <string name="buzz_community_enable">İştirakı aktivləşdir</string>
-    <string name="buzz_community_consent">Tətbiq daxili açıq kataloqlardakı serverlərin həş identifikatorlarını, veb yoxlama nəticələrini, yuvarlaqlaşdırılmış gecikməni, yoxlama vaxtını və bu quraşdırmanın açıq açarını ictimai paylaşacaq. Relay serverləri IP ünvanınızı da görür. Şəxsi abunəliklər və qoşulma məlumatları avtomatik paylaşılmır. Başqaları açıq məlumatları köçürə bilər; iştirakı söndürmək bu nüsxələri geri qaytarmır.</string>
+    <string name="buzz_community_consent">Tətbiq daxili açıq kataloqlardan və açıq şəkildə paylaşdığınız və ya qəbul etdiyiniz siyahılardan serverləri tanıdan heşləri, veb yoxlama nəticələrini, yuvarlaqlaşdırılmış gecikməni, yoxlama vaxtlarını və bu quraşdırmanın açıq açarını yayımlayacaq. Relay serverləri IP ünvanınızı da görür. Şəxsi abunəliklər və bağlantı giriş məlumatları avtomatik paylaşılmır. Başqaları açıq məlumatları köçürə bilər; iştirakı söndürmək nüsxələri geri qaytarmır.</string>
     <string name="buzz_community_share_named">Paylaş: %1$s</string>
     <string name="buzz_community_share_title">Abunəliyi açıq paylaşmaq?</string>
-    <string name="buzz_community_share_warning">Giriş tokeni DAXİL OLMAQLA TAM abunəlik URL-i BÜTÜN iştirakçılara və relay operatorlarına açıq olacaq. Onlar abunəlikdən istifadə edə və keçidi köçürə bilərlər. Yalnız öz abunəliyinizi və yalnız provayder açıq paylaşıma icazə verdikdə paylaşın. Nüsxələri geri çağırmaq mümkün deyil. Şəxsi abunəliklər heç vaxt avtomatik yayımlanmır.</string>
+    <string name="buzz_community_share_warning">Giriş tokeni DAXİL OLMAQLA abunəliyin TAM URL-i BÜTÜN iştirakçılara və relay operatorlarına açıq olacaq. Onlar abunəlikdən istifadə edə və keçidi köçürə bilərlər. Yalnız öz abunəliyinizi və yalnız provayder açıq paylaşıma icazə verdikdə paylaşın. Nüsxələri geri çağırmaq mümkün deyil. İştirak aktiv olduqda təsdiqlədiyiniz paylaşım sonrakı mübadilələrdə yenilənir; digər abunəliklər şəxsi qalır.</string>
     <string name="buzz_community_publish">Hamı üçün yayımla</string>
     <string name="buzz_community_load_title">Təklif olunan siyahı yüklənsin?</string>
-    <string name="buzz_community_load_warning">Bu ünvanı başqa iştirakçı paylaşıb. Məzmun etibarlı sayılmır və dəyişə bilər. Yükləmə zamanı sayta sorğu göndərilir və sayt IP ünvanınızı görə bilər. Siyahı yalnız Yüklə düyməsindən sonra alınır; serverlər yenə yerli yoxlamadan keçməlidir.</string>
+    <string name="buzz_community_load_warning">Bu ünvanı başqa iştirakçı paylaşıb. Məzmun etibarlı sayılmır və dəyişə bilər. Yükləmə zamanı sayt IP ünvanınızı görə bilər. Təsdiqdən sonra qəbul edilən siyahı avtomatik seçim zamanı yenilənə bilər. İştirak aktiv olduqda yerli yoxlama qiymətləri paylaşılır; URL avtomatik yenidən yayımlanmır. Serverlər yenə yerli yoxlamadan keçməlidir.</string>
     <string name="buzz_community_load">Siyahını yüklə</string>
     <string name="buzz_community_stop_sharing">Siyahılarımı paylaşmağı dayandır</string>
     <string name="buzz_community_stop_warning">Cari siyahı təklifləriniz gələcək mübadilədən çıxarılacaq. İştirakçıların və relay serverlərinin artıq saxladığı nüsxələri geri çağırmaq mümkün deyil. Yerli abunəliklər silinmir.</string>

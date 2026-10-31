@@ -17,7 +17,7 @@
     <string name="buzz_stop_failed">無法確認 VPN 已中斷。請先中斷，再重試自動選擇。</string>
     <string name="buzz_no_compatible">此清單沒有適合自動選擇的伺服器。請嘗試其他來源。</string>
     <string name="buzz_profile_unsupported">此設定檔不適合在簡易模式下連線。請嘗試自動選擇或其他伺服器。</string>
-    <string name="buzz_profile_insecure">此伺服器停用了憑證驗證，此設定已不再受支援。自動選擇會略過它並檢查其他伺服器。</string>
+    <string name="buzz_profile_insecure">此設定允許關閉連線保護。自動選擇將重新測試此設定，同時保持連線保護開啟。</string>
     <string name="buzz_cancelling">Stopping after the current check…</string>
     <string name="buzz_progress">Checking server %1$d of %2$d</string>
     <string name="buzz_loading">Downloading server lists…</string>
@@ -27,7 +27,7 @@
     <string name="buzz_manage">Manage subscriptions</string>
     <string name="buzz_public_note">Public servers are run by third parties. Availability and privacy are not guaranteed. Web checks do not verify messages or calls.</string>
     <string name="buzz_credit">Free and open source · based on v2rayNG / Xray</string>
-    <string name="buzz_url_hint">Paste an HTTPS subscription URL in V2Ray format. Your subscription stays on this device.</string>
+    <string name="buzz_url_hint">貼上 V2Ray 格式的 HTTPS 訂閱連結。預設情況下，訂閱僅儲存在此裝置上。</string>
     <string name="buzz_url">Subscription URL</string>
     <string name="buzz_add">Add and download</string>
     <string name="buzz_cancelled">Stopped. You can select a server manually.</string>
@@ -54,4 +54,6 @@
     <string name="buzz_share_app_qr_failed">無法產生 QR 碼。</string>
     <string name="buzz_share_app_qr_description">QR 碼：Zhuzhalka 下載頁面</string>
     <string name="buzz_share_app_retry">重試</string>
+    <string name="buzz_share_on_add">向 Zhuzhalka 網路中的所有人公開</string>
+    <string name="buzz_share_on_add_disabled">請先啟用 Zhuzhalka 網路並等待同步完成。</string>
 </resources>

@@ -23,6 +23,21 @@ import com.v2ray.ang.util.Utils
  */
 object CoreConfigContextBuilder {
 
+    /** Exact, isolated single-profile probe plan. Subscription/routing storage is intentionally not read. */
+    internal fun buildProbe(context: Context, guid: String, profile: ProfileItem): CoreConfigContext? {
+        val strict = ServiceWebProbe.strictProfile(profile) ?: return null
+        return CoreConfigContext(
+            context = context,
+            guid = guid,
+            resolvedOutbounds = listOf(CoreConfigContext.ResolvedOutbound(
+                tag = AppConfig.TAG_PROXY,
+                profile = strict,
+                resolvedProfiles = listOf(strict),
+                resolvedType = CoreResolvedType.NORMAL,
+            )),
+        )
+    }
+
     /**
      * Load one profile and produce a fully analyzed context.
      *

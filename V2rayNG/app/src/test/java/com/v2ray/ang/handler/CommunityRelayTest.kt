@@ -242,6 +242,29 @@ class CommunityRelayTest {
         assertEquals(1, CommunityJson.parse("[1]", 3)?.asJsonArray?.get(0)?.asInt)
     }
 
+    @Test
+    fun requestReadsBothVersionNamespacesAndAuthenticatesLegacyAndV2Events() = runBlocking {
+        val legacy = CommunityProtocol.sign(CommunityBundle(), first, now, version = 1)
+        val current = signed(second)
+        val requestSeen = CompletableDeferred<JsonArray>()
+        val server = server().apply { enqueue(upgrade { socket, request ->
+            if (request[0].asString == "REQ") {
+                requestSeen.complete(request)
+                val sub = request[1].asString
+                socket.send(eventFrame(sub, legacy))
+                socket.send(eventFrame(sub, current))
+                socket.send(frame("EOSE", sub))
+            }
+        }) }
+        val result = relay(server).exchange(null, now)
+        val filter = requestSeen.await()[2].asJsonObject
+        val expected = setOf(CommunityProtocol.LEGACY_NAMESPACE, CommunityProtocol.NAMESPACE)
+        assertEquals(expected, filter["#d"].asJsonArray.map { it.asString }.toSet())
+        assertEquals(expected, filter["#t"].asJsonArray.map { it.asString }.toSet())
+        assertEquals(setOf(1, 2), result.events.map { it.version }.toSet())
+        assertEquals(1, result.readableRelays)
+    }
+
     private fun signed(signer: CommunitySigner, hash: String = "11".repeat(32)) = CommunityProtocol.sign(
         CommunityBundle(votes = listOf(CommunityVote(CommunityEndpointKey("eternity", hash), signer.publicKeyHex(), now, true, 250))), signer, now,
     )

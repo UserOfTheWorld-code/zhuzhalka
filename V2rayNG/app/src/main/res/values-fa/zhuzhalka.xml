@@ -17,7 +17,7 @@
     <string name="buzz_stop_failed">قطع اتصال VPN تأیید نشد. آن را قطع کنید و انتخاب خودکار را دوباره انجام دهید.</string>
     <string name="buzz_no_compatible">این فهرست سرور مناسبی برای انتخاب خودکار ندارد. منبع دیگری را امتحان کنید.</string>
     <string name="buzz_profile_unsupported">این پروفایل برای اتصال در حالت ساده مناسب نیست. انتخاب خودکار یا سرور دیگری را امتحان کنید.</string>
-    <string name="buzz_profile_insecure">این سرور بررسی گواهی را غیرفعال کرده است که دیگر پشتیبانی نمی‌شود. انتخاب خودکار از آن عبور می‌کند و سرورهای دیگر را بررسی می‌کند.</string>
+    <string name="buzz_profile_insecure">این پیکربندی اجازهٔ غیرفعال کردن حفاظت اتصال را می‌دهد. انتخاب خودکار آن را بدون غیرفعال کردن حفاظت اتصال دوباره بررسی می‌کند.</string>
     <string name="buzz_cancelling">Stopping after the current check…</string>
     <string name="buzz_progress">Checking server %1$d of %2$d</string>
     <string name="buzz_loading">Downloading server lists…</string>
@@ -27,7 +27,7 @@
     <string name="buzz_manage">Manage subscriptions</string>
     <string name="buzz_public_note">Public servers are run by third parties. Availability and privacy are not guaranteed. Web checks do not verify messages or calls.</string>
     <string name="buzz_credit">Free and open source · based on v2rayNG / Xray</string>
-    <string name="buzz_url_hint">Paste an HTTPS subscription URL in V2Ray format. Your subscription stays on this device.</string>
+    <string name="buzz_url_hint">نشانی HTTPS اشتراک با قالب V2Ray را وارد کنید. به‌طور پیش‌فرض، اشتراک فقط در این دستگاه می‌ماند.</string>
     <string name="buzz_url">Subscription URL</string>
     <string name="buzz_add">Add and download</string>
     <string name="buzz_cancelled">Stopped. You can select a server manually.</string>
@@ -54,4 +54,6 @@
     <string name="buzz_share_app_qr_failed">ساخت کد QR انجام نشد.</string>
     <string name="buzz_share_app_qr_description">کد QR: صفحه دانلود Zhuzhalka</string>
     <string name="buzz_share_app_retry">دوباره تلاش کنید</string>
+    <string name="buzz_share_on_add">در دسترس همه در شبکهٔ ژوژالکا</string>
+    <string name="buzz_share_on_add_disabled">ابتدا شبکهٔ ژوژالکا را فعال کنید و منتظر همگام‌سازی بمانید.</string>
 </resources>

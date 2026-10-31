@@ -23,6 +23,33 @@ class CommunityRankingTest {
     private fun twoVotes(endpoint: Int, latency: Int? = null) =
         listOf(vote(endpoint, 1, latency = latency), vote(endpoint, 2, latency = latency))
 
+    @Test fun customSourceRequiresExactExplicitApprovalAndStillRejectsAuthentication() {
+        val url = "https://catalog.example.net/explicitly-public?token=approved"
+        val sub = SubscriptionItem(url = url)
+        assertNull(CommunityRanking.sourceIdForUrl(url))
+        val approved = setOf(url)
+        val id = CommunityRanking.sourceIdForUrl(url, approved)!!
+        assertTrue(id.matches(Regex("list:[0-9a-f]{64}")))
+        assertNull(CommunityRanking.publicEndpointKey(id, sub, profile()))
+        assertNotNull(CommunityRanking.publicEndpointKey(id, sub, profile(), approved))
+        assertNull(CommunityRanking.publicEndpointKey(id, sub.copy(url = url + "&changed=1"), profile(), approved))
+        assertNull(CommunityRanking.publicEndpointKey(id, sub.copy(requestHeaders = "Authorization: private"), profile(), approved))
+        assertNull(CommunityRanking.publicEndpointKey(id, sub.copy(enabled = false), profile(), approved))
+    }
+
+    @Test fun approvedCustomSourceKeysIgnoreCredentialChangesAndKeepNormalPromotionLimits() {
+        val url = "https://catalog.example.net/public.txt"
+        val approved = setOf(url)
+        val id = CommunityRanking.sourceIdForUrl(url, approved)!!
+        val sub = SubscriptionItem(url = url)
+        val endpoint = CommunityRanking.publicEndpointKey(id, sub, profile(), approved)!!
+        assertEquals(endpoint, CommunityRanking.publicEndpointKey(id, sub, profile().copy(password = "new-private-password", path = "/secret"), approved))
+        val reports = listOf(1, 2).map { CommunityVote(endpoint, author(it), now, true, 250) }
+        val candidates = listOf("ordinary", "public")
+        assertEquals(listOf("public", "ordinary"), CommunityRanking.promote(candidates, reports, now, { if (it == "public") endpoint else null }))
+        assertEquals(candidates, CommunityRanking.promote(candidates, reports.take(1), now, { if (it == "public") endpoint else null }))
+    }
+
     @Test fun eachCuratedSourceCanProduceItsOwnOpaqueEndpointKey() {
         PublicSourceCatalog.sources.forEach { entry ->
             val result = CommunityRanking.publicEndpointKey(entry.id, SubscriptionItem(url = entry.subscriptionUrl), profile())

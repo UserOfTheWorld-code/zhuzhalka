@@ -12,8 +12,8 @@ import subprocess
 import time
 import zipfile
 
-VERSION = "0.3.0-alpha.3"
-VERSION_CODE = 5000302
+VERSION = "0.3.0-alpha.4"
+VERSION_CODE = 5000303
 ROOT = Path(__file__).resolve().parents[1]
 ABIS = ("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
 

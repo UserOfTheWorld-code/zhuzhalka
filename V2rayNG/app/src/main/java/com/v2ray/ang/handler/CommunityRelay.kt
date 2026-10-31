@@ -86,8 +86,8 @@ internal class CommunityRelay(
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 val filter = JsonObject().apply {
                     add("kinds", JsonArray().apply { add(CommunityProtocol.KIND) })
-                    add("#d", JsonArray().apply { add(CommunityProtocol.NAMESPACE) })
-                    add("#t", JsonArray().apply { add(CommunityProtocol.NAMESPACE) })
+                    add("#d", JsonArray().apply { add(CommunityProtocol.NAMESPACE); add(CommunityProtocol.LEGACY_NAMESPACE) })
+                    add("#t", JsonArray().apply { add(CommunityProtocol.NAMESPACE); add(CommunityProtocol.LEGACY_NAMESPACE) })
                     addProperty("since", (nowMillis - CommunityProtocol.TTL_MILLIS).coerceAtLeast(0) / 1000)
                     addProperty("limit", 64)
                 }

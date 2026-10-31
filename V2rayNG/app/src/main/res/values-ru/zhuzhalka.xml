@@ -17,7 +17,7 @@
     <string name="buzz_stop_failed">Не удалось дождаться отключения VPN. Отключите его и повторите автоподбор.</string>
     <string name="buzz_no_compatible">В списке нет подходящих для автоподбора серверов. Попробуйте другой источник.</string>
     <string name="buzz_profile_unsupported">Этот профиль не подходит для подключения в простом режиме. Попробуйте автоподбор или другой сервер.</string>
-    <string name="buzz_profile_insecure">У этого сервера отключена проверка сертификата, что больше не поддерживается. Автоподбор пропустит его и проверит другие.</string>
+    <string name="buzz_profile_insecure">В профиле разрешено отключение защиты соединения. Автоподбор повторно проверит его без отключения защиты соединения.</string>
     <string name="buzz_cancelling">Остановка после текущей проверки…</string>
     <string name="buzz_progress">Проверка сервера %1$d из %2$d</string>
     <string name="buzz_loading">Загружаем списки серверов…</string>
@@ -27,7 +27,7 @@
     <string name="buzz_manage">Управление подписками</string>
     <string name="buzz_public_note">Серверами управляют сторонние владельцы. Доступность и приватность не гарантированы. Веб-проверки не проверяют сообщения и звонки.</string>
     <string name="buzz_credit">Бесплатно · открытый код v2rayNG / Xray</string>
-    <string name="buzz_url_hint">Вставьте HTTPS-ссылку на подписку в формате V2Ray. Подписка хранится на этом устройстве.</string>
+    <string name="buzz_url_hint">Вставьте HTTPS-ссылку на подписку в формате V2Ray. По умолчанию подписка остаётся на этом устройстве.</string>
     <string name="buzz_url">Ссылка на подписку</string>
     <string name="buzz_add">Добавить и загрузить</string>
     <string name="buzz_cancelled">Остановлено. Можно выбрать сервер вручную.</string>
@@ -54,4 +54,6 @@
     <string name="buzz_share_app_qr_failed">Не удалось создать QR-код.</string>
     <string name="buzz_share_app_qr_description">QR-код: страница скачивания Жужалки</string>
     <string name="buzz_share_app_retry">Повторить</string>
+    <string name="buzz_share_on_add">Доступна всем в сети Жужалки</string>
+    <string name="buzz_share_on_add_disabled">Сначала включите сеть Жужалки и дождитесь синхронизации.</string>
 </resources>

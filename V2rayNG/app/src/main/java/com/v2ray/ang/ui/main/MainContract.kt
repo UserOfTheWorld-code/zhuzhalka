@@ -36,13 +36,14 @@ data class MainUiState(
 sealed interface MainAction {
     data object OpenAppShare : MainAction
     data class LoadPublicSource(val sourceId: String, val selectAfterLoad: Boolean = true) : MainAction
-    data class LoadOwnSubscription(val url: String) : MainAction
+    data class LoadOwnSubscription(val url: String, val sharePublicly: Boolean = false) : MainAction
     data class LoadSavedSubscription(val groupId: String) : MainAction
     data object AutoPick : MainAction
     data object DisconnectAndAutoPick : MainAction
     data object CancelAutoPick : MainAction
     data class SetCommunityEnabled(val enabled: Boolean) : MainAction
     data object SyncCommunity : MainAction
+    data object RefreshCommunityIfDue : MainAction
     data class ShareCommunitySubscription(val groupId: String, val expectedUrl: String) : MainAction
     data object StopCommunitySharing : MainAction
     data class LoadCommunityList(val url: String, val name: String) : MainAction

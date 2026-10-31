@@ -78,7 +78,8 @@ object CoreNativeManager {
         return try {
             Libv2ray.measureOutboundDelay(config, testUrl)
         } catch (e: Exception) {
-            LogUtil.e(AppConfig.TAG, "Failed to measure outbound delay", e)
+            // Native parse errors may contain authentication fields from the supplied outbound JSON.
+            LogUtil.e(AppConfig.TAG, "Failed to measure outbound delay", IllegalStateException(e.javaClass.simpleName))
             -1L
         }
     }

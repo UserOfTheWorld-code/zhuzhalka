@@ -44,11 +44,15 @@ class ZhuzhalkaSelectionTest {
         assertEquals(R.string.buzz_no_unique, importResultMessage(PublicSourceImportResult(PublicSourceImportStatus.NO_UNIQUE_SERVERS)))
     }
 
-    @Test fun certificatePinnedProfilesAreEligibleEvenWithLegacyInsecureFlag() {
+    @Test fun legacyInsecureProfilesAreEligibleOnlyForAnUnmodifiedStrictSnapshot() {
         val profile = ProfileItem(configType = EConfigType.VLESS, insecure = true)
-        assertFalse(ServiceWebProbe.canProbeProfile(profile))
-        assertFalse(ServiceWebProbe.canProbeProfile(profile.copy(pinnedCA256 = "")))
-        assertTrue(ServiceWebProbe.canProbeProfile(profile.copy(pinnedCA256 = "test-certificate-pin")))
+        assertTrue(ServiceWebProbe.canProbeProfile(profile))
+        assertTrue(ServiceWebProbe.canProbeProfile(profile.copy(pinnedCA256 = "")))
+        assertEquals(profile.copy(insecure = false), ServiceWebProbe.strictProfile(profile))
+        val pinned = profile.copy(pinnedCA256 = "test-certificate-pin")
+        assertTrue(ServiceWebProbe.canProbeProfile(pinned))
+        assertEquals(pinned.copy(insecure = false), ServiceWebProbe.strictProfile(pinned))
+        assertTrue(profile.insecure == true)
         assertTrue(ServiceWebProbe.canProbeProfile(profile.copy(insecure = false)))
         assertTrue(ServiceWebProbe.canProbeProfile(profile.copy(insecure = null)))
     }

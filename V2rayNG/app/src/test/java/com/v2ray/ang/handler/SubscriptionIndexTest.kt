@@ -79,6 +79,64 @@ class SubscriptionIndexTest {
     }
 
     @Test
+    fun strictProbeCommitPreservesGuidIndexSelectionAndCurrentMetadata() {
+        val original = seedStrictProbeProfile()
+        val renamed = original.copy(remarks = "User renamed", addedTime = 123)
+        profileValues["probe"] = JsonUtil.toJson(renamed)
+        org.junit.jupiter.api.Assertions.assertTrue(MmkvManager.acceptStrictProbe("probe", original))
+        assertEquals(renamed.copy(insecure = false), MmkvManager.decodeServerConfig("probe"))
+        assertEquals("other", MmkvManager.getSelectServer())
+        assertEquals(listOf("probe"), MmkvManager.decodeServerList("group"))
+    }
+
+    @Test
+    fun strictProbeCommitRejectsMutationMissingIndexDisabledAndImplicitChains() {
+        val original = seedStrictProbeProfile()
+        for (changed in listOf(original.copy(password = "new"), original.copy(sni = "new.example"),
+            original.copy(subscriptionId = "other"), original.copy(proxyChainProfiles = "other"))) {
+            profileValues["probe"] = JsonUtil.toJson(changed)
+            org.junit.jupiter.api.Assertions.assertFalse(MmkvManager.acceptStrictProbe("probe", original))
+            assertEquals(changed, MmkvManager.decodeServerConfig("probe"))
+        }
+        profileValues["probe"] = JsonUtil.toJson(original)
+        for (subscription in listOf(SubscriptionItem(enabled = false), SubscriptionItem(prevProfile = "previous"),
+            SubscriptionItem(nextProfile = "next"))) {
+            subValues["group"] = JsonUtil.toJson(subscription)
+            org.junit.jupiter.api.Assertions.assertFalse(MmkvManager.acceptStrictProbe("probe", original))
+        }
+        subValues["group"] = JsonUtil.toJson(SubscriptionItem())
+        mainValues["SUB_SERVERS_group"] = "[]"
+        org.junit.jupiter.api.Assertions.assertFalse(MmkvManager.acceptStrictProbe("probe", original))
+        assertEquals(original, MmkvManager.decodeServerConfig("probe"))
+    }
+
+    @Test
+    fun failedOrUnverifiedStrictProbeWriteRestoresExactOriginalPayload() {
+        for (claimsSuccess in listOf(false, true)) {
+            val original = seedStrictProbeProfile()
+            val previous = profileValues.getValue("probe")
+            val strictJson = JsonUtil.toJson(original.copy(insecure = false))
+            doAnswer { profileValues["probe"] = "partial"; claimsSuccess }
+                .whenever(profiles).encode("probe", strictJson)
+            mockStatic(Log::class.java).use {
+                assertThrows(IllegalStateException::class.java) { MmkvManager.acceptStrictProbe("probe", original) }
+            }
+            assertEquals(previous, profileValues["probe"])
+            assertEquals("other", MmkvManager.getSelectServer())
+        }
+    }
+
+    private fun seedStrictProbeProfile(): ProfileItem {
+        val original = ProfileItem(configType = EConfigType.VLESS, subscriptionId = "group", insecure = true,
+            server = "test.example", serverPort = "443", password = "test", sni = "test.example")
+        profileValues["probe"] = JsonUtil.toJson(original)
+        subValues["group"] = JsonUtil.toJson(SubscriptionItem())
+        mainValues["SUB_SERVERS_group"] = "[\"probe\"]"
+        mainValues["SELECTED_SERVER"] = "other"
+        return original
+    }
+
+    @Test
     fun recentSuccessCacheRoundTripsGuidsAndTimestampsOnly() {
         val entries = listOf(RecentSuccessfulServer("one", 1000), RecentSuccessfulServer("two", 999))
         assertEquals(emptyList<RecentSuccessfulServer>(), MmkvManager.decodeRecentSuccessfulServers())

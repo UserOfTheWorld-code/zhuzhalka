@@ -357,6 +357,34 @@ object MmkvManager {
         return key
     }
 
+    /** Tighten one tested profile without changing its GUID, index, metadata or the user's selection. */
+    internal fun acceptStrictProbe(guid: String, original: ProfileItem): Boolean = withProfileIndexLock {
+        val previous = profileFullStorage.decodeString(guid) ?: return@withProfileIndexLock false
+        val current = JsonUtil.fromJsonSafe(previous, ProfileItem::class.java) ?: return@withProfileIndexLock false
+        val group = getSubscriptionId(current.subscriptionId)
+        val subscription = decodeSubscription(group) ?: return@withProfileIndexLock false
+        if (group != getSubscriptionId(original.subscriptionId) ||
+            current.duplicateIdentity() != original.duplicateIdentity() ||
+            !current.proxyChainProfiles.isNullOrBlank() || !subscription.enabled ||
+            !subscription.prevProfile.isNullOrBlank() || !subscription.nextProfile.isNullOrBlank() ||
+            guid !in decodeServerList(group)) return@withProfileIndexLock false
+        if (current.insecure == false) return@withProfileIndexLock true
+        val strict = current.copy(insecure = false)
+        try {
+            requireStorageWrite(profileFullStorage.encode(guid, JsonUtil.toJson(strict)), "Strict profile write failed")
+            check(decodeServerConfig(guid) == strict) { "Strict profile readback failed" }
+        } catch (error: Exception) {
+            try {
+                requireStorageWrite(profileFullStorage.encode(guid, previous), "Strict profile rollback failed")
+                check(profileFullStorage.decodeString(guid) == previous) { "Strict profile rollback readback failed" }
+            } catch (rollbackError: Exception) {
+                error.addSuppressed(rollbackError)
+            }
+            throw error
+        }
+        true
+    }
+
     /**
      * Saves a profile batch before publishing its group index and removing replaced payloads.
      *

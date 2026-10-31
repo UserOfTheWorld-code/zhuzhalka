@@ -6,6 +6,8 @@ import com.v2ray.ang.dto.entities.ProfileItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withTimeoutOrNull
 
 internal data class AutoCandidate(val groupId: String, val guid: String)
@@ -22,6 +24,20 @@ internal fun resolveTestedAutoCandidate(dataSource: MainDataSource, guid: String
     val candidate = resolveAutoCandidate(dataSource, guid) ?: return null
     val current = dataSource.decodeServerConfig(guid) ?: return null
     return candidate.takeIf { current.duplicateIdentity() == testedProfile.duplicateIdentity() }
+}
+
+/** Only a complete strict success may tighten the stored profile; cancellation never accepts a partial test. */
+internal suspend fun acceptTestedAutoCandidate(
+    dataSource: MainDataSource,
+    guid: String,
+    original: ProfileItem,
+    result: ServiceProbeResult,
+): AutoCandidate? {
+    currentCoroutineContext().ensureActive()
+    if (!result.passed || resolveTestedAutoCandidate(dataSource, guid, original) == null) return null
+    currentCoroutineContext().ensureActive()
+    if (!dataSource.acceptStrictProbe(guid, original)) return null
+    return resolveTestedAutoCandidate(dataSource, guid, original.copy(insecure = false))
 }
 
 /** STOP_SUCCESS precedes TUN teardown; also wait until Android no longer routes probes through VPN. */

@@ -1,5 +1,6 @@
 package com.v2ray.ang.ui.main
 
+import com.v2ray.ang.handler.CommunityApprovedSource
 import com.v2ray.ang.handler.CommunityListOffer
 import com.v2ray.ang.handler.CommunitySnapshot
 import com.v2ray.ang.handler.CommunityProtocol
@@ -14,11 +15,14 @@ internal data class CommunityUiState(
     val voteCount: Int = 0,
     val offers: List<CommunityListOffer> = emptyList(),
     val ownOfferCount: Int = 0,
-)
+    val approvedSources: List<CommunityApprovedSource> = emptyList(),
+) {
+    val approvedPublicUrls: Set<String> get() = approvedSources.map { it.url }.toSet()
+}
 
 internal fun communityUiState(snapshot: CommunitySnapshot, syncing: Boolean = false, failed: Boolean = false) =
     CommunityUiState(true, snapshot.enabled, syncing, failed, snapshot.peerCount,
-        snapshot.votes.size, snapshot.offers, snapshot.ownOffers.size)
+        snapshot.votes.size, snapshot.offers, snapshot.ownOffers.size, snapshot.approvedSources)
 
 /** Revalidate the exact URL shown in the confirmation, not merely its mutable group ID. */
 internal fun communityOfferForConfirmedSubscription(

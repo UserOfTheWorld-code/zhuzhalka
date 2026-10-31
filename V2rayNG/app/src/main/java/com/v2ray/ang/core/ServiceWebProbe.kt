@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.SystemClock
-import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.enums.EConfigType
 import com.v2ray.ang.dto.entities.ProfileItem
 import kotlinx.coroutines.Dispatchers
@@ -40,14 +39,13 @@ object ServiceWebProbe {
             ?.hasTransport(NetworkCapabilities.TRANSPORT_VPN) == true
     }
 
-    suspend fun check(context: Context, guid: String, deadline: Long = Long.MAX_VALUE): ServiceProbeResult = withContext(Dispatchers.IO) {
-        val profile = MmkvManager.decodeServerConfig(guid) ?: return@withContext ServiceProbeResult(emptyMap())
-        // Arbitrary JSON and policy groups may route directly; only individual proxy profiles qualify.
-        if (!canProbeProfile(profile)) {
-            return@withContext ServiceProbeResult(emptyMap())
-        }
+    suspend fun check(context: Context, guid: String, profile: ProfileItem, deadline: Long = Long.MAX_VALUE): ServiceProbeResult = withContext(Dispatchers.IO) {
+        // Never reread a GUID here: all three sites must use the exact immutable copy the caller accepts.
+        val strict = strictProfile(profile) ?: return@withContext ServiceProbeResult(emptyMap())
+        currentCoroutineContext().ensureActive()
+        if (SystemClock.elapsedRealtime() >= deadline) return@withContext ServiceProbeResult(emptyMap())
         CoreNativeManager.initCoreEnv(context)
-        val config = CoreConfigManager.getV2rayConfig4Speedtest(context, guid)
+        val config = CoreConfigManager.getV2rayConfig4Probe(context, guid, strict)
         if (!config.status) return@withContext ServiceProbeResult(emptyMap())
 
         // Initialize the native environment before starting any sibling measurements.
@@ -59,12 +57,15 @@ object ServiceWebProbe {
         }
     }
 
+    /** Eligibility is not TLS success. Legacy insecure flags are retried with verification enabled. */
     internal fun canProbeProfile(profile: ProfileItem): Boolean =
         profile.configType in setOf(EConfigType.VLESS, EConfigType.VMESS,
             EConfigType.TROJAN, EConfigType.SHADOWSOCKS, EConfigType.HYSTERIA2,
-            EConfigType.WIREGUARD) &&
-            // CoreOutboundBuilder enforces certificate pinning even if the legacy insecure flag is set.
-            (profile.insecure != true || !profile.pinnedCA256.isNullOrEmpty())
+            EConfigType.WIREGUARD) && profile.proxyChainProfiles.isNullOrBlank()
+
+    /** Keep the supplied SNI, pin and REALITY fields; never trust or discover a new certificate. */
+    internal fun strictProfile(profile: ProfileItem): ProfileItem? =
+        profile.takeIf(::canProbeProfile)?.copy(insecure = false)
 }
 
 /** Scheduling only; the caller owns native setup and the shared limit, and each service runs once. */

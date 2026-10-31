@@ -1,5 +1,6 @@
 package com.v2ray.ang.util
 
+import android.os.SystemClock
 import com.v2ray.ang.AppConfig
 import com.v2ray.ang.AppConfig.LOOPBACK
 import com.v2ray.ang.BuildConfig
@@ -8,6 +9,16 @@ import okhttp3.Credentials
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.Response
+import okhttp3.ResponseBody
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import java.io.File
 import java.io.IOException
 import java.net.IDN
@@ -21,6 +32,95 @@ import java.net.URL
 import java.util.concurrent.TimeUnit
 
 object HttpUtil {
+
+    internal const val MAX_DIRECT_SUBSCRIPTION_BYTES = 8L * 1024 * 1024
+
+    internal data class SubscriptionContent(val body: String, val headers: Headers)
+
+    /** Auto-pick runs with its own VPN stopped. Bound the entire direct download, including redirects/body. */
+    internal suspend fun getSubscriptionDirect(
+        request: UrlContentRequest,
+        deadlineMillis: Long,
+        nowMillis: () -> Long = SystemClock::elapsedRealtime,
+        callFactory: (Long) -> Call.Factory = ::directSubscriptionClient,
+    ): SubscriptionContent {
+        val start = nowMillis()
+        val downloadDeadline = minOf(deadlineMillis, start.coerceAtMost(Long.MAX_VALUE - 15_000L) + 15_000L)
+        var url = request.url?.toHttpUrlOrNull() ?: throw IOException("Invalid subscription URL")
+        val origin = url
+        repeat(3) {
+            currentCoroutineContext().ensureActive()
+            val remaining = downloadDeadline - nowMillis()
+            if (remaining <= 0) throw IOException("Subscription download deadline reached")
+            if (!url.isHttps || url.username.isNotEmpty() || url.password.isNotEmpty()) {
+                throw IOException("Subscription download requires HTTPS without embedded credentials")
+            }
+            val builder = Request.Builder().url(url).get()
+                .header("User-agent", request.userAgent?.takeIf { it.isNotBlank() } ?: "v2rayNG/${BuildConfig.VERSION_NAME}")
+            // A cross-origin redirect never receives private subscription headers.
+            if (url.host == origin.host && url.port == origin.port) {
+                JsonUtil.parseHeadersToMap(request.requestHeaders).forEach { (name, value) ->
+                    if (!name.equals("Proxy-Authorization", true)) {
+                        try { builder.header(name, value) } catch (_: IllegalArgumentException) { }
+                    }
+                }
+            }
+            val call = callFactory(remaining).newCall(builder.build())
+            val response = suspendCancellableCoroutine<DirectSubscriptionResponse> { continuation ->
+                continuation.invokeOnCancellation { call.cancel() }
+                call.enqueue(object : Callback {
+                    override fun onFailure(call: Call, error: IOException) {
+                        continuation.resumeWithException(error)
+                    }
+                    override fun onResponse(call: Call, response: Response) {
+                        val result = try {
+                            response.use {
+                                val body = if (it.isSuccessful && !it.isRedirect) readBoundedSubscriptionBody(it.body) else ""
+                                DirectSubscriptionResponse(it.code, it.headers, body)
+                            }
+                        } catch (error: Exception) {
+                            continuation.resumeWithException(error)
+                            return
+                        }
+                        continuation.resume(result)
+                    }
+                })
+            }
+            currentCoroutineContext().ensureActive()
+            if (nowMillis() >= downloadDeadline) throw IOException("Subscription download deadline reached")
+            when (response.code) {
+                in 200..299 -> return SubscriptionContent(response.body, response.headers)
+                300, 301, 302, 303, 307, 308 -> {
+                    url = response.headers["Location"]?.let(url::resolve)
+                        ?: throw IOException("Invalid subscription redirect")
+                }
+                else -> throw IOException("Subscription HTTP status ${response.code}")
+            }
+        }
+        throw IOException("Too many subscription redirects")
+    }
+
+    internal fun directSubscriptionClient(timeoutMillis: Long): OkHttpClient = OkHttpClient.Builder()
+        .proxy(Proxy.NO_PROXY)
+        .connectTimeout(timeoutMillis, TimeUnit.MILLISECONDS)
+        .readTimeout(timeoutMillis, TimeUnit.MILLISECONDS)
+        .callTimeout(timeoutMillis, TimeUnit.MILLISECONDS)
+        .followRedirects(false)
+        .followSslRedirects(false)
+        .build()
+
+    private data class DirectSubscriptionResponse(val code: Int, val headers: Headers, val body: String)
+
+    private fun readBoundedSubscriptionBody(body: ResponseBody?): String {
+        if (body == null) return ""
+        // OkHttp exposes decompressed bytes here. Check the stream as well as Content-Length:
+        // chunked/gzip responses can omit their final size, and a timeout alone cannot bound memory.
+        if (body.contentLength() > MAX_DIRECT_SUBSCRIPTION_BYTES ||
+            body.source().request(MAX_DIRECT_SUBSCRIPTION_BYTES + 1)) {
+            throw IOException("Subscription response exceeds size limit")
+        }
+        return body.string()
+    }
 
     /**
      * Converts the domain part of a URL string to its IDN (Punycode, ASCII Compatible Encoding) format.

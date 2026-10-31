@@ -3,6 +3,7 @@ package com.v2ray.ang.ui.main
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,9 +16,11 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -28,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -39,6 +43,9 @@ import com.v2ray.ang.R
 internal fun ZhuzhalkaSubscriptionDialog(
     url: String,
     onUrlChange: (String) -> Unit,
+    sharePublicly: Boolean,
+    sharingAvailable: Boolean,
+    onSharePubliclyChange: (Boolean) -> Unit,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
 ) {
@@ -90,9 +97,29 @@ internal fun ZhuzhalkaSubscriptionDialog(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
                         modifier = Modifier.fillMaxWidth(),
                     )
+                    Row(
+                        modifier = Modifier.fillMaxWidth().toggleable(
+                            value = sharePublicly,
+                            enabled = sharingAvailable,
+                            role = Role.Checkbox,
+                            onValueChange = onSharePubliclyChange,
+                        ).padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Checkbox(checked = sharePublicly, onCheckedChange = null, enabled = sharingAvailable)
+                        Text(stringResource(R.string.buzz_share_on_add), Modifier.weight(1f).padding(start = 8.dp))
+                    }
+                    if (sharePublicly) Text(
+                        stringResource(R.string.buzz_community_share_warning),
+                        style = MaterialTheme.typography.bodySmall,
+                    ) else if (!sharingAvailable) Text(
+                        stringResource(R.string.buzz_share_on_add_disabled),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                     Button(
                         onClick = onConfirm,
-                        enabled = url.isNotBlank(),
+                        enabled = url.isNotBlank() && (!sharePublicly || sharingAvailable),
                         modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
                     ) {
                         Text(stringResource(R.string.buzz_add))

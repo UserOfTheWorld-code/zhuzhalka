@@ -566,13 +566,13 @@
 
     <string name="buzz_community_title">Zhuzhalka network</string>
     <string name="buzz_community_enable">Enable participation</string>
-    <string name="buzz_community_consent">The app will publicly share hashes identifying servers from its built-in public catalogs, web-check results, rounded latency, check times and this installation’s public key. Relays also see your IP address. Personal subscriptions and connection credentials are not shared automatically. Other people can copy public data; disabling participation cannot recall those copies.</string>
+    <string name="buzz_community_consent">برنومه هَش سرورا ز فهرستا پؽش‌فرز وو فهرستایی ک خوتووݩ آشکارا پخش یا قوۊل کردیڌن، نتیجه واجۊری وب، دیرکرد گِردشده، زمووݩ واجۊری وو کلید عومۊمی ای نصب ن پخش اکونه. سرورا واسط IP ایسا ن هم ابینن. اشتراکا خوسۊصی وو داده یل منپیز خوتکار پخش ناوۊن. دییرووݩ اتۊنن داده یل عومۊمی ن کپی کۊنن؛ خامۊش کردن مشارکت کپی یل ن پس ناگیره.</string>
     <string name="buzz_community_share_named">Share: %1$s</string>
     <string name="buzz_community_share_title">Publish subscription?</string>
-    <string name="buzz_community_share_warning">The FULL subscription URL, INCLUDING any access token, will be published to ALL participants and relay operators. They may use the subscription and copy its link. Share only your own subscription and only if its provider permits public sharing. Copies cannot be recalled. Personal subscriptions are never shared automatically.</string>
+    <string name="buzz_community_share_warning">پوی لینک اشتراک، وا توکن دسترسی، سی پوی شرکت کونندا وو گردوونندا سرورا واسط پخش ابۊ. اونا اتۊنن اشتراک ن و کار بگرن وو لینک ن کپی کۊنن. فقط اشتراک خوتووݩ ن، وا اجازه ارائه کون سی پخش عومۊمی، به اشتراک بنین. کپی یل پس گرؽڌه ناوۊن. تا مشارکت ره وسته هڌ، پخش تئیڌشده من تبادلا بئڌی تمدید ابۊ؛ باقی اشتراکا خوسۊصی امۊنن.</string>
     <string name="buzz_community_publish">Publish for everyone</string>
     <string name="buzz_community_load_title">Load a suggested list?</string>
-    <string name="buzz_community_load_warning">This address was shared by another participant. Its contents are untrusted and may change. Loading it sends a request to that site, which can see your IP address. The list is fetched only after you press Load; servers still require local checks.</string>
+    <string name="buzz_community_load_warning">ای آدرس ن ی شرکت کون دییر فرستاده. محتواس ز پؽش موورد اعتماد نؽڌ وو گاشڌ آلشت ابۊ. وا بارگیری، سایت IP ایسا ن ابینه. بئڌ تئیڌ، فهرست قوۊل‌شده گاشڌ من پسند خوتکار ورۊ ابۊ. تا مشارکت ره وسته هڌ، امتیاز واجۊری یل محلی پخش ابۊ؛ خود آدرس خوتکار دباره پخش نابۊ. سرورا هنی هم واجۊری محلی اخۊن.</string>
     <string name="buzz_community_load">Load list</string>
     <string name="buzz_community_stop_sharing">Stop sharing my lists</string>
     <string name="buzz_community_stop_warning">Your current list offers will be withdrawn from future exchanges. Copies already saved by participants or relays cannot be recalled. This does not delete your local subscriptions.</string>

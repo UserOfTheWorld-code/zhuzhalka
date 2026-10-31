@@ -3,6 +3,7 @@ package com.v2ray.ang.ui.main
 import com.v2ray.ang.dto.entities.ProfileItem
 import com.v2ray.ang.dto.entities.SubscriptionItem
 import com.v2ray.ang.enums.EConfigType
+import com.v2ray.ang.handler.CommunityApprovedSource
 import com.v2ray.ang.handler.CommunityEndpointKey
 import com.v2ray.ang.handler.CommunityListOffer
 import com.v2ray.ang.handler.CommunitySnapshot
@@ -130,6 +131,33 @@ class CommunityAutoPickTest {
         verify(source, times(1)).decodeServerConfig("one")
         verify(source, times(1)).decodeServerConfig("two")
         verify(source, times(0)).decodeServerConfig("unindexed")
+    }
+
+    @Test fun explicitlyChosenPublicCustomListCanHaveKeysButReceivedOffersAloneCannot() {
+        val source: MainDataSource = mock()
+        val url = "https://catalog.example.net/public.txt"
+        val candidate = AutoCandidate("g", "guid")
+        whenever(source.getSubscriptionItem("g")).thenReturn(SubscriptionItem(url = url))
+        whenever(source.getServerGuidList("g")).thenReturn(listOf("guid"))
+        whenever(source.decodeServerConfig("guid")).thenReturn(profile("guid"))
+        assertNull(communityEndpointKey(source, candidate))
+        assertTrue(snapshotCommunityKeys(source, listOf(candidate)).isEmpty())
+        val endpoint = communityEndpointKey(source, candidate, approvedPublicUrls = setOf(url))
+        assertNotNull(endpoint)
+        assertEquals(endpoint, snapshotCommunityKeys(source, listOf(candidate), setOf(url))["guid"])
+        whenever(source.getSubscriptionItem("g")).thenReturn(SubscriptionItem(url = url + "?changed=1"))
+        assertNull(communityEndpointKey(source, candidate, approvedPublicUrls = setOf(url)))
+    }
+
+    @Test fun presentationCarriesOnlyDurableApprovedSourcesAsRatingPermissions() {
+        val url = "https://catalog.example.net/public.txt"
+        val received = CommunityListOffer("Public", url, now)
+        assertTrue(communityUiState(CommunitySnapshot(enabled = true, offers = listOf(received))).approvedPublicUrls.isEmpty())
+        val selected = CommunityApprovedSource("group", "Public", url, now, false)
+        val state = communityUiState(CommunitySnapshot(enabled = true, approvedSources = listOf(selected)))
+        assertEquals(listOf(selected), state.approvedSources)
+        assertEquals(setOf(url), state.approvedPublicUrls)
+        assertEquals(0, state.ownOfferCount)
     }
 
     private fun profile(id: String) = ProfileItem(configType = EConfigType.VLESS, subscriptionId = "g",

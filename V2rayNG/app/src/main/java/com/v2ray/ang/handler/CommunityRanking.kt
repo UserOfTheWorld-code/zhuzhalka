@@ -37,12 +37,14 @@ object CommunityRanking {
     const val MAX_LATENCY_MILLIS = 60_000
 
     private val hex64 = Regex("[0-9a-fA-F]{64}")
+    private val publicListSource = Regex("list:[0-9a-f]{64}")
     private val supportedProtocols = setOf(EConfigType.VLESS, EConfigType.VMESS, EConfigType.TROJAN,
         EConfigType.SHADOWSOCKS, EConfigType.HYSTERIA2, EConfigType.WIREGUARD)
 
     /**
-     * Only exact curated, unauthenticated subscription URLs qualify. No URL, password, username,
-     * key, SNI, transport path, arbitrary header or hash of credentials enters the fingerprint.
+     * Only curated or explicitly approved public subscription URLs qualify. The source ID for an
+     * approved custom list hashes its exact URL; no raw URL or profile credential is exported.
+     * The endpoint portion excludes keys, SNI, transport paths and arbitrary headers.
      * The digest is an identifier, not anonymity: public catalog endpoints can be enumerated.
      * URL association does not prove that a user has not edited a profile inside that group, and
      * does not authorize exporting any profile or subscription. This API only creates rating keys.
@@ -51,9 +53,10 @@ object CommunityRanking {
         sourceId: String,
         subscription: SubscriptionItem,
         profile: ProfileItem,
+        approvedPublicUrls: Set<String> = emptySet(),
     ): CommunityEndpointKey? {
-        val source = PublicSourceCatalog.sources.firstOrNull { it.id == sourceId } ?: return null
-        if (subscription.url != source.subscriptionUrl || !subscription.enabled || subscription.allowInsecureUrl ||
+        val expectedSourceId = sourceIdForUrl(subscription.url, approvedPublicUrls) ?: return null
+        if (sourceId != expectedSourceId || !subscription.enabled || subscription.allowInsecureUrl ||
             !subscription.requestHeaders.isNullOrBlank() || !subscription.userAgent.isNullOrBlank() ||
             !subscription.prevProfile.isNullOrBlank() || !subscription.nextProfile.isNullOrBlank() ||
             profile.configType !in supportedProtocols || profile.insecure == true ||
@@ -78,6 +81,18 @@ object CommunityRanking {
         return CommunityEndpointKey(sourceId, digest)
     }
 
+    /** A custom URL is public only after explicit local consent, never by URL/token heuristics. */
+    fun sourceIdForUrl(url: String, approvedPublicUrls: Set<String> = emptySet()): String? {
+        PublicSourceCatalog.sources.firstOrNull { it.subscriptionUrl == url }?.let { return it.id }
+        if (url !in approvedPublicUrls || !CommunityProtocol.validOffer(CommunityListOffer("source", url, 1), 1)) return null
+        return "list:" + MessageDigest.getInstance("SHA-256").digest(url.toByteArray(Charsets.UTF_8))
+            .joinToString("") { "%02x".format(it.toInt() and 0xff) }
+    }
+
+    internal fun validSourceId(sourceId: String, allowPublicLists: Boolean = true): Boolean =
+        PublicSourceCatalog.sources.any { it.id == sourceId } ||
+            (allowPublicLists && publicListSource.matches(sourceId))
+
     /** Round the slowest successful service measurement; rejected values must not be published. */
     fun roundLatencyMillis(slowestMillis: Long): Int? = slowestMillis
         .takeIf { it in 0L..MAX_LATENCY_MILLIS.toLong() }
@@ -86,9 +101,8 @@ object CommunityRanking {
     /** One latest vote per authenticated author and endpoint, with strict time and size limits. */
     fun retainVotes(votes: List<CommunityVote>, nowMillis: Long): List<CommunityVote> {
         if (nowMillis <= 0L) return emptyList()
-        val knownSources = PublicSourceCatalog.sources.map { it.id }.toSet()
         return votes.asSequence().take(MAX_INPUT_VOTES)
-            .filter { it.key.sourceId in knownSources && hex64.matches(it.key.endpointHash) && hex64.matches(it.authorId) &&
+            .filter { validSourceId(it.key.sourceId) && hex64.matches(it.key.endpointHash) && hex64.matches(it.authorId) &&
                 it.observedAtMillis > 0L && it.observedAtMillis <= nowMillis &&
                 nowMillis - it.observedAtMillis <= TTL_MILLIS &&
                 (it.latencyBucketMillis == null || (it.passed && it.latencyBucketMillis in 0..MAX_LATENCY_MILLIS)) }

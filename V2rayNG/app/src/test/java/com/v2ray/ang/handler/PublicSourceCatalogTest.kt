@@ -4,6 +4,9 @@ import com.v2ray.ang.dto.SubscriptionUpdateResult
 import com.v2ray.ang.dto.entities.SubscriptionCache
 import com.v2ray.ang.dto.entities.SubscriptionItem
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.runBlocking
+import com.v2ray.ang.util.HttpUtil
+import okhttp3.Headers
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -12,6 +15,71 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class PublicSourceCatalogTest {
+    @Test fun autoDownloadFinishesBeforeAnyNewGroupIsCreated() = runBlocking {
+        val result = importer.addCustomAndRefreshForAuto(source.displayName, source.subscriptionUrl, 1000, { 0 },
+            download = { item, deadline ->
+                assertEquals(source.subscriptionUrl, item.url)
+                assertEquals(1000L, deadline)
+                assertTrue(storage.items.isEmpty())
+                HttpUtil.SubscriptionContent("body", Headers.Builder().build())
+            }, importDownloaded = { target, content ->
+                assertEquals("body", content.body)
+                storage.profiles[target.guid] = 2
+                SubscriptionUpdateResult(configCount = 2, successCount = 1)
+            })
+        assertEquals(PublicSourceImportStatus.SUCCESS, result.status)
+        assertEquals(2, result.configCount)
+        assertTrue(refreshes.isEmpty(), "Legacy proxy download must not run")
+    }
+
+    @Test fun cancelledOrFailedAutoDownloadNeverCreatesAGroup() = runBlocking {
+        for (cancelled in listOf(false, true)) {
+            try {
+                val result = importer.addCustomAndRefreshForAuto(source.displayName, source.subscriptionUrl, 1000, { 0 },
+                    download = { _, _ -> if (cancelled) throw CancellationException() else error("network") },
+                    importDownloaded = { _, _ -> error("Must not import") })
+                assertEquals(PublicSourceImportStatus.REFRESH_FAILED, result.status)
+                assertFalse(cancelled)
+            } catch (_: CancellationException) { assertTrue(cancelled) }
+            assertTrue(storage.items.isEmpty())
+            assertTrue(storage.ids.isEmpty())
+        }
+    }
+
+    @Test fun expiredAutoBudgetDoesNotFetchAndLateResponseDoesNotImport() = runBlocking {
+        var now = 1000L
+        var fetched = 0
+        val download: suspend (SubscriptionItem, Long) -> HttpUtil.SubscriptionContent = { _, _ ->
+            fetched++; now = 1000; HttpUtil.SubscriptionContent("body", Headers.Builder().build())
+        }
+        repeat(2) { run ->
+            if (run == 1) now = 0
+            val result = importer.addCustomAndRefreshForAuto(source.displayName, source.subscriptionUrl, 1000, { now }, download,
+                importDownloaded = { _, _ -> error("Expired result must not import") })
+            assertEquals(PublicSourceImportStatus.REFRESH_FAILED, result.status)
+        }
+        assertEquals(1, fetched)
+        assertTrue(storage.items.isEmpty())
+    }
+
+    @Test fun disabledOrChangedSubscriptionNeverImportsAnAutoDownload() = runBlocking {
+        val item = SubscriptionItem(remarks = "Private name", url = source.subscriptionUrl, enabled = false)
+        storage.seed("existing", item, 4)
+        val disabled = importer.addCustomAndRefreshForAuto("ignored", source.subscriptionUrl, 1000, { 0 },
+            download = { _, _ -> error("Disabled list must not fetch") }, importDownloaded = { _, _ -> error("No import") })
+        assertEquals(PublicSourceImportStatus.DISABLED, disabled.status)
+        storage.items["existing"] = item.copy(enabled = true, requestHeaders = "test")
+        val changed = importer.addCustomAndRefreshForAuto("ignored", source.subscriptionUrl, 1000, { 0 },
+            download = { snapshot, _ ->
+                assertEquals("test", snapshot.requestHeaders)
+                storage.items["existing"] = snapshot.copy(requestHeaders = "changed")
+                HttpUtil.SubscriptionContent("body", Headers.Builder().build())
+            }, importDownloaded = { _, _ -> error("Old authentication must not import") })
+        assertEquals(PublicSourceImportStatus.REFRESH_FAILED, changed.status)
+        assertEquals(4, storage.profiles["existing"])
+        assertEquals("changed", storage.items["existing"]?.requestHeaders)
+    }
+
     private val source = PublicSource("first", "Publisher", "https://example.org/subscription")
     private val storage = FakeStorage()
     private val refreshes = mutableListOf<SubscriptionCache>()

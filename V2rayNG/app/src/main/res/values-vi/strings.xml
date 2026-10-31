@@ -564,13 +564,13 @@
 
     <string name="buzz_community_title">Mạng Жужалка</string>
     <string name="buzz_community_enable">Bật tham gia</string>
-    <string name="buzz_community_consent">Ứng dụng sẽ công khai mã băm nhận dạng máy chủ trong các danh mục công khai tích hợp, kết quả kiểm tra web, độ trễ đã làm tròn, thời gian kiểm tra và khóa công khai của bản cài đặt này. Máy chủ chuyển tiếp cũng thấy địa chỉ IP của bạn. Gói đăng ký cá nhân và thông tin xác thực kết nối không được tự động chia sẻ. Người khác có thể sao chép dữ liệu công khai; tắt tham gia không thu hồi được các bản sao.</string>
+    <string name="buzz_community_consent">Ứng dụng sẽ công khai mã băm nhận dạng máy chủ từ danh mục tích hợp và các danh sách bạn chủ động chia sẻ hoặc chấp nhận, kết quả kiểm tra web, độ trễ làm tròn, thời gian kiểm tra và khóa công khai của bản cài đặt này. Máy chủ chuyển tiếp cũng thấy địa chỉ IP của bạn. Đăng ký riêng tư và thông tin xác thực kết nối không tự động được chia sẻ. Người khác có thể sao chép dữ liệu công khai; tắt tham gia không thu hồi được các bản sao.</string>
     <string name="buzz_community_share_named">Chia sẻ: %1$s</string>
     <string name="buzz_community_share_title">Công khai gói đăng ký?</string>
-    <string name="buzz_community_share_warning">TOÀN BỘ URL đăng ký, KỂ CẢ mã truy cập, sẽ được công khai cho TẤT CẢ người tham gia và nhà vận hành máy chủ chuyển tiếp. Họ có thể sử dụng gói đăng ký và sao chép liên kết. Chỉ chia sẻ gói của bạn khi nhà cung cấp cho phép công khai. Không thể thu hồi bản sao. Gói cá nhân không bao giờ được tự động công khai.</string>
+    <string name="buzz_community_share_warning">TOÀN BỘ URL đăng ký, KỂ CẢ mã truy cập, sẽ được công khai cho TẤT CẢ người tham gia và nhà vận hành máy chủ chuyển tiếp. Họ có thể sử dụng đăng ký và sao chép liên kết. Chỉ chia sẻ đăng ký của bạn khi nhà cung cấp cho phép công khai. Không thể thu hồi bản sao. Nội dung đã xác nhận công khai được gia hạn trong các lần trao đổi tiếp theo khi tham gia còn bật; các đăng ký khác vẫn riêng tư.</string>
     <string name="buzz_community_publish">Công khai cho mọi người</string>
     <string name="buzz_community_load_title">Tải danh sách được đề xuất?</string>
-    <string name="buzz_community_load_warning">Địa chỉ này do người tham gia khác chia sẻ. Nội dung chưa đáng tin cậy và có thể thay đổi. Khi tải, trang web sẽ nhận yêu cầu và thấy địa chỉ IP của bạn. Danh sách chỉ được tải sau khi bạn nhấn Tải; máy chủ vẫn cần được kiểm tra tại máy.</string>
+    <string name="buzz_community_load_warning">Địa chỉ này do người tham gia khác chia sẻ. Nội dung chưa đáng tin cậy và có thể thay đổi. Khi tải, trang web nhận yêu cầu và thấy địa chỉ IP của bạn. Sau khi xác nhận, danh sách đã chấp nhận có thể tự động cập nhật khi Tự động chọn. Đánh giá từ kiểm tra tại máy được chia sẻ khi bật tham gia; URL không tự động được công khai lại. Máy chủ vẫn cần kiểm tra tại máy.</string>
     <string name="buzz_community_load">Tải danh sách</string>
     <string name="buzz_community_stop_sharing">Dừng chia sẻ danh sách của tôi</string>
     <string name="buzz_community_stop_warning">Các đề xuất danh sách hiện tại của bạn sẽ được rút khỏi những lần trao đổi sau. Không thể thu hồi bản sao mà người tham gia hoặc máy chủ chuyển tiếp đã lưu. Các gói đăng ký trên máy không bị xóa.</string>

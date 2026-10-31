@@ -30,6 +30,8 @@ interface MainDataSource : Closeable {
 
     fun getServerGuidList(groupId: String): List<String>
     fun decodeServerConfig(guid: String): ProfileItem?
+    /** Commit only the strict TLS flag after all probe sites pass and the original identity still matches. */
+    fun acceptStrictProbe(guid: String, original: ProfileItem): Boolean
     fun decodeAffiliationInfo(guid: String): ServerAffiliationInfo?
 
     fun encodeServerList(guids: List<String>, groupId: String)
